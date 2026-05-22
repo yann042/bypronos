@@ -50,10 +50,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 /* Match card */
 .match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden;transition:border-color .15s}
 .match-card:hover{border-color:rgba(0,212,170,.3)}
-.match-header{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid var(--bord)}
+.match-header{display:flex;align-items:center;justify-content:space-between;padding:3px 10px;border-bottom:1px solid var(--bord)}
 .league{font-size:10px;color:var(--txt2);font-weight:500;display:flex;align-items:center;gap:4px}
 .match-time{font-size:10px;font-weight:700;color:var(--txt2);background:var(--bg3);padding:2px 7px;border-radius:8px}
-.match-body{padding:6px 10px}
+.match-body{padding:4px 8px 6px}
 
 /* Teams header */
 .teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:16px}
@@ -63,13 +63,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .vs-box{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt2);text-align:center;min-width:36px}
 
 /* ── Étape 1 : boutons résultat ── */
-.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:0}
-.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:5px 3px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:0;margin-top:3px}
+.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:4px 3px 5px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
 .result-btn:hover{border-color:var(--acc);background:rgba(0,212,170,.07)}
 .result-btn.sel-win{background:rgba(22,163,74,.18);border-color:var(--acc-win)}
 .result-btn.sel-draw{background:rgba(56,189,248,.15);border-color:var(--acc2)}
 .result-btn.sel-lose{background:rgba(232,93,74,.15);border-color:var(--acc3)}
-.rb-label{font-size:10px;color:var(--txt);font-weight:600;display:block;margin-bottom:1px;letter-spacing:.1px;word-break:break-word;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb-label{font-size:9px;color:var(--txt2);font-weight:600;display:block;margin-bottom:0;letter-spacing:.1px;word-break:break-word;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rb-odd{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--acc);display:block}
 .result-btn.sel-win .rb-odd{color:var(--acc-win)}
 .result-btn.sel-draw .rb-odd{color:var(--acc2)}
@@ -682,11 +682,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .rb-logo{width:18px;height:18px}
 }
 
-.match-teams-row{display:flex;align-items:center;padding:4px 10px 3px;gap:6px}
-.mtr-home,.mtr-away{display:flex;align-items:center;gap:4px;flex:1;font-size:11px;font-weight:700;color:var(--txt)}
-.mtr-away{justify-content:flex-end}
-.mtr-home img,.mtr-away img{width:16px;height:16px;object-fit:contain;flex-shrink:0}
-.mtr-vs{font-size:10px;color:var(--txt2);font-weight:600;flex-shrink:0}
+.match-teams-row{display:flex;align-items:center;justify-content:space-between;padding:4px 10px}
+.mtr-home{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt)}
+.mtr-away{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt)}
+.mtr-home img,.mtr-away img{width:18px;height:18px;object-fit:contain;flex-shrink:0}
+.mtr-vs{font-size:10px;color:var(--txt2);font-weight:600;padding:0 8px}
 </style>
 </head>
 <body>
@@ -1011,8 +1011,8 @@ function buildCard(m) {
     </div>
     <div class="match-teams-row">
       <div class="mtr-home">${logoImg(homeLogo, homeName)}<span>${homeName}</span></div>
-      <div class="mtr-vs">VS</div>
-      <div class="mtr-away">${logoImg(awayLogo, awayName)}<span>${awayName}</span></div>
+      <div class="mtr-vs">-</div>
+      <div class="mtr-away"><span>${awayName}</span>${logoImg(awayLogo, awayName)}</div>
     </div>
     <div class="match-body">
       <div class="teams" style="display:none">
