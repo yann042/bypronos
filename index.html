@@ -9,7 +9,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f5f5f0;--bg2:#ffffff;--bg3:#eef0eb;--bg4:#e0e3db;
+  --bg:#f5f5f0;--bg2:#ffffff;--bg3:#d8ddd5;--bg4:#c8cfc4;
   --acc:#0a8a6a;--acc-win:#157a38;--acc-score:#c45a00;--acc-score-dark:#8b3500;--acc-score-light:#e07030;--acc2:#b8860b;--acc3:#e85d4a;
   --txt:#1a1f1a;--txt2:#5a6a5a;--bord:#d0d5cc;
 }
@@ -925,23 +925,20 @@ function buildCard(m) {
     ? `<img class="team-logo" src="${url}" alt="${name}" onerror="this.style.display='none'">`
     : '';
 
-  const resultRow = `<div class="result-row" >
+  const resultRow = `<div class="result-row">
     <div class="result-btn ${selWin}" onclick="selectResult(${m.id},'win')">
-      ${rbLogoImg(homeLogo, m.home)}
-      <span class="rb-label rb-full">1 · ${m.home}</span>
-      <span class="rb-label rb-short" style="display:none">1</span>
+      <span class="rb-label rb-full">${m.home}</span>
+      <span class="rb-label rb-short" style="display:none">${m.home.split(' ')[0]}</span>
       <span class="rb-odd">${m.odds[0].toFixed(2)}</span>
     </div>
     <div class="result-btn ${selDraw}" onclick="selectResult(${m.id},'draw')">
-      <span style="font-size:18px;display:block;margin-bottom:2px">🤝</span>
-      <span class="rb-label rb-full">N · Nul</span>
-      <span class="rb-label rb-short" style="display:none">N</span>
+      <span class="rb-label rb-full">Match nul</span>
+      <span class="rb-label rb-short" style="display:none">Nul</span>
       <span class="rb-odd">${m.odds[1].toFixed(2)}</span>
     </div>
     <div class="result-btn ${selLose}" onclick="selectResult(${m.id},'lose')">
-      ${rbLogoImg(awayLogo, m.away)}
-      <span class="rb-label rb-full">2 · ${m.away}</span>
-      <span class="rb-label rb-short" style="display:none">2</span>
+      <span class="rb-label rb-full">${m.away}</span>
+      <span class="rb-label rb-short" style="display:none">${m.away.split(' ')[0]}</span>
       <span class="rb-odd">${m.odds[2].toFixed(2)}</span>
     </div>
   </div>`;
