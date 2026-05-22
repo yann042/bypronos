@@ -312,6 +312,89 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-btn{background:var(--bg3);border:1px solid var(--bord);color:var(--acc2);border-radius:6px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;transition:all .15s;display:flex;align-items:center;gap:6px}
 .ranking-btn:hover{border-color:var(--acc2);background:rgba(247,201,72,.08)}
 .ranking-btn .pts-total{font-size:16px;color:var(--acc2)}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE MOBILE
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Layout principal : 1 colonne */
+  .main{grid-template-columns:1fr;grid-template-rows:auto;overflow:visible;height:auto}
+
+  /* Sidebar cachée sur mobile → remplacée par nav horizontale */
+  .sidebar{display:none}
+
+  /* Contenu pleine largeur */
+  .content{padding:12px;overflow-y:visible}
+
+  /* Betslip : sous le contenu, pleine largeur */
+  .betslip{border-left:none;border-top:1px solid var(--bord);height:auto;max-height:none}
+  .betslip-body{max-height:400px}
+
+  /* App height auto sur mobile */
+  .app{grid-template-rows:56px auto;height:auto;min-height:100vh}
+  .view-panel{height:auto;min-height:calc(100vh - 56px);overflow:visible}
+
+  /* Header compact */
+  .header{padding:0 10px;gap:8px;flex-wrap:nowrap}
+  .logo{font-size:18px}
+  .nav{gap:2px;overflow-x:auto;flex-wrap:nowrap}
+  .nav-btn{padding:5px 8px;font-size:12px;white-space:nowrap;flex-shrink:0}
+  .player-badge{padding:4px 8px;font-size:12px}
+  .player-badge .avatar{width:20px;height:20px;font-size:10px}
+
+  /* Match cards */
+  .match-card{margin-bottom:10px}
+  .team-name{font-size:14px}
+  .teams{gap:6px}
+  .vs-box{font-size:12px;min-width:28px}
+
+  /* Boutons résultat */
+  .result-row{gap:4px}
+  .result-btn{padding:7px 4px}
+  .rb-label{font-size:9px}
+  .rb-odd{font-size:16px}
+
+  /* Pills scores */
+  .score-pills{gap:4px}
+  .score-pill{padding:4px 8px 4px 7px}
+  .pill-score{font-size:13px}
+  .pill-odd{font-size:10px}
+
+  /* Bet items */
+  .bet-score-big{font-size:26px}
+  .pts-badge-val{font-size:16px !important}
+
+  /* Login box */
+  .login-box{width:90vw;padding:28px 20px}
+
+  /* Tchat */
+  .chat-bubble{bottom:16px;right:16px}
+  .chat-window{width:calc(100vw - 32px)}
+
+  /* Ranking view */
+  .ranking-view{padding:16px}
+  .ranking-table{font-size:12px}
+  .ranking-table th,.ranking-table td{padding:8px 6px}
+  .rank-pts{font-size:16px}
+
+  /* Live view */
+  .live-view{padding:16px}
+
+  /* Boost banner */
+  .boost-banner{padding:10px 12px;gap:8px}
+  .boost-text{font-size:12px}
+
+  /* Section titre */
+  .section-title{font-size:16px}
+}
+
+@media (max-width: 400px) {
+  .nav-btn{padding:5px 6px;font-size:11px}
+  .team-name{font-size:13px}
+  .rb-odd{font-size:14px}
+  .bet-score-big{font-size:22px}
+}
 </style>
 </head>
 <body>
