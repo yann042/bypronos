@@ -48,12 +48,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;margin-bottom:14px}
 
 /* Match card */
-.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s}
+.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:8px;margin-bottom:8px;overflow:hidden;transition:border-color .15s}
 .match-card:hover{border-color:rgba(0,212,170,.3)}
-.match-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--bord)}
-.league{font-size:11px;color:var(--txt2);font-weight:500;display:flex;align-items:center;gap:6px}
-.match-time{font-size:11px;font-weight:700;color:var(--txt2);background:var(--bg3);padding:2px 9px;border-radius:10px}
-.match-body{padding:8px 12px}
+.match-header{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid var(--bord)}
+.league{font-size:10px;color:var(--txt2);font-weight:500;display:flex;align-items:center;gap:4px}
+.match-time{font-size:10px;font-weight:700;color:var(--txt2);background:var(--bg3);padding:2px 7px;border-radius:8px}
+.match-body{padding:6px 10px}
 
 /* Teams header */
 .teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:16px}
@@ -63,13 +63,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .vs-box{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt2);text-align:center;min-width:36px}
 
 /* ── Étape 1 : boutons résultat ── */
-.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:0}
-.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:5px 6px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:0}
+.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
 .result-btn:hover{border-color:var(--acc);background:rgba(0,212,170,.07)}
 .result-btn.sel-win{background:rgba(22,163,74,.18);border-color:var(--acc-win)}
 .result-btn.sel-draw{background:rgba(56,189,248,.15);border-color:var(--acc2)}
 .result-btn.sel-lose{background:rgba(232,93,74,.15);border-color:var(--acc3)}
-.rb-label{font-size:12px;color:var(--txt);font-weight:700;display:block;margin-bottom:1px;letter-spacing:.2px;word-break:break-word;line-height:1.2}
+.rb-label{font-size:10px;color:var(--txt);font-weight:600;display:block;margin-bottom:1px;letter-spacing:.1px;word-break:break-word;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rb-odd{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--acc);display:block}
 .result-btn.sel-win .rb-odd{color:var(--acc-win)}
 .result-btn.sel-draw .rb-odd{color:var(--acc2)}
@@ -671,11 +671,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .rb-full  { display: block !important; }
 }
 
-.team-logo{width:32px;height:32px;object-fit:contain;display:block;margin:0 auto 4px}
-.match-header-logos{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 0}
+.team-logo{width:22px;height:22px;object-fit:contain;display:block;margin:0 auto 2px}
+.match-header-logos{display:flex;align-items:center;justify-content:space-between;padding:4px 10px 2px}
 .match-header-logo{display:flex;flex-direction:column;align-items:center;gap:3px}
-.match-header-logo img{width:28px;height:28px;object-fit:contain}
-.match-header-logo span{font-size:13px;color:var(--txt);font-weight:700;max-width:90px;text-align:center;line-height:1.2;word-break:break-word}
+.match-header-logo img{width:22px;height:22px;object-fit:contain}
+.match-header-logo span{font-size:11px;color:var(--txt);font-weight:700;max-width:80px;text-align:center;line-height:1.2;word-break:break-word}
 .rb-logo{width:22px;height:22px;object-fit:contain;display:block;margin:0 auto 3px}
 @media(max-width:768px){
   .match-header-logo img{width:24px;height:24px}
