@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>By Pronos — Pronostics entre amis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
+  --acc:#00d4aa;--acc-win:#16a34a;--acc-score:#f97316;--acc-score-dark:#c2410c;--acc-score-light:#fdba74;--acc2:#f7c948;--acc3:#e85d4a;
+  --txt:#e6edf3;--txt2:#8b949e;--bord:#30363d;
+}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;font-size:14px}
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative}
+
+/* Header */
+.header{background:var(--bg2);border-bottom:1px solid var(--bord);padding:0 16px;display:flex;align-items:center;gap:16px}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
+.logo span{color:var(--txt)}
+.nav{display:flex;gap:4px;flex:1}
+.nav-btn{background:none;border:none;color:var(--txt2);padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;transition:all .15s}
+.nav-btn:hover{background:var(--bg3);color:var(--txt)}
+.nav-btn.active{background:var(--bg3);color:var(--acc)}
+.header-right{display:flex;align-items:center;gap:10px}
+
+/* Layout */
+.main{display:grid;grid-template-columns:220px 1fr 300px;height:calc(100vh - 56px);overflow:hidden}
+
+/* Sidebar */
+.sidebar{background:var(--bg2);border-right:1px solid var(--bord);padding:12px 8px;overflow-y:auto}
+.sidebar h3{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:2px;padding:10px 10px 6px;text-transform:uppercase}
+.sport-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sport-item:hover{background:var(--bg3)}
+.sport-item.active{background:var(--bg3);border-left-color:var(--acc)}
+.sport-icon{font-size:16px;width:22px;text-align:center}
+.sport-name{font-size:13px;font-weight:500;flex:1}
+.sport-count{background:var(--bg4);color:var(--txt2);font-size:11px;padding:2px 7px;border-radius:10px;font-weight:600}
+
+/* Content */
+.content{overflow-y:auto;padding:16px 20px}
+.boost-banner{background:rgba(247,201,72,.07);border:1px solid rgba(247,201,72,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.boost-banner:hover{border-color:rgba(247,201,72,.5)}
+.boost-text{font-size:13px;font-weight:600;color:var(--acc2)}
+.boost-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;margin-bottom:14px}
+
+/* Match card */
+.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s}
+.match-card:hover{border-color:rgba(0,212,170,.3)}
+.match-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--bord)}
+.league{font-size:11px;color:var(--txt2);font-weight:500;display:flex;align-items:center;gap:6px}
+.match-time{font-size:11px;font-weight:700;color:var(--txt2);background:var(--bg3);padding:2px 9px;border-radius:10px}
+.match-body{padding:14px}
+
+/* Teams header */
+.teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:16px}
+.team-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;line-height:1.2}
+.team-info{font-size:11px;color:var(--txt2);margin-top:2px}
+.team.right .team-name,.team.right .team-info{text-align:right}
+.vs-box{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt2);text-align:center;min-width:36px}
+
+/* ── Étape 1 : boutons résultat ── */
+.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:0}
+.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:9px 6px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.result-btn:hover{border-color:var(--acc);background:rgba(0,212,170,.07)}
+.result-btn.sel-win{background:rgba(22,163,74,.18);border-color:var(--acc-win)}
+.result-btn.sel-draw{background:rgba(56,189,248,.15);border-color:var(--acc2)}
+.result-btn.sel-lose{background:rgba(232,93,74,.15);border-color:var(--acc3)}
+.rb-label{font-size:10px;color:var(--txt2);font-weight:600;display:block;margin-bottom:3px;letter-spacing:.3px}
+.rb-odd{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--acc);display:block}
+.result-btn.sel-win .rb-odd{color:var(--acc-win)}
+.result-btn.sel-draw .rb-odd{color:var(--acc2)}
+.result-btn.sel-lose .rb-odd{color:var(--acc3)}
+
+/* ── Étape 2 : bloc score exact ── */
+.score-step{margin-top:10px;border-radius:8px;padding:10px 12px;animation:fadeIn .2s ease}
+.score-step.win{background:rgba(22,163,74,.05);border:1px solid rgba(22,163,74,.25)}
+.score-step.draw{background:rgba(247,201,72,.05);border:1px solid rgba(247,201,72,.2)}
+.score-step.lose{background:rgba(232,93,74,.05);border:1px solid rgba(232,93,74,.15)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.score-step-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.score-step-label.win{color:var(--acc-win)}
+.score-step-label.draw{color:var(--acc2)}
+.score-step-label.lose{color:var(--acc3)}
+.score-pills{display:flex;flex-wrap:wrap;gap:5px}
+.score-pill{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:5px 11px 5px 9px;cursor:pointer;transition:all .15s}
+.pill-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt)}
+.pill-odd{font-size:11px;color:var(--txt2)}
+
+/* Victoire domicile → vert */
+.score-pill.win{border-color:rgba(22,163,74,.4)}
+.score-pill.win:hover{border-color:var(--acc-win);background:rgba(22,163,74,.08)}
+.score-pill.win.selected{background:rgba(22,163,74,.18);border-color:var(--acc-win)}
+.score-pill.win.selected .pill-score{color:var(--acc-win)}
+.score-pill.win.selected .pill-odd{color:var(--acc-win)}
+
+/* Match nul → jaune */
+.score-pill.draw{border-color:rgba(247,201,72,.3)}
+.score-pill.draw:hover{border-color:var(--acc2);background:rgba(247,201,72,.08)}
+.score-pill.draw.selected{background:rgba(247,201,72,.18);border-color:var(--acc2)}
+.score-pill.draw.selected .pill-score{color:var(--acc2)}
+.score-pill.draw.selected .pill-odd{color:var(--acc2)}
+
+/* Victoire extérieur → rouge */
+.score-pill.lose{border-color:rgba(232,93,74,.3)}
+.score-pill.lose:hover{border-color:var(--acc3);background:rgba(232,93,74,.08)}
+.score-pill.lose.selected{background:rgba(232,93,74,.18);border-color:var(--acc3)}
+.score-pill.lose.selected .pill-score{color:var(--acc3)}
+.score-pill.lose.selected .pill-odd{color:var(--acc3)}
+.score-step-hint{font-size:11px;color:var(--txt2);margin-top:8px;display:flex;align-items:center;gap:4px}
+
+/* Betslip */
+.betslip{background:var(--bg2);border-left:1px solid var(--bord);display:flex;flex-direction:column;height:100%}
+.betslip-header{padding:14px 16px;border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.betslip-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;display:flex;align-items:center;gap:8px}
+.bet-count{background:var(--acc);color:#0d1117;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.clear-btn{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:12px;transition:color .15s}
+.clear-btn:hover{color:var(--acc3)}
+.betslip-body{flex:1;overflow-y:auto;padding:12px}
+.empty-slip{text-align:center;padding:40px 16px;color:var(--txt2)}
+.empty-slip .ico{font-size:40px;margin-bottom:12px;opacity:.35}
+.empty-slip p{font-size:12px;line-height:1.7}
+
+/* Bet item */
+.bet-item{background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:10px 12px;margin-bottom:8px;position:relative}
+.remove-bet{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--txt2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;transition:color .15s}
+.remove-bet:hover{color:var(--acc3)}
+.bet-match{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px;line-height:1.2}
+/* Score exact affiché en grand */
+.bet-score-big{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:6px}
+.bet-score-big.win{color:var(--acc-win)}
+.bet-score-big.draw{color:var(--acc2)}
+.bet-score-big.lose{color:var(--acc3)}
+/* Résultat déduit affiché dessous */
+.bet-result-deduced{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:3px 9px;margin-bottom:8px;border:1px solid}
+.bet-result-deduced.win{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.3)}
+.bet-result-deduced.draw{background:rgba(247,201,72,.1);border-color:rgba(247,201,72,.3)}
+.bet-result-deduced.lose{background:rgba(232,93,74,.1);border-color:rgba(232,93,74,.3)}
+.bet-result-deduced .arrow{font-size:10px;color:var(--txt2)}
+.bet-result-deduced .label{font-size:11px;font-weight:700}
+.bet-result-deduced .label.win{color:var(--acc-win)}
+.bet-result-deduced .label.draw{color:var(--acc2)}
+.bet-result-deduced .label.lose{color:var(--acc3)}
+.bet-odds-row{display:flex;gap:8px;margin-bottom:8px;align-items:baseline}
+.bet-odd-score{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--acc2)}
+.bet-odd-result{font-size:11px;color:var(--txt2)}
+.stake-input{width:100%;background:var(--bg2);border:1px solid var(--bord);border-radius:6px;padding:7px 10px;color:var(--txt);font-size:14px;font-family:'Barlow',sans-serif;outline:none;transition:border-color .15s}
+.stake-input:focus{border-color:var(--acc2)}
+.bet-return{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--txt2)}
+.bet-return strong{color:var(--acc2)}
+.bet-pts-badges{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.pts-badge{background:var(--bg2);border:1px solid var(--bord);border-radius:7px;padding:7px 10px;text-align:center}
+.pts-badge-label{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--txt2);display:block;margin-bottom:3px}
+.pts-badge-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;display:block;line-height:1}
+.pts-badge.result .pts-badge-val{color:var(--acc)}
+.pts-badge.score{background:linear-gradient(135deg,rgba(197,144,42,.18),rgba(245,200,66,.08));border-color:rgba(197,144,42,.5) !important}
+.pts-badge.score .pts-badge-val{background:linear-gradient(135deg,var(--acc-score-dark),var(--acc-score),var(--acc-score-light),var(--acc-score));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 2px rgba(197,144,42,.4));font-size:20px !important;white-space:nowrap}
+.pts-badge-sub{font-size:9px;color:var(--txt2);display:block;margin-top:2px}
+.pts-loss-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;background:rgba(232,93,74,.07);border:1px solid rgba(232,93,74,.2);border-radius:6px;padding:5px 10px}
+.pts-loss-label{font-size:11px;color:var(--txt2)}
+.pts-loss-val{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--acc3)}
+.pts-bonus-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:5px 10px}
+.pts-bonus-label{font-size:11px;color:var(--txt2)}
+.pts-bonus-val{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--acc)}
+.pts-max-row{text-align:center;margin-top:6px;font-size:11px;color:var(--txt2)}
+.pts-max-row strong{color:var(--acc)}
+
+/* Footer */
+.betslip-footer{padding:14px 16px;border-top:1px solid var(--bord);flex-shrink:0}
+.total-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--txt2)}
+.total-row.big{font-size:15px;font-weight:700;color:var(--txt);margin-top:4px}
+.total-row.big span:last-child{color:var(--acc2)}
+.place-btn{width:100%;background:var(--acc);color:#0d1117;border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .15s;margin-top:12px}
+.place-btn:hover{opacity:.9}
+
+.view-panel{height:calc(100vh - 56px);overflow:hidden;position:relative}
+
+/* ── Login overlay ── */
+.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--bg2);border:1px solid var(--bord);border-radius:14px;padding:36px 32px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:6px}
+.login-logo span{color:var(--txt)}
+.login-sub{font-size:13px;color:var(--txt2);margin-bottom:24px}
+.login-label{font-size:11px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;text-align:left;display:block}
+.login-input{width:100%;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:10px 14px;color:var(--txt);font-size:16px;font-family:'Barlow',sans-serif;outline:none;transition:border-color .15s;margin-bottom:14px}
+.login-input:focus{border-color:var(--acc)}
+.login-btn{width:100%;background:var(--acc);color:#0d1117;border:none;border-radius:8px;padding:12px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .15s}
+.login-btn:hover{opacity:.9}
+.login-players{margin-top:20px;border-top:1px solid var(--bord);padding-top:16px;text-align:left}
+.login-players-label{font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.login-player-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 12px;margin:3px 3px 0 0;cursor:pointer;transition:all .15s;font-size:13px}
+.login-player-chip:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ── Header joueur ── */
+.player-badge{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .15s}
+.player-badge:hover{border-color:var(--acc3)}
+.player-badge .avatar{width:22px;height:22px;border-radius:50%;background:var(--acc);color:#0d1117;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* ── Vue Classement ── */
+.ranking-view{height:100%;overflow-y:auto;padding:24px 28px;background:var(--bg)}
+.ranking-header{margin-bottom:22px}
+.ranking-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700}
+.ranking-tabs{display:flex;gap:6px;margin-top:12px}
+.ranking-tab{background:var(--bg3);border:1px solid var(--bord);color:var(--txt2);padding:6px 16px;border-radius:20px;font-size:12px;cursor:pointer;transition:all .15s;font-weight:600}
+.ranking-tab:hover{border-color:var(--acc);color:var(--acc)}
+.ranking-tab.active{background:var(--acc);color:#0d1117;border-color:var(--acc)}
+.ranking-table{width:100%;border-collapse:collapse;max-width:680px}
+.ranking-table th{font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:1.2px;text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:2px solid var(--bord)}
+.ranking-table th:last-child,.ranking-table td:last-child{text-align:right}
+.ranking-table td{padding:12px 12px;border-bottom:1px solid rgba(48,54,61,.5);font-size:14px;vertical-align:middle}
+.ranking-table tr:hover td{background:var(--bg2)}
+.rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--txt2);width:36px}
+.rank-pos.gold{color:#ffd700}
+.rank-pos.silver{color:#c0c0c0}
+.rank-pos.bronze{color:#cd7f32}
+.rank-name{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.rank-name .you-badge{background:var(--acc);color:#0d1117;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;letter-spacing:.5px}
+.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--acc2)}
+.rank-detail{font-size:11px;color:var(--txt2)}
+.rank-bets{font-size:12px;color:var(--txt2)}
+.ranking-empty{text-align:center;padding:60px 20px;color:var(--txt2)}
+.ranking-empty .ico{font-size:44px;margin-bottom:14px;opacity:.3}
+.ranking-empty p{font-size:13px;line-height:1.8}
+.journee-badge{display:inline-block;background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--txt2);margin-bottom:16px;max-width:680px}
+.live-view{height:100%;display:flex;flex-direction:column;background:var(--bg);padding:20px 28px;overflow-y:auto}
+.live-header{margin-bottom:20px}
+.live-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;display:flex;align-items:center;gap:10px}
+.live-sub{font-size:12px;color:var(--txt2);margin-top:4px}
+.live-widget-wrap{position:relative;max-width:820px}
+.live-fallback{display:none;text-align:center;padding:60px 20px;color:var(--txt2)}
+.live-fallback-ico{font-size:48px;margin-bottom:14px;opacity:.3}
+.live-fallback p{font-size:13px;line-height:1.8}
+.live-fallback-sub{font-size:12px;margin-top:6px}
+.live-fallback-sub a{color:var(--acc);text-decoration:none}
+.live-fallback-sub a:hover{text-decoration:underline}
+
+/* ── Tchat flottant ── */
+.chat-bubble{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.chat-toggle{width:52px;height:52px;border-radius:50%;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,212,170,.4);transition:all .2s}
+.chat-toggle:hover{transform:scale(1.08);background:#00bfa5}
+.chat-unread{position:absolute;top:-4px;right:-4px;background:var(--acc3);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;display:none}
+.chat-window{width:300px;background:var(--bg2);border:1px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);display:none;flex-direction:column;animation:chatIn .2s ease}
+.chat-window.open{display:flex}
+@keyframes chatIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.chat-header{padding:12px 14px;background:var(--bg3);border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-header-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px}
+.chat-online{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:pulse 1.8s infinite}
+.chat-close{background:none;border:none;color:var(--txt2);font-size:18px;cursor:pointer;line-height:1;transition:color .15s}
+.chat-close:hover{color:var(--acc3)}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;max-height:320px;min-height:200px}
+.chat-msg{display:flex;flex-direction:column;gap:2px;max-width:85%}
+.chat-msg.me{align-self:flex-end;align-items:flex-end}
+.chat-msg.other{align-self:flex-start;align-items:flex-start}
+.chat-msg-author{font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:.4px}
+.chat-msg.me .chat-msg-author{color:var(--acc)}
+.chat-msg-bubble{padding:7px 11px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.chat-msg.me .chat-msg-bubble{background:var(--acc);color:#0d1117;border-bottom-right-radius:3px}
+.chat-msg.other .chat-msg-bubble{background:var(--bg3);color:var(--txt);border-bottom-left-radius:3px}
+.chat-msg-time{font-size:9px;color:var(--txt2);margin-top:1px}
+.chat-system{text-align:center;font-size:11px;color:var(--txt2);padding:4px 0;font-style:italic}
+.chat-empty{text-align:center;padding:30px 16px;color:var(--txt2);font-size:12px;opacity:.6}
+.chat-input-row{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--bord);flex-shrink:0}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:7px 12px;color:var(--txt);font-size:13px;font-family:'Barlow',sans-serif;outline:none;transition:border-color .15s}
+.chat-input:focus{border-color:var(--acc)}
+.chat-send{background:var(--acc);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:opacity .15s}
+.chat-send:hover{opacity:.85}
+.notif{position:fixed;top:70px;right:20px;background:var(--bg2);border:1px solid var(--acc);border-radius:10px;padding:12px 18px;z-index:9999;font-size:13px;font-weight:600;color:var(--acc);box-shadow:0 8px 30px rgba(0,0,0,.6);animation:slidein .3s ease;display:none}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Points dans le bulletin */
+.points-preview{background:linear-gradient(135deg,rgba(0,212,170,.08),rgba(247,201,72,.06));border:1px solid rgba(0,212,170,.25);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.points-preview-title{font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
+.points-preview-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;font-size:12px;color:var(--txt2)}
+.points-preview-row span:last-child{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--acc)}
+.points-preview-row.total-pts{border-top:1px solid var(--bord);margin-top:6px;padding-top:6px}
+.points-preview-row.total-pts span:last-child{font-size:20px;color:var(--acc2)}
+
+/* Tableau classement */
+.leaderboard-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center}
+.leaderboard-overlay.open{display:flex}
+.leaderboard-modal{background:var(--bg2);border:1px solid var(--bord);border-radius:14px;width:520px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lb-header{padding:16px 20px;border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between}
+.lb-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
+.lb-close{background:none;border:none;color:var(--txt2);font-size:22px;cursor:pointer;transition:color .15s;line-height:1}
+.lb-close:hover{color:var(--acc3)}
+.lb-body{overflow-y:auto;padding:16px}
+.lb-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+.lb-stat{background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:12px;text-align:center}
+.lb-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--acc2);line-height:1}
+.lb-stat-label{font-size:10px;color:var(--txt2);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-top:3px}
+.lb-stat-val.green{color:var(--acc)}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--bord)}
+.lb-table th:last-child,.lb-table td:last-child{text-align:right}
+.lb-table td{padding:9px 10px;font-size:13px;border-bottom:1px solid rgba(48,54,61,.5)}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-table tr:hover td{background:var(--bg3)}
+.lb-match{font-weight:600}
+.lb-score{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--acc2)}
+.lb-result-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.lb-result-badge.win{background:rgba(0,212,170,.15);color:var(--acc)}
+.lb-result-badge.draw{background:rgba(247,201,72,.15);color:var(--acc2)}
+.lb-result-badge.lose{background:rgba(232,93,74,.15);color:var(--acc3)}
+.lb-pts{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--acc2)}
+.lb-empty{text-align:center;padding:40px;color:var(--txt2);font-size:13px}
+.lb-empty .ico{font-size:36px;margin-bottom:10px;opacity:.35}
+
+/* Bouton classement dans header */
+.ranking-btn{background:var(--bg3);border:1px solid var(--bord);color:var(--acc2);border-radius:6px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;transition:all .15s;display:flex;align-items:center;gap:6px}
+.ranking-btn:hover{border-color:var(--acc2);background:rgba(247,201,72,.08)}
+.ranking-btn .pts-total{font-size:16px;color:var(--acc2)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="logo">BY<span> PRONOS</span></div>
+    <nav class="nav">
+      <button class="nav-btn active" onclick="showView('sports',this)">Sports</button>
+      <button class="nav-btn" onclick="showView('live',this)">🔴 Live</button>
+      <button class="nav-btn" onclick="showView('ranking',this)">🏆 Classement</button>
+    </nav>
+    <div class="header-right">
+      <button class="ranking-btn" onclick="openLeaderboard()">🏆 <span id="headerPts">0 pts</span></button>
+      <div class="balance" id="balanceDisplay">1 250,00 &euro;</div>
+      <button class="deposit-btn">+ D&eacute;p&ocirc;t</button>
+    </div>
+  </div>
+
+  <div id="view-sports" class="view-panel">
+  <div class="main">
+    <div class="sidebar">
+      <h3>Sport</h3>
+      <div class="sport-item active"><span class="sport-icon">⚽</span><span class="sport-name">Football</span><span class="sport-count">10</span></div>
+      <h3 style="margin-top:10px">Compétition</h3>
+      <div class="sport-item active"><span class="sport-icon">🇫🇷</span><span class="sport-name">Ligue 1</span><span class="sport-count">10</span></div>
+      <h3 style="margin-top:10px">Matchs</h3>
+      <div class="sport-item" onclick="scrollToMatch(1,this)"><span class="sport-icon">⚽</span><span class="sport-name">Lorient - Le Havre</span></div>
+      <div class="sport-item" onclick="scrollToMatch(2,this)"><span class="sport-icon">⚽</span><span class="sport-name">Marseille - Rennes</span></div>
+      <div class="sport-item" onclick="scrollToMatch(3,this)"><span class="sport-icon">⚽</span><span class="sport-name">Strasbourg - Monaco</span></div>
+      <div class="sport-item" onclick="scrollToMatch(4,this)"><span class="sport-icon">⚽</span><span class="sport-name">Brest - Angers</span></div>
+      <div class="sport-item" onclick="scrollToMatch(5,this)"><span class="sport-icon">⚽</span><span class="sport-name">Paris FC - Paris SG</span></div>
+      <div class="sport-item" onclick="scrollToMatch(6,this)"><span class="sport-icon">⚽</span><span class="sport-name">Lille - Auxerre</span></div>
+      <div class="sport-item" onclick="scrollToMatch(7,this)"><span class="sport-icon">⚽</span><span class="sport-name">Nice - Metz</span></div>
+      <div class="sport-item" onclick="scrollToMatch(8,this)"><span class="sport-icon">⚽</span><span class="sport-name">Nantes - Toulouse</span></div>
+      <div class="sport-item" onclick="scrollToMatch(9,this)"><span class="sport-icon">⚽</span><span class="sport-name">Lyon - Lens</span></div>
+      <div class="sport-item" onclick="scrollToMatch(10,this)"><span class="sport-icon">⚽</span><span class="sport-name">Saint-Étienne - Rodez</span></div>
+    </div>
+
+    <div class="content">
+      <div class="boost-banner">
+        <div style="font-size:22px">⚡</div>
+        <div>
+          <div class="boost-text">Boost score exact — Paris FC 0-3 Paris SG</div>
+          <div class="boost-sub">Cote boostée à 9.50 (normale 7.80) · Offre limitée</div>
+        </div>
+      </div>
+      <div class="section-title">🇫🇷 Ligue 1 — Journée du jour</div>
+      <div id="matchList"></div>
+    </div>
+
+    <div class="betslip">
+      <div class="betslip-header">
+        <div class="betslip-title">Mon bulletin <div class="bet-count" id="betCount">0</div></div>
+        <button class="clear-btn" onclick="clearAll()">Tout effacer</button>
+      </div>
+      <div class="betslip-body" id="betslipBody">
+        <div class="empty-slip">
+          <div class="ico">🎯</div>
+          <p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p>
+        </div>
+      </div>
+      <div class="betslip-footer" id="betslipFooter" style="display:none">
+        <div class="total-row"><span>Paris validés</span><span id="totalBets">0 pari(s)</span></div>
+        <div class="total-row"><span>✅ Bon résultat</span><span id="ptsResult" style="color:var(--acc);font-weight:700">0 pts</span></div>
+        <div class="total-row" style="align-items:flex-start">
+          <span style="display:flex;flex-direction:column;gap:2px">
+            <span style="display:flex;align-items:center;gap:5px"><span style="background:linear-gradient(135deg,#c9922a,#f5c842);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">Score exact</span> 🎯</span>
+            <span style="font-size:10px;color:var(--txt2)">+0.5 pt bonus si bon écart (hors nul)</span>
+          </span>
+          <span id="ptsScore" style="background:linear-gradient(135deg,#c9922a,#f5c842,#ffe599);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">0 pts</span>
+        </div>
+        <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenalty" style="color:var(--acc3);font-weight:700">0 pts</span></div>
+        <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotal" style="color:var(--acc)">0 pts</span></div>
+        <button class="place-btn" onclick="placeBets()">VALIDER MES PARIS →</button>
+      </div>
+    </div>
+  </div>
+</div>
+  </div><!-- /view-sports -->
+
+  <!-- ── Vue LIVE ────────────────────────────────── -->
+  <div id="view-live" class="view-panel" style="display:none">
+    <div class="live-view">
+      <div class="live-header">
+        <div class="live-title">🔴 Scores en direct — Ligue 1</div>
+        <div class="live-sub">Données temps réel via ScoreAxis · actualisation automatique</div>
+      </div>
+      <div class="live-widget-wrap">
+        <!-- Widget ScoreAxis Livescore Ligue 1 -->
+        <div class="scoreaxis-widget" style="width:100%;height:auto;font-size:14px;background-color:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:10px;overflow:auto">
+          <script src="https://widgets.scoreaxis.com/api/football/livescore/league/61?lang=fr&teamLogo=1&header=1&links=1&font=heebo&fontSize=14&rowDensity=110&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23161b22&textColor=%23e6edf3&linkColor=%2300d4aa&borderColor=%2330363d&tabColor=%2321262d" async></script>
+          <div style="padding:6px 12px;font-weight:500;font-size:11px;color:#8b949e">Données live par <a href="https://www.scoreaxis.com/" style="color:#00d4aa" target="_blank">ScoreAxis</a></div>
+        </div>
+        <div class="live-fallback" id="liveFallback">
+          <div class="live-fallback-ico">⚽</div>
+          <p>Chargement des scores en direct…</p>
+          <p class="live-fallback-sub">Si le widget ne s'affiche pas, <a href="https://www.flashscore.fr/football/france/ligue-1/" target="_blank" rel="noopener">ouvrir Flashscore Ligue 1 ↗</a></p>
+        </div>
+      </div>
+    </div>
+  </div><!-- /view-live -->
+
+  <!-- ── Vue Classement ──────────────────────── -->
+  <div id="view-ranking" class="view-panel" style="display:none">
+    <div class="ranking-view">
+      <div class="ranking-header">
+        <div class="ranking-title">🏆 Classement des joueurs</div>
+        <div class="ranking-tabs">
+          <button class="ranking-tab active" onclick="switchRankTab('season',this)">Saison complète</button>
+          <button class="ranking-tab" onclick="switchRankTab('day',this)">Journée en cours</button>
+        </div>
+      </div>
+      <div class="journee-badge">📅 Journée en cours — Ligue 1 · <span id="rankDayLabel">Paris non encore validés</span></div>
+      <table class="ranking-table" id="rankingTable">
+        <thead><tr>
+          <th>#</th><th>Joueur</th><th>Paris</th><th>Pts résultat</th><th>Pts score</th><th>Total</th>
+        </tr></thead>
+        <tbody id="rankingBody">
+          <tr><td colspan="6"><div class="ranking-empty"><div class="ico">🏆</div><p>Aucun joueur enregistré.<br>Connectez-vous et validez vos paris pour apparaître.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div><!-- /view-ranking -->
+
+<div class="notif" id="notif"></div>
+
+<!-- Leaderboard modal -->
+<div class="leaderboard-overlay" id="lbOverlay" onclick="closeLbIfOutside(event)">
+  <div class="leaderboard-modal">
+    <div class="lb-header">
+      <div class="lb-title">&#127942; Tableau des points</div>
+      <button class="lb-close" onclick="closeLeaderboard()">&#215;</button>
+    </div>
+    <div class="lb-body">
+      <div class="lb-summary">
+        <div class="lb-stat"><div class="lb-stat-val green" id="lbTotalPts">0</div><div class="lb-stat-label">Points totaux</div></div>
+        <div class="lb-stat"><div class="lb-stat-val" id="lbNbParis">0</div><div class="lb-stat-label">Paris jou&#233;s</div></div>
+        <div class="lb-stat"><div class="lb-stat-val" id="lbMiseTotale">0 &#8364;</div><div class="lb-stat-label">Mises totales</div></div>
+      </div>
+      <table class="lb-table">
+        <thead><tr><th>Match</th><th>Score pari&#233;</th><th>R&#233;sultat</th><th>Mise</th><th>Points</th></tr></thead>
+        <tbody id="lbTableBody">
+          <tr><td colspan="5"><div class="lb-empty"><div class="ico">&#128203;</div>Aucun pari valid&#233; pour l&#39;instant</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// ── Données matchs ────────────────────────────
+// ══════════════════════════════════════════════
+const matches = [
+  {id:1,  home:'Lorient',       away:'Le Havre',   time:'13:00', odds:[2.80,3.10,2.55]},
+  {id:2,  home:'Marseille',     away:'Rennes',     time:'15:00', odds:[1.75,3.50,4.80]},
+  {id:3,  home:'Strasbourg',    away:'Monaco',     time:'15:00', odds:[3.20,3.30,2.15]},
+  {id:4,  home:'Brest',         away:'Angers',     time:'15:00', odds:[2.10,3.20,3.60]},
+  {id:5,  home:'Paris FC',      away:'Paris SG',   time:'17:05', odds:[8.50,5.00,1.18]},
+  {id:6,  home:'Lille',         away:'Auxerre',    time:'17:05', odds:[1.65,3.60,5.20]},
+  {id:7,  home:'Nice',          away:'Metz',       time:'19:05', odds:[1.55,3.80,6.00]},
+  {id:8,  home:'Nantes',        away:'Toulouse',   time:'19:05', odds:[2.40,3.20,3.00]},
+  {id:9,  home:'Lyon',          away:'Lens',       time:'20:45', odds:[2.05,3.30,3.80]},
+  {id:10, home:'Saint-Etienne', away:'Rodez',      time:'20:45', odds:[2.20,3.10,3.40]},
+];
+
+const SCORES = {
+  win:  [{h:1,a:0},{h:2,a:0},{h:2,a:1},{h:3,a:0},{h:3,a:1},{h:3,a:2},{h:4,a:0},{h:4,a:1},{h:4,a:2},{h:4,a:3},{h:5,a:0},{h:5,a:1},{h:5,a:2},{h:5,a:3},{h:5,a:4}],
+  draw: [{h:0,a:0},{h:1,a:1},{h:2,a:2},{h:3,a:3},{h:4,a:4},{h:5,a:5}],
+  lose: [{h:0,a:1},{h:0,a:2},{h:1,a:2},{h:0,a:3},{h:1,a:3},{h:2,a:3},{h:0,a:4},{h:1,a:4},{h:2,a:4},{h:3,a:4},{h:0,a:5},{h:1,a:5},{h:2,a:5},{h:3,a:5},{h:4,a:5}],
+};
+
+// ══════════════════════════════════════════════
+// ── Calculs cotes & résultat ──────────────────
+// ══════════════════════════════════════════════
+function scoreOdd(m, h, a) {
+  const [o1,oN,o2] = m.odds;
+  const p1=1/o1, pN=1/oN, p2=1/o2, tot=p1+pN+p2;
+  const lh=1.35*(p1/tot+0.5*pN/tot), la=1.35*(p2/tot+0.5*pN/tot);
+  function pois(l,k){let e=Math.exp(-l),f=1;for(let i=1;i<=k;i++)f*=i;return e*Math.pow(l,k)/f;}
+  const prob=pois(lh,h)*pois(la,a);
+  if(prob<0.00001) return 999.0;
+  return Math.round(1/prob*1.15*10)/10;
+}
+function deduceResult(m, h, a) {
+  if(h>a) return {label:'Victoire '+m.home, cls:'win', short:'1'};
+  if(h===a) return {label:'Match nul', cls:'draw', short:'N'};
+  return {label:'Victoire '+m.away, cls:'lose', short:'2'};
+}
+function hasGoodGap(b, realH, realA) {
+  return (b.h - b.a) === (realH - realA);
+}
+
+function calcPoints(b, realH, realA) {
+  const result = Math.round(b.resultOdd*100)/100;
+  const score  = Math.round(b.scoreOdd*100)/100;
+  let bonus = 0;
+  if (realH !== undefined && realA !== undefined) {
+    const goodResult = (b.h>b.a && realH>realA)||(b.h===b.a && realH===realA)||(b.h<b.a && realH<realA);
+    const exactScore = b.h===realH && b.a===realA;
+    const isDrawProno = b.h === b.a; // pas de bonus sur prono nul
+    if (goodResult && !exactScore && !isDrawProno && hasGoodGap(b, realH, realA)) bonus = 0.5;
+  }
+  return { result, score, bonus, total: Math.round((result+score)*100)/100 };
+}
+
+// ══════════════════════════════════════════════
+// ── État ─────────────────────────────────────
+// ══════════════════════════════════════════════
+let betslip    = {};
+let matchState = {};
+let currentPlayer = null;
+let rankTab    = 'season';
+
+// ══════════════════════════════════════════════
+// ── Rendu matchs ─────────────────────────────
+// ══════════════════════════════════════════════
+function buildCard(m) {
+  const state = matchState[m.id] || {resultCls:null};
+  const selWin  = state.resultCls==='win'  ? 'sel-win'  : '';
+  const selDraw = state.resultCls==='draw' ? 'sel-draw' : '';
+  const selLose = state.resultCls==='lose' ? 'sel-lose' : '';
+
+  const resultRow = `<div class="result-row">
+    <div class="result-btn ${selWin}"  onclick="selectResult(${m.id},'win')">
+      <span class="rb-label">1 · ${m.home}</span>
+      <span class="rb-odd">${m.odds[0].toFixed(2)}</span>
+    </div>
+    <div class="result-btn ${selDraw}" onclick="selectResult(${m.id},'draw')">
+      <span class="rb-label">N · Nul</span>
+      <span class="rb-odd">${m.odds[1].toFixed(2)}</span>
+    </div>
+    <div class="result-btn ${selLose}" onclick="selectResult(${m.id},'lose')">
+      <span class="rb-label">2 · ${m.away}</span>
+      <span class="rb-odd">${m.odds[2].toFixed(2)}</span>
+    </div>
+  </div>`;
+
+  let scoreBlock = '';
+  if(state.resultCls) {
+    const scores = (SCORES[state.resultCls]||[]).map(s=>({h:s.h,a:s.a,odd:scoreOdd(m,s.h,s.a)}));
+    const clsLabel = {
+      win:  '✦ '+m.home+' gagne — choisissez le score',
+      draw: '◆ Match nul — choisissez le score',
+      lose: '✦ '+m.away+' gagne — choisissez le score'
+    };
+    const pills = scores.map(s=>{
+      const key=`${m.id}_${s.h}_${s.a}`;
+      const sel=betslip[key]?'selected':'';
+      return `<div class="score-pill ${state.resultCls} ${sel}" onclick="toggleScore(${m.id},${s.h},${s.a})">
+        <span class="pill-score">${s.h}-${s.a}</span>
+        <span class="pill-odd">${s.odd.toFixed(1)}</span>
+      </div>`;
+    }).join('');
+    const hintKey = Object.keys(betslip).find(k=>k.startsWith(m.id+'_'));
+    const hintHtml = hintKey
+      ? `<div class="score-step-hint">✅ Score sélectionné — visible dans le bulletin</div>`
+      : `<div class="score-step-hint">👆 Cliquez sur un score pour l'ajouter au bulletin</div>`;
+    scoreBlock = `<div class="score-step ${state.resultCls}">
+      <div class="score-step-label ${state.resultCls}">${clsLabel[state.resultCls]}</div>
+      <div class="score-pills">${pills}</div>
+      ${hintHtml}
+    </div>`;
+  }
+
+  return `<div class="match-card" data-id="${m.id}">
+    <div class="match-header">
+      <div class="league"><span>🇫🇷</span> Ligue 1</div>
+      <span class="match-time">🕐 ${m.time}</span>
+    </div>
+    <div class="match-body">
+      <div class="teams">
+        <div class="team"><div class="team-name">${m.home}</div><div class="team-info">Domicile</div></div>
+        <div class="vs-box">vs</div>
+        <div class="team right"><div class="team-name">${m.away}</div><div class="team-info">Extérieur</div></div>
+      </div>
+      ${resultRow}
+      ${scoreBlock}
+    </div>
+  </div>`;
+}
+
+function renderMatches() {
+  document.getElementById('matchList').innerHTML = matches.map(buildCard).join('');
+}
+
+// ══════════════════════════════════════════════
+// ── Interactions paris ────────────────────────
+// ══════════════════════════════════════════════
+function selectResult(matchId, cls) {
+  if(matchState[matchId] && matchState[matchId].resultCls===cls) {
+    delete matchState[matchId];
+    Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+  } else {
+    Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+    matchState[matchId]={resultCls:cls};
+  }
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function toggleScore(matchId, h, a) {
+  const key=`${matchId}_${h}_${a}`;
+  const m=matches.find(x=>x.id===matchId);
+  if(!m) return;
+  if(betslip[key]) {
+    delete betslip[key];
+  } else {
+    Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+    const odd=scoreOdd(m,h,a);
+    const res=deduceResult(m,h,a);
+    const rMap={win:m.odds[0],draw:m.odds[1],lose:m.odds[2]};
+    betslip[key]={matchId,h,a,matchName:m.home+' - '+m.away,home:m.home,away:m.away,scoreOdd:odd,resultLabel:res.label,resultCls:res.cls,resultShort:res.short,resultOdd:rMap[res.cls],stake:1};
+  }
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+// ══════════════════════════════════════════════
+// ── Bulletin ─────────────────────────────────
+// ══════════════════════════════════════════════
+function renderBetslip() {
+  const keys=Object.keys(betslip);
+  document.getElementById('betCount').textContent=keys.length;
+  const body=document.getElementById('betslipBody');
+  const footer=document.getElementById('betslipFooter');
+  if(!keys.length){
+    body.innerHTML=`<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>`;
+    footer.style.display='none';
+    return;
+  }
+  footer.style.display='block';
+  body.innerHTML=keys.map(k=>{
+    const b=betslip[k];
+    const ptsR=b.resultOdd.toFixed(2);
+    const ptsS=b.scoreOdd.toFixed(2);
+    const ptsMax=(b.resultOdd+b.scoreOdd).toFixed(2);
+    return `<div class="bet-item">
+      <button class="remove-bet" onclick="removeBet('${k}')" title="Supprimer">×</button>
+      <div class="bet-match">${b.matchName}</div>
+      <div class="bet-score-big ${b.resultCls}">${b.h} — ${b.a}</div>
+      <div class="bet-result-deduced ${b.resultCls}"><span class="arrow">↳</span><span class="label ${b.resultCls}">${b.resultLabel} (${b.resultShort})</span></div>
+      <div class="bet-pts-badges">
+        <div class="pts-badge result"><span class="pts-badge-label">✅ Bon résultat</span><span class="pts-badge-val">${ptsR} pts</span><span class="pts-badge-sub">si résultat correct</span></div>
+        <div class="pts-badge score"><span class="pts-badge-label">🎯 Score exact</span><span class="pts-badge-val">${ptsS} pts</span><span class="pts-badge-sub">gain exceptionnel</span></div>
+      </div>
+      <div class="pts-bonus-row"><span class="pts-bonus-label">🎯 Bon résultat + bon écart</span><span class="pts-bonus-val">+0.5 pt</span></div>
+      <div class="pts-loss-row"><span class="pts-loss-label">❌ Pronostic faux</span><span class="pts-loss-val">−1 pt</span></div>
+      <div class="pts-max-row">Max si tout juste : <strong>${ptsMax} pts</strong></div>
+    </div>`;
+  }).join('');
+  updateTotals();
+}
+
+function updateTotals() {
+  const keys=Object.keys(betslip);
+  const ptsR=keys.reduce((s,k)=>s+betslip[k].resultOdd,0);
+  const ptsS=keys.reduce((s,k)=>s+betslip[k].scoreOdd,0);
+  const pen=keys.length;
+  document.getElementById('totalBets').textContent=keys.length+' pari(s)';
+  document.getElementById('ptsResult').textContent='+'+ptsR.toFixed(2)+' pts';
+  document.getElementById('ptsScore').textContent='+'+ptsS.toFixed(2)+' pts'; document.getElementById('ptsScore').style.color='var(--acc-score)';
+  document.getElementById('ptsPenalty').textContent='-'+pen+' pt'+(pen>1?'s':'');
+  document.getElementById('ptsTotal').textContent=(ptsR+ptsS).toFixed(2)+' pts';
+}
+
+function removeBet(key) {
+  delete betslip[key];
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function clearAll() {
+  betslip={};
+  matchState={};
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function placeBets() {
+  const keys=Object.keys(betslip);
+  if(!keys.length) return;
+  if(!currentPlayer){
+    showNotif('⚠️ Connectez-vous dabord !');
+    openLogin();
+    return;
+  }
+  const players=loadPlayers();
+  if(!players[currentPlayer]) players[currentPlayer]={season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
+  const p=players[currentPlayer];
+  const day='Journée en cours';
+  if(!p.season.days[day]) p.season.days[day]={ptsResult:0,ptsScore:0,bets:0};
+  keys.forEach(k=>{
+    const b=betslip[k];
+    const pts=calcPoints(b);
+    p.season.ptsResult+=pts.result;
+    p.season.ptsScore+=pts.score;
+    p.season.bets+=1;
+    p.season.days[day].ptsResult+=pts.result;
+    p.season.days[day].ptsScore+=pts.score;
+    p.season.days[day].bets+=1;
+  });
+  p.current={};
+  savePlayers(players);
+  const totalPts=keys.reduce((s,k)=>s+calcPoints(betslip[k]).total,0);
+  showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' — max '+totalPts.toFixed(2)+' pts potentiels');
+  betslip={};
+  matchState={};
+  renderMatches();
+  renderBetslip();
+}
+
+// ══════════════════════════════════════════════
+// ── Navigation vues ──────────────────────────
+// ══════════════════════════════════════════════
+function showView(view, btn) {
+  document.querySelectorAll('.view-panel').forEach(p=>p.style.display='none');
+  document.getElementById('view-'+view).style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(view==='ranking') renderRanking();
+}
+
+function scrollToMatch(id, el) {
+  document.querySelectorAll('.sport-item[onclick]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  const card=document.querySelector(`.match-card[data-id="${id}"]`);
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══════════════════════════════════════════════
+// ── Système joueurs ───────────────────────────
+// ══════════════════════════════════════════════
+const STORAGE_KEY='bypronos_players';
+
+function loadPlayers() {
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}; }
+  catch(e){ return {}; }
+}
+function savePlayers(data) {
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}
+function autosave() {
+  if(!currentPlayer) return;
+  const players=loadPlayers();
+  if(!players[currentPlayer]) return;
+  players[currentPlayer].current={betslip:JSON.parse(JSON.stringify(betslip)),matchState:JSON.parse(JSON.stringify(matchState))};
+  savePlayers(players);
+}
+
+function openLogin() {
+  const players=loadPlayers();
+  const names=Object.keys(players);
+  const list=document.getElementById('loginPlayersList');
+  const wrap=document.getElementById('loginPlayers');
+  if(names.length){
+    list.innerHTML=names.map(n=>`<span class="login-player-chip" onclick="doLoginName('${n}')">👤 ${n}</span>`).join('');
+    wrap.style.display='block';
+  } else {
+    wrap.style.display='none';
+  }
+  document.getElementById('loginInput').value='';
+  document.getElementById('loginOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('loginInput').focus(),150);
+}
+
+function doLogin() {
+  const val=document.getElementById('loginInput').value.trim();
+  if(!val) return;
+  doLoginName(val);
+}
+
+function doLoginName(name) {
+  currentPlayer=name;
+  document.getElementById('loginOverlay').style.display='none';
+  document.getElementById('playerName').textContent=name;
+  document.getElementById('playerAvatar').textContent=name.charAt(0).toUpperCase();
+  const players=loadPlayers();
+  if(!players[name]) players[name]={season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
+  savePlayers(players);
+  // Restaurer paris en cours
+  betslip={};
+  matchState={};
+  const saved=players[name].current||{};
+  if(saved.betslip) Object.assign(betslip,saved.betslip);
+  if(saved.matchState) Object.assign(matchState,saved.matchState);
+  renderMatches();
+  renderBetslip();
+}
+
+// ══════════════════════════════════════════════
+// ── Classement ───────────────────────────────
+// ══════════════════════════════════════════════
+function switchRankTab(tab, btn) {
+  rankTab=tab;
+  document.querySelectorAll('.ranking-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRanking();
+}
+
+function renderRanking() {
+  const players=loadPlayers();
+  const day='Journée en cours';
+  document.getElementById('rankDayLabel').textContent=day;
+  let rows=[];
+  Object.entries(players).forEach(([name,data])=>{
+    if(rankTab==='season'){
+      rows.push({name,bets:data.season.bets,ptsResult:data.season.ptsResult,ptsScore:data.season.ptsScore,total:data.season.ptsResult+data.season.ptsScore});
+    } else {
+      const d=data.season.days[day]||{ptsResult:0,ptsScore:0,bets:0};
+      rows.push({name,bets:d.bets,ptsResult:d.ptsResult,ptsScore:d.ptsScore,total:d.ptsResult+d.ptsScore});
+    }
+  });
+  rows.sort((a,b)=>b.total-a.total);
+  const tbody=document.getElementById('rankingBody');
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="6"><div class="ranking-empty"><div class="ico">🏆</div><p>Aucun joueur enregistré.<br>Connectez-vous et validez vos paris pour apparaître.</p></div></td></tr>';
+    return;
+  }
+  const medals=['🥇','🥈','🥉'];
+  tbody.innerHTML=rows.map((r,i)=>{
+    const isYou=r.name===currentPlayer;
+    return `<tr>
+      <td class="rank-pos ${i<3?['gold','silver','bronze'][i]:''}">${i<3?medals[i]:i+1}</td>
+      <td class="rank-name">${r.name}${isYou?' <span class="you-badge">VOUS</span>':''}</td>
+      <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
+      <td style="color:var(--acc);font-size:13px">+${r.ptsResult.toFixed(2)}</td>
+      <td style="color:var(--acc2);font-size:13px">+${r.ptsScore.toFixed(2)}</td>
+      <td class="rank-pts">${r.total.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// ── Notif & Init ─────────────────────────────
+// ══════════════════════════════════════════════
+function showNotif(msg) {
+  const n=document.getElementById('notif');
+  n.textContent=msg;
+  n.style.display='block';
+  setTimeout(()=>n.style.display='none',3500);
+}
+
+
+// ══════════════════════════════════════════════
+// ── Tchat local ──────────────────────────────
+// ══════════════════════════════════════════════
+const CHAT_KEY = 'bypronos_chat';
+let chatOpen = false;
+let unreadCount = 0;
+let lastMsgCount = 0;
+
+function loadMessages() {
+  try { return JSON.parse(localStorage.getItem(CHAT_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveMessages(msgs) {
+  // Garder les 200 derniers messages max
+  if (msgs.length > 200) msgs = msgs.slice(-200);
+  localStorage.setItem(CHAT_KEY, JSON.stringify(msgs));
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chatWindow');
+  win.classList.toggle('open', chatOpen);
+  if (chatOpen) {
+    unreadCount = 0;
+    updateUnread();
+    renderChat();
+    setTimeout(() => {
+      const input = document.getElementById('chatInput');
+      if (input) input.focus();
+      scrollChatBottom();
+    }, 50);
+  }
+}
+
+function sendChat() {
+  if (!currentPlayer) { showNotif('⚠️ Connectez-vous dabord !'); openLogin(); return; }
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = loadMessages();
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  msgs.push({ author: currentPlayer, text, time, id: Date.now() });
+  saveMessages(msgs);
+  input.value = '';
+  renderChat();
+  scrollChatBottom();
+}
+
+function renderChat() {
+  const msgs = loadMessages();
+  const container = document.getElementById('chatMessages');
+  const empty = document.getElementById('chatEmpty');
+  if (!msgs.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  // Grouper messages consécutifs du même auteur
+  let html = '';
+  msgs.forEach((m, i) => {
+    const isMe = m.author === currentPlayer;
+    const cls = isMe ? 'me' : 'other';
+    const showAuthor = i === 0 || msgs[i-1].author !== m.author;
+    html += `<div class="chat-msg ${cls}">
+      ${showAuthor ? `<div class="chat-msg-author">${m.author}</div>` : ''}
+      <div class="chat-msg-bubble">${escapeHtml(m.text)}</div>
+      <div class="chat-msg-time">${m.time}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function scrollChatBottom() {
+  const c = document.getElementById('chatMessages');
+  if (c) c.scrollTop = c.scrollHeight;
+}
+
+function updateUnread() {
+  const badge = document.getElementById('chatUnread');
+  if (!badge) return;
+  if (unreadCount > 0 && !chatOpen) {
+    badge.style.display = 'flex';
+    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Polling : vérifie les nouveaux messages toutes les 3s
+setInterval(() => {
+  const msgs = loadMessages();
+  if (msgs.length > lastMsgCount) {
+    const newCount = msgs.length - lastMsgCount;
+    lastMsgCount = msgs.length;
+    if (!chatOpen) {
+      unreadCount += newCount;
+      updateUnread();
+    } else {
+      renderChat();
+      scrollChatBottom();
+    }
+  }
+}, 3000);
+
+// Init chat count
+window.addEventListener('load', () => {
+  lastMsgCount = loadMessages().length;
+});
+
+renderMatches();
+window.addEventListener('load', ()=>{ openLogin(); });
+</script>
+
+<!-- ── Login overlay ─────────────────────────── -->
+<div class="login-overlay" id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center">
+  <div class="login-box">
+    <div class="login-logo">BY<span> PRONOS</span></div>
+    <div class="login-sub">Entrez votre prénom pour jouer</div>
+    <label class="login-label">Votre prénom</label>
+    <input class="login-input" id="loginInput" type="text" placeholder="Ex: Thomas" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">JOUER →</button>
+    <div class="login-players" id="loginPlayers" style="display:none">
+      <div class="login-players-label">Joueurs enregistrés</div>
+      <div id="loginPlayersList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tchat flottant ── -->
+<div class="chat-bubble" id="chatBubble">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <div class="chat-online"></div>
+        💬 Tchat By Pronos
+      </div>
+      <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">Aucun message pour l'instant.<br>Soyez le premier à écrire !</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" type="text" placeholder="Écrivez un message…" maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <button class="chat-toggle" onclick="toggleChat()" title="Ouvrir le tchat">💬</button>
+    <div class="chat-unread" id="chatUnread">0</div>
+  </div>
+</div>
+</body>
+</html>
