@@ -395,6 +395,192 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .rb-odd{font-size:14px}
   .bet-score-big{font-size:22px}
 }
+
+@media (max-width: 768px) {
+
+  /* Empêcher tout débordement horizontal */
+  html, body { overflow-x: hidden; width: 100%; }
+  .app, .content, .match-card, .match-body { max-width: 100%; overflow-x: hidden; }
+
+  /* Boutons résultat : étiquettes très compactes */
+  .result-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  .result-btn { padding: 6px 2px; min-width: 0; overflow: hidden; }
+  .rb-label { font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0; }
+  .rb-odd { font-size: 15px; }
+
+  /* Match header : noms d'équipes tronqués si trop longs */
+  .team-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .teams { grid-template-columns: 1fr 30px 1fr; gap: 4px; }
+  .vs-box { font-size: 11px; min-width: 30px; }
+
+  /* Score pills : taille réduite */
+  .score-pill { padding: 4px 7px; }
+  .pill-score { font-size: 12px; }
+  .pill-odd { font-size: 10px; }
+
+  /* Header : masquer le texte du bouton joueur sur très petit écran */
+  #playerName { display: none; }
+}
+
+@media (max-width: 768px) {
+
+  /* Taille de base plus grande */
+  body { font-size: 16px; }
+
+  /* Noms équipes plus lisibles */
+  .team-name { font-size: 17px !important; }
+  .team-info { font-size: 13px; }
+
+  /* Boutons résultat plus grands */
+  .result-btn { padding: 12px 4px; }
+  .rb-label { font-size: 11px !important; }
+  .rb-odd { font-size: 22px !important; }
+
+  /* League + heure */
+  .league { font-size: 13px; }
+  .match-time { font-size: 13px; padding: 4px 12px; }
+
+  /* Boost banner */
+  .boost-text { font-size: 15px; }
+  .boost-sub { font-size: 13px; }
+
+  /* Section title */
+  .section-title { font-size: 20px !important; }
+
+  /* Score pills */
+  .pill-score { font-size: 16px !important; }
+  .pill-odd { font-size: 13px !important; }
+  .score-pill { padding: 7px 12px !important; }
+
+  /* Score step label */
+  .score-step-label { font-size: 13px; }
+  .score-step-hint { font-size: 13px; }
+
+  /* Nav */
+  .nav-btn { font-size: 14px !important; padding: 8px 10px !important; }
+  .logo { font-size: 22px !important; }
+}
+
+@media (max-width: 768px) {
+
+  /* Betslip desktop caché sur mobile */
+  .betslip { display: none; }
+
+  /* ── Bouton flottant bulletin ── */
+  .mobile-slip-btn {
+    display: flex;
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7000;
+    background: var(--acc);
+    color: #0d1117;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,212,170,.5);
+    align-items: center;
+    gap: 8px;
+    letter-spacing: .5px;
+    transition: all .2s;
+  }
+  .mobile-slip-btn .slip-badge {
+    background: #0d1117;
+    color: var(--acc);
+    font-size: 12px;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-slip-btn.has-bets { background: var(--acc); }
+  .mobile-slip-btn.empty { background: var(--bg3); color: var(--txt2); box-shadow: none; }
+
+  /* ── Tiroir bulletin mobile ── */
+  .mobile-slip-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 6500;
+    background: var(--bg2);
+    border-top: 2px solid var(--acc);
+    border-radius: 18px 18px 0 0;
+    max-height: 85vh;
+    transform: translateY(100%);
+    transition: transform .3s ease;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.6);
+  }
+  .mobile-slip-drawer.open {
+    transform: translateY(0);
+  }
+  .mobile-slip-drawer-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+  .mobile-slip-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 10px;
+    border-bottom: 1px solid var(--bord);
+    flex-shrink: 0;
+  }
+  .mobile-slip-drawer-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mobile-slip-close {
+    background: none;
+    border: none;
+    color: var(--txt2);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .mobile-slip-drawer-body {
+    overflow-y: auto;
+    padding: 12px;
+    flex: 1;
+  }
+  .mobile-slip-drawer-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--bord);
+    flex-shrink: 0;
+  }
+  /* Overlay sombre derrière le tiroir */
+  .mobile-slip-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 6400;
+  }
+  .mobile-slip-overlay.open { display: block; }
+}
+
+@media (min-width: 769px) {
+  .mobile-slip-btn, .mobile-slip-drawer, .mobile-slip-overlay { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -1059,6 +1245,88 @@ window.addEventListener('load', () => {
   lastMsgCount = loadMessages().length;
 });
 
+
+// ── Bulletin mobile ───────────────────────────────────────────────
+function openMobileSlip() {
+  document.getElementById('mobileSlipDrawer').classList.add('open');
+  document.getElementById('mobileSlipOverlay').classList.add('open');
+  syncMobileSlip();
+}
+function closeMobileSlip() {
+  document.getElementById('mobileSlipDrawer').classList.remove('open');
+  document.getElementById('mobileSlipOverlay').classList.remove('open');
+}
+
+function syncMobileSlip() {
+  const keys = Object.keys(betslip);
+
+  // Badge bouton flottant
+  const btn = document.getElementById('mobileSlipBtn');
+  const badge = document.getElementById('betCountMobileBtn');
+  if (badge) badge.textContent = keys.length;
+  if (btn) {
+    btn.className = keys.length > 0
+      ? 'mobile-slip-btn has-bets'
+      : 'mobile-slip-btn empty';
+    btn.innerHTML = keys.length > 0
+      ? '🎯 Mon bulletin <span class="slip-badge">' + keys.length + '</span>'
+      : '🎯 Mon bulletin <span class="slip-badge">0</span>';
+    btn.onclick = openMobileSlip;
+  }
+
+  const countEl = document.getElementById('betCountMobile');
+  if (countEl) countEl.textContent = keys.length;
+
+  const body = document.getElementById('betslipBodyMobile');
+  const footer = document.getElementById('betslipFooterMobile');
+  if (!body) return;
+
+  if (!keys.length) {
+    body.innerHTML = '<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>';
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+  if (footer) footer.style.display = 'block';
+
+  body.innerHTML = keys.map(k => {
+    const b = betslip[k];
+    const ptsR = b.resultOdd.toFixed(2);
+    const ptsS = b.scoreOdd.toFixed(2);
+    const ptsMax = (b.resultOdd + b.scoreOdd).toFixed(2);
+    return '<div class="bet-item">' +
+      '<button class="remove-bet" onclick="removeBet(\'' + k + '\')" title="Supprimer">×</button>' +
+      '<div class="bet-match">' + b.matchName + '</div>' +
+      '<div class="bet-score-big ' + b.resultCls + '">' + b.h + ' — ' + b.a + '</div>' +
+      '<div class="bet-result-deduced ' + b.resultCls + '"><span class="arrow">↳</span><span class="label ' + b.resultCls + '">' + b.resultLabel + ' (' + b.resultShort + ')</span></div>' +
+      '<div class="bet-pts-badges">' +
+        '<div class="pts-badge result"><span class="pts-badge-label">✅ Bon résultat</span><span class="pts-badge-val">' + ptsR + ' pts</span><span class="pts-badge-sub">si résultat correct</span></div>' +
+        '<div class="pts-badge score"><span class="pts-badge-label">🎯 Score exact</span><span class="pts-badge-val">' + ptsS + ' pts</span><span class="pts-badge-sub">gain exceptionnel</span></div>' +
+      '</div>' +
+      '<div class="pts-bonus-row"><span class="pts-bonus-label">🎯 Bon résultat + bon écart</span><span class="pts-bonus-val">+0.5 pt</span></div>' +
+      '<div class="pts-loss-row"><span class="pts-loss-label">❌ Pronostic faux</span><span class="pts-loss-val">−1 pt</span></div>' +
+      '<div class="pts-max-row">Max si tout juste : <strong>' + ptsMax + ' pts</strong></div>' +
+    '</div>';
+  }).join('');
+
+  // Totaux
+  const ptsR = keys.reduce((s,k) => s + betslip[k].resultOdd, 0);
+  const ptsS = keys.reduce((s,k) => s + betslip[k].scoreOdd, 0);
+  const pen  = keys.length;
+  const el = (id) => document.getElementById(id);
+  if (el('totalBetsMobile'))    el('totalBetsMobile').textContent   = pen + ' pari(s)';
+  if (el('ptsResultMobile'))    el('ptsResultMobile').textContent   = '+' + ptsR.toFixed(2) + ' pts';
+  if (el('ptsScoreMobile'))     el('ptsScoreMobile').textContent    = '+' + ptsS.toFixed(2) + ' pts';
+  if (el('ptsPenaltyMobile'))   el('ptsPenaltyMobile').textContent  = '-' + pen + ' pt' + (pen>1?'s':'');
+  if (el('ptsTotalMobile'))     el('ptsTotalMobile').textContent    = (ptsR+ptsS).toFixed(2) + ' pts';
+}
+
+// Hook renderBetslip pour sync mobile
+const _origRenderBetslipDesktop = renderBetslip;
+function renderBetslip() {
+  _origRenderBetslipDesktop();
+  syncMobileSlip();
+}
+
 renderMatches();
 window.addEventListener('load', ()=>{ openLogin(); });
 </script>
@@ -1101,5 +1369,35 @@ window.addEventListener('load', ()=>{ openLogin(); });
     <div class="chat-unread" id="chatUnread">0</div>
   </div>
 </div>
+
+<!-- ── Bulletin mobile flottant ── -->
+<div class="mobile-slip-overlay" id="mobileSlipOverlay" onclick="closeMobileSlip()"></div>
+
+<div class="mobile-slip-drawer" id="mobileSlipDrawer">
+  <div class="mobile-slip-drawer-handle"></div>
+  <div class="mobile-slip-drawer-header">
+    <div class="mobile-slip-drawer-title">Mon bulletin <div class="bet-count" id="betCountMobile">0</div></div>
+    <button class="mobile-slip-close" onclick="closeMobileSlip()">×</button>
+  </div>
+  <div class="mobile-slip-drawer-body" id="betslipBodyMobile"></div>
+  <div class="mobile-slip-drawer-footer" id="betslipFooterMobile" style="display:none">
+    <div class="total-row"><span>Paris validés</span><span id="totalBetsMobile">0 pari(s)</span></div>
+    <div class="total-row"><span>✅ Bon résultat</span><span id="ptsResultMobile" style="color:var(--acc);font-weight:700">0 pts</span></div>
+    <div class="total-row">
+      <span style="display:flex;flex-direction:column;gap:1px">
+        <span style="background:linear-gradient(135deg,#c9922a,#f5c842);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">Score exact 🎯</span>
+        <span style="font-size:10px;color:var(--txt2)">+0.5 pt bonus si bon écart (hors nul)</span>
+      </span>
+      <span id="ptsScoreMobile" style="background:linear-gradient(135deg,#c9922a,#f5c842,#ffe599);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">0 pts</span>
+    </div>
+    <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenaltyMobile" style="color:var(--acc3);font-weight:700">0 pts</span></div>
+    <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotalMobile" style="color:var(--acc)">0 pts</span></div>
+    <button class="place-btn" style="margin-top:10px" onclick="placeBets()">VALIDER MES PARIS →</button>
+  </div>
+</div>
+
+<button class="mobile-slip-btn empty" id="mobileSlipBtn" onclick="openMobileSlip()">
+  🎯 Mon bulletin <span class="slip-badge" id="betCountMobileBtn">0</span>
+</button>
 </body>
 </html>
