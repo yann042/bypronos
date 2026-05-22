@@ -9,9 +9,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
-  --acc:#00d4aa;--acc-win:#16a34a;--acc-score:#f97316;--acc-score-dark:#c2410c;--acc-score-light:#fdba74;--acc2:#f7c948;--acc3:#e85d4a;
-  --txt:#e6edf3;--txt2:#8b949e;--bord:#30363d;
+  --bg:#f5f5f0;--bg2:#ffffff;--bg3:#eef0eb;--bg4:#e0e3db;
+  --acc:#0a8a6a;--acc-win:#157a38;--acc-score:#c45a00;--acc-score-dark:#8b3500;--acc-score-light:#e07030;--acc2:#b8860b;--acc3:#e85d4a;
+  --txt:#1a1f1a;--txt2:#5a6a5a;--bord:#d0d5cc;
 }
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;font-size:14px}
 .app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative}
@@ -77,6 +77,18 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 /* ── Étape 2 : bloc score exact ── */
 .score-step{margin-top:10px;border-radius:8px;padding:10px 12px;animation:fadeIn .2s ease}
+.result-btn.btn-other{border-color:rgba(168,85,247,.35);background:rgba(168,85,247,.06)}
+.result-btn.btn-other:hover{border-color:#a855f7;background:rgba(168,85,247,.12)}
+.result-btn.sel-other{background:rgba(168,85,247,.18);border-color:#a855f7}
+.result-btn.sel-other .rb-odd{color:#a855f7}
+.result-btn.sel-other .rb-label{color:#a855f7}
+.score-step.other{background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.2)}
+.score-step-label.other{color:#a855f7}
+.score-pill.other{border-color:rgba(168,85,247,.3)}
+.score-pill.other:hover{border-color:#a855f7;background:rgba(168,85,247,.08)}
+.score-pill.other.selected{background:rgba(168,85,247,.18);border-color:#a855f7}
+.score-pill.other.selected .pill-score{color:#a855f7}
+.score-pill.other.selected .pill-odd{color:#a855f7}
 .score-step.win{background:rgba(22,163,74,.05);border:1px solid rgba(22,163,74,.25)}
 .score-step.draw{background:rgba(247,201,72,.05);border:1px solid rgba(247,201,72,.2)}
 .score-step.lose{background:rgba(232,93,74,.05);border:1px solid rgba(232,93,74,.15)}
@@ -156,7 +168,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pts-badge-label{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--txt2);display:block;margin-bottom:3px}
 .pts-badge-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;display:block;line-height:1}
 .pts-badge.result .pts-badge-val{color:var(--acc)}
-.pts-badge.score{background:linear-gradient(135deg,rgba(197,144,42,.18),rgba(245,200,66,.08));border-color:rgba(197,144,42,.5) !important}
+.pts-badge.score{background:rgba(139,96,0,.08);border:2px solid rgba(139,96,0,.35) !important}
 .pts-badge.score .pts-badge-val{background:linear-gradient(135deg,var(--acc-score-dark),var(--acc-score),var(--acc-score-light),var(--acc-score));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 2px rgba(197,144,42,.4));font-size:20px !important;white-space:nowrap}
 .pts-badge-sub{font-size:9px;color:var(--txt2);display:block;margin-top:2px}
 .pts-loss-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;background:rgba(232,93,74,.07);border:1px solid rgba(232,93,74,.2);border-radius:6px;padding:5px 10px}
@@ -166,7 +178,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pts-bonus-label{font-size:11px;color:var(--txt2)}
 .pts-bonus-val{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--acc)}
 .pts-max-row{text-align:center;margin-top:6px;font-size:11px;color:var(--txt2)}
-.pts-max-row strong{color:var(--acc)}
+.pts-max-row strong{color:#8b6000;font-weight:800}
 
 /* Footer */
 .betslip-footer{padding:14px 16px;border-top:1px solid var(--bord);flex-shrink:0}
@@ -657,6 +669,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .rb-short { display: none !important; }
   .rb-full  { display: block !important; }
 }
+
+.team-logo{width:32px;height:32px;object-fit:contain;display:block;margin:0 auto 4px}
+.match-header-logos{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 0}
+.match-header-logo{display:flex;flex-direction:column;align-items:center;gap:3px}
+.match-header-logo img{width:28px;height:28px;object-fit:contain}
+.match-header-logo span{font-size:10px;color:var(--txt2);font-weight:600;max-width:70px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb-logo{width:22px;height:22px;object-fit:contain;display:block;margin:0 auto 3px}
+@media(max-width:768px){
+  .match-header-logo img{width:24px;height:24px}
+  .rb-logo{width:18px;height:18px}
+}
 </style>
 </head>
 <body>
@@ -727,7 +750,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
             <span style="display:flex;align-items:center;gap:5px"><span style="background:linear-gradient(135deg,#c9922a,#f5c842);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">Score exact</span> 🎯</span>
             <span style="font-size:10px;color:var(--txt2)">+0.5 pt bonus si bon écart (hors nul)</span>
           </span>
-          <span id="ptsScore" style="background:linear-gradient(135deg,#c9922a,#f5c842,#ffe599);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">0 pts</span>
+          <span id="ptsScore" style="color:#8b6000;font-weight:700">0 pts</span>
         </div>
         <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenalty" style="color:var(--acc3);font-weight:700">0 pts</span></div>
         <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotal" style="color:var(--acc)">0 pts</span></div>
@@ -808,6 +831,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 </div>
 
 <script>
+const LOGOS = {"Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
+
+function getLogo(name) {
+  // Cherche une correspondance partielle
+  for (const [key, url] of Object.entries(LOGOS)) {
+    if (name.includes(key) || key.includes(name)) return url;
+  }
+  return null;
+}
 // ══════════════════════════════════════════════
 // ── Données matchs ────────────────────────────
 // ══════════════════════════════════════════════
@@ -828,6 +860,9 @@ const SCORES = {
   win:  [{h:1,a:0},{h:2,a:0},{h:2,a:1},{h:3,a:0},{h:3,a:1},{h:3,a:2},{h:4,a:0},{h:4,a:1},{h:4,a:2},{h:4,a:3},{h:5,a:0},{h:5,a:1},{h:5,a:2},{h:5,a:3},{h:5,a:4}],
   draw: [{h:0,a:0},{h:1,a:1},{h:2,a:2},{h:3,a:3},{h:4,a:4},{h:5,a:5}],
   lose: [{h:0,a:1},{h:0,a:2},{h:1,a:2},{h:0,a:3},{h:1,a:3},{h:2,a:3},{h:0,a:4},{h:1,a:4},{h:2,a:4},{h:3,a:4},{h:0,a:5},{h:1,a:5},{h:2,a:5},{h:3,a:5},{h:4,a:5}],
+  other_win:  [{h:6,a:0},{h:6,a:1},{h:6,a:2},{h:6,a:3},{h:6,a:4},{h:6,a:5},{h:7,a:0},{h:7,a:1},{h:7,a:2},{h:8,a:0}],
+  other_draw: [{h:6,a:6},{h:7,a:7}],
+  other_lose: [{h:0,a:6},{h:1,a:6},{h:2,a:6},{h:3,a:6},{h:4,a:6},{h:5,a:6},{h:0,a:7},{h:1,a:7},{h:2,a:7},{h:0,a:8}],
 };
 
 // ══════════════════════════════════════════════
@@ -843,9 +878,10 @@ function scoreOdd(m, h, a) {
   return Math.round(1/prob*1.15*10)/10;
 }
 function deduceResult(m, h, a) {
-  if(h>a) return {label:'Victoire '+m.home, cls:'win', short:'1'};
-  if(h===a) return {label:'Match nul', cls:'draw', short:'N'};
-  return {label:'Victoire '+m.away, cls:'lose', short:'2'};
+  const cls = h>a ? 'win' : h===a ? 'draw' : 'lose';
+  const label = cls==='win' ? 'Victoire '+m.home : cls==='draw' ? 'Match nul' : 'Victoire '+m.away;
+  const short = cls==='win' ? '1' : cls==='draw' ? 'N' : '2';
+  return {label, cls, short};
 }
 function hasGoodGap(b, realH, realA) {
   return (b.h - b.a) === (realH - realA);
@@ -876,63 +912,115 @@ let rankTab    = 'season';
 // ── Rendu matchs ─────────────────────────────
 // ══════════════════════════════════════════════
 function buildCard(m) {
-  const state = matchState[m.id] || {resultCls:null};
-  const selWin  = state.resultCls==='win'  ? 'sel-win'  : '';
-  const selDraw = state.resultCls==='draw' ? 'sel-draw' : '';
-  const selLose = state.resultCls==='lose' ? 'sel-lose' : '';
+  const state = matchState[m.id] || {resultCls: null};
+  const selWin  = state.resultCls === 'win'  ? 'sel-win'  : '';
+  const selDraw = state.resultCls === 'draw' ? 'sel-draw' : '';
+  const selLose = state.resultCls === 'lose' ? 'sel-lose' : '';
+  const homeLogo = getLogo(m.home);
+  const awayLogo = getLogo(m.away);
+  const rbLogoImg = (url, name) => url
+    ? `<img class="rb-logo" src="${url}" alt="${name}" onerror="this.style.display='none'">`
+    : '';
+  const logoImg = (url, name) => url
+    ? `<img class="team-logo" src="${url}" alt="${name}" onerror="this.style.display='none'">`
+    : '';
 
-  const resultRow = `<div class="result-row">
-    <div class="result-btn ${selWin}"  onclick="selectResult(${m.id},'win')">
-      <span class="rb-label">1 · ${m.home}</span>
+  const resultRow = `<div class="result-row" >
+    <div class="result-btn ${selWin}" onclick="selectResult(${m.id},'win')">
+      ${rbLogoImg(homeLogo, m.home)}
+      <span class="rb-label rb-full">1 · ${m.home}</span>
+      <span class="rb-label rb-short" style="display:none">1</span>
       <span class="rb-odd">${m.odds[0].toFixed(2)}</span>
     </div>
     <div class="result-btn ${selDraw}" onclick="selectResult(${m.id},'draw')">
-      <span class="rb-label">N · Nul</span>
+      <span style="font-size:18px;display:block;margin-bottom:2px">🤝</span>
+      <span class="rb-label rb-full">N · Nul</span>
+      <span class="rb-label rb-short" style="display:none">N</span>
       <span class="rb-odd">${m.odds[1].toFixed(2)}</span>
     </div>
     <div class="result-btn ${selLose}" onclick="selectResult(${m.id},'lose')">
-      <span class="rb-label">2 · ${m.away}</span>
+      ${rbLogoImg(awayLogo, m.away)}
+      <span class="rb-label rb-full">2 · ${m.away}</span>
+      <span class="rb-label rb-short" style="display:none">2</span>
       <span class="rb-odd">${m.odds[2].toFixed(2)}</span>
     </div>
   </div>`;
 
   let scoreBlock = '';
-  if(state.resultCls) {
-    const scores = (SCORES[state.resultCls]||[]).map(s=>({h:s.h,a:s.a,odd:scoreOdd(m,s.h,s.a)}));
+  let otherPill = '';
+
+  if (state.resultCls) {
+    const scoreKey = state.resultCls;
+    const pillCls = scoreKey.startsWith('other') ? 'other' : scoreKey;
+
     const clsLabel = {
-      win:  '✦ '+m.home+' gagne — choisissez le score',
-      draw: '◆ Match nul — choisissez le score',
-      lose: '✦ '+m.away+' gagne — choisissez le score'
+      win:        '✦ ' + m.home + ' gagne — choisissez le score',
+      draw:       '◆ Match nul — choisissez le score',
+      lose:       '✦ ' + m.away + ' gagne — choisissez le score',
+      other_win:  '🔥 ' + m.home + ' gagne (6+ buts) — score exact',
+      other_draw: '🔥 Match nul (6+ buts) — score exact',
+      other_lose: '🔥 ' + m.away + ' gagne (6+ buts) — score exact',
     };
-    const pills = scores.map(s=>{
-      const key=`${m.id}_${s.h}_${s.a}`;
-      const sel=betslip[key]?'selected':'';
-      return `<div class="score-pill ${state.resultCls} ${sel}" onclick="toggleScore(${m.id},${s.h},${s.a})">
+
+    const scores = (SCORES[scoreKey] || []).map(s => ({
+      h: s.h, a: s.a, odd: scoreOdd(m, s.h, s.a)
+    }));
+
+    const pills = scores.map(s => {
+      const key = `${m.id}_${s.h}_${s.a}`;
+      const sel = betslip[key] ? 'selected' : '';
+      return `<div class="score-pill ${pillCls} ${sel}" onclick="toggleScore(${m.id},${s.h},${s.a})">
         <span class="pill-score">${s.h}-${s.a}</span>
         <span class="pill-odd">${s.odd.toFixed(1)}</span>
       </div>`;
     }).join('');
-    const hintKey = Object.keys(betslip).find(k=>k.startsWith(m.id+'_'));
+
+    // Pill "Autres 6+" à la fin des groupes principaux
+    if (!scoreKey.startsWith('other')) {
+      const otherCls = scoreKey === 'win' ? 'other_win' : scoreKey === 'draw' ? 'other_draw' : 'other_lose';
+      const selOtherPill = (state.resultCls === otherCls) ? 'selected' : '';
+      otherPill = `<div class="score-pill other ${selOtherPill}" onclick="selectOtherResult(${m.id},'${otherCls}',null)">
+        <span class="pill-score">+6</span>
+        <span class="pill-odd">Autres</span>
+      </div>`;
+    }
+
+    const hintKey = Object.keys(betslip).find(k => k.startsWith(m.id + '_'));
     const hintHtml = hintKey
       ? `<div class="score-step-hint">✅ Score sélectionné — visible dans le bulletin</div>`
       : `<div class="score-step-hint">👆 Cliquez sur un score pour l'ajouter au bulletin</div>`;
-    scoreBlock = `<div class="score-step ${state.resultCls}">
-      <div class="score-step-label ${state.resultCls}">${clsLabel[state.resultCls]}</div>
-      <div class="score-pills">${pills}</div>
+
+    scoreBlock = `<div class="score-step ${pillCls}">
+      <div class="score-step-label ${pillCls}">${clsLabel[scoreKey]}</div>
+      <div class="score-pills">${pills}${otherPill}</div>
       ${hintHtml}
     </div>`;
   }
+
+  const homeName = m.home;
+  const awayName = m.away;
 
   return `<div class="match-card" data-id="${m.id}">
     <div class="match-header">
       <div class="league"><span>🇫🇷</span> Ligue 1</div>
       <span class="match-time">🕐 ${m.time}</span>
     </div>
+    <div class="match-header-logos">
+      <div class="match-header-logo">
+        ${logoImg(homeLogo, homeName)}
+        <span>${homeName}</span>
+      </div>
+      <div style="font-size:11px;color:var(--txt2);font-weight:700">VS</div>
+      <div class="match-header-logo">
+        ${logoImg(awayLogo, awayName)}
+        <span>${awayName}</span>
+      </div>
+    </div>
     <div class="match-body">
-      <div class="teams">
-        <div class="team"><div class="team-name">${m.home}</div><div class="team-info">Domicile</div></div>
+      <div class="teams" style="display:none">
+        <div class="team"><div class="team-name">${homeName}</div><div class="team-info">Domicile</div></div>
         <div class="vs-box">vs</div>
-        <div class="team right"><div class="team-name">${m.away}</div><div class="team-info">Extérieur</div></div>
+        <div class="team right"><div class="team-name">${awayName}</div><div class="team-info">Extérieur</div></div>
       </div>
       ${resultRow}
       ${scoreBlock}
@@ -949,6 +1037,7 @@ function renderMatches() {
 // ══════════════════════════════════════════════
 function selectResult(matchId, cls) {
   if(!currentPlayer){ openLogin(); return; }
+  if(cls.startsWith('other')) return; // géré par openOtherModal
   if(matchState[matchId] && matchState[matchId].resultCls===cls) {
     delete matchState[matchId];
     Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
@@ -1114,6 +1203,47 @@ function autosave() {
   if(!players[currentPlayer]) return;
   players[currentPlayer].current={betslip:JSON.parse(JSON.stringify(betslip)),matchState:JSON.parse(JSON.stringify(matchState))};
   savePlayers(players);
+}
+
+function openOtherModal(matchId) {
+  if(!currentPlayer){ openLogin(); return; }
+  const m = matches.find(x => x.id === matchId);
+  if(!m) return;
+  // Modale simple : choisir 1 / N / 2 pour les scores 6+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `<div style="background:#161b22;border:1px solid #30363d;border-radius:14px;padding:28px 24px;width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+    <div style="font-size:22px;margin-bottom:6px">🔥</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">${m.home} - ${m.away}</div>
+    <div style="font-size:12px;color:#8b949e;margin-bottom:18px">Score avec 6 buts ou plus — qui gagne ?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="selectOtherResult(${matchId},'other_win',this.closest('[style*=fixed]'))"
+        style="background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.4);color:#16a34a;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
+        ✦ ${m.home} gagne (6-0, 7-1…)
+      </button>
+      <button onclick="selectOtherResult(${matchId},'other_draw',this.closest('[style*=fixed]'))"
+        style="background:rgba(247,201,72,.1);border:1px solid rgba(247,201,72,.3);color:#f7c948;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
+        ◆ Match nul (6-6, 7-7…)
+      </button>
+      <button onclick="selectOtherResult(${matchId},'other_lose',this.closest('[style*=fixed]'))"
+        style="background:rgba(232,93,74,.12);border:1px solid rgba(232,93,74,.3);color:#e85d4a;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
+        ✦ ${m.away} gagne (0-6, 1-7…)
+      </button>
+      <button onclick="this.closest('[style*=fixed]').remove()"
+        style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:13px;margin-top:4px">Annuler</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+}
+
+function selectOtherResult(matchId, cls, overlay) {
+  if(overlay) overlay.remove();
+  Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+  matchState[matchId] = { resultCls: cls };
+  renderMatches();
+  renderBetslip();
+  autosave();
 }
 
 function openLogin() {
@@ -1462,7 +1592,7 @@ window.addEventListener('load', ()=>{ openLogin(); });
     <div class="total-row"><span>✅ Bon résultat</span><span id="ptsResultMobile" style="color:var(--acc);font-weight:700">0 pts</span></div>
     <div class="total-row">
       <span style="display:flex;flex-direction:column;gap:1px">
-        <span style="background:linear-gradient(135deg,#c9922a,#f5c842);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">Score exact 🎯</span>
+        <span style="color:#8b6000;font-weight:700">Score exact 🎯</span>
         <span style="font-size:10px;color:var(--txt2)">+0.5 pt bonus si bon écart (hors nul)</span>
       </span>
       <span id="ptsScoreMobile" style="background:linear-gradient(135deg,#c9922a,#f5c842,#ffe599);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">0 pts</span>
