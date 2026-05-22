@@ -48,12 +48,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;margin-bottom:14px}
 
 /* Match card */
-.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden;transition:border-color .15s}
+.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:8px;margin-bottom:5px;overflow:hidden;transition:border-color .15s}
 .match-card:hover{border-color:rgba(0,212,170,.3)}
-.match-header{display:flex;align-items:center;justify-content:space-between;padding:3px 10px;border-bottom:1px solid var(--bord)}
+.match-header{display:flex;align-items:center;justify-content:space-between;padding:2px 8px;border-bottom:1px solid var(--bord)}
 .league{font-size:10px;color:var(--txt2);font-weight:500;display:flex;align-items:center;gap:4px}
 .match-time{font-size:10px;font-weight:700;color:var(--txt2);background:var(--bg3);padding:2px 7px;border-radius:8px}
-.match-body{padding:4px 8px 6px}
+.match-body{padding:3px 6px 5px}
 
 /* Teams header */
 .teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:16px}
@@ -63,8 +63,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .vs-box{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt2);text-align:center;min-width:36px}
 
 /* ── Étape 1 : boutons résultat ── */
-.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:0;margin-top:3px}
-.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:4px 3px 5px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:0;margin-top:2px}
+.result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:4px 3px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
 .result-btn:hover{border-color:var(--acc);background:rgba(0,212,170,.07)}
 .result-btn.sel-win{background:rgba(22,163,74,.18);border-color:var(--acc-win)}
 .result-btn.sel-draw{background:rgba(56,189,248,.15);border-color:var(--acc2)}
@@ -682,11 +682,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .rb-logo{width:18px;height:18px}
 }
 
-.match-teams-row{display:flex;align-items:center;justify-content:space-between;padding:4px 10px}
-.mtr-home{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt)}
-.mtr-away{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt)}
+.match-teams-row{display:grid;grid-template-columns:1fr 36px 1fr;align-items:center;padding:3px 8px}
+.mtr-home{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt);justify-content:flex-start;overflow:hidden}
+.mtr-away{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt);justify-content:flex-end;overflow:hidden}
 .mtr-home img,.mtr-away img{width:18px;height:18px;object-fit:contain;flex-shrink:0}
-.mtr-vs{font-size:10px;color:var(--txt2);font-weight:600;padding:0 8px}
+.mtr-vs{font-size:10px;color:var(--txt2);font-weight:600;text-align:center}
 </style>
 </head>
 <body>
@@ -1010,9 +1010,15 @@ function buildCard(m) {
       <span class="match-time">🕐 ${m.time}</span>
     </div>
     <div class="match-teams-row">
-      <div class="mtr-home">${logoImg(homeLogo, homeName)}<span>${homeName}</span></div>
-      <div class="mtr-vs">-</div>
-      <div class="mtr-away"><span>${awayName}</span>${logoImg(awayLogo, awayName)}</div>
+      <div class="mtr-home">
+        ${homeLogo ? `<img src="${homeLogo}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px" onerror="this.style.display='none'">` : ''}
+        <span>${homeName}</span>
+      </div>
+      <div class="mtr-vs">vs</div>
+      <div class="mtr-away">
+        <span>${awayName}</span>
+        ${awayLogo ? `<img src="${awayLogo}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-left:5px" onerror="this.style.display='none'">` : ''}
+      </div>
     </div>
     <div class="match-body">
       <div class="teams" style="display:none">
