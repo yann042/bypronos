@@ -614,6 +614,49 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   /* Espace en bas pour ne pas masquer le dernier match */
   .content { padding-bottom: 80px !important; }
 }
+
+@media (max-width: 768px) {
+
+  /* Forcer pas de scroll horizontal */
+  * { box-sizing: border-box; }
+  html, body, .app, .content, .match-body, .match-card {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Boutons résultat : label court sur mobile */
+  .rb-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    font-size: 9px !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* Pills : 3 par ligne fixe */
+  .score-pills {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+  }
+  .score-pill {
+    min-width: 0 !important;
+    padding: 5px 3px !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+  .pill-score { font-size: 12px !important; }
+  .pill-odd   { font-size: 10px !important; }
+}
+
+@media (max-width: 768px) {
+  .rb-full  { display: none !important; }
+  .rb-short { display: block !important; font-size: 13px !important; font-weight: 700; }
+}
+@media (min-width: 769px) {
+  .rb-short { display: none !important; }
+  .rb-full  { display: block !important; }
+}
 </style>
 </head>
 <body>
@@ -942,17 +985,18 @@ function toggleScore(matchId, h, a) {
 // ══════════════════════════════════════════════
 function renderBetslip() {
   const keys=Object.keys(betslip);
-  document.getElementById('betCount').textContent=keys.length;
+  const countEl=document.getElementById('betCount');
+  if(countEl) countEl.textContent=keys.length;
   const body=document.getElementById('betslipBody');
   const footer=document.getElementById('betslipFooter');
   if(!keys.length){
-    body.innerHTML=`<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>`;
-    footer.style.display='none';
+    if(body) body.innerHTML=`<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>`;
+    if(footer) footer.style.display='none';
     syncMobileSlip();
     return;
   }
-  footer.style.display='block';
-  body.innerHTML=keys.map(k=>{
+  if(footer) footer.style.display='block';
+  if(body) body.innerHTML=keys.map(k=>{
     const b=betslip[k];
     const ptsR=b.resultOdd.toFixed(2);
     const ptsS=b.scoreOdd.toFixed(2);
