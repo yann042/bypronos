@@ -581,6 +581,39 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 @media (min-width: 769px) {
   .mobile-slip-btn, .mobile-slip-drawer, .mobile-slip-overlay { display: none !important; }
 }
+
+@media (max-width: 768px) {
+
+  /* Bouton bulletin plus compact */
+  .mobile-slip-btn {
+    bottom: 16px !important;
+    padding: 10px 18px !important;
+    font-size: 14px !important;
+    border-radius: 24px !important;
+  }
+
+  /* Pills scores : pas de débordement */
+  .score-pills {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+  }
+  .score-pill {
+    padding: 5px 4px !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+  .pill-score { font-size: 13px !important; }
+  .pill-odd { font-size: 10px !important; }
+
+  /* Score step : padding réduit */
+  .score-step { padding: 8px !important; }
+  .score-step-label { font-size: 11px !important; margin-bottom: 6px !important; }
+  .score-step-hint { font-size: 11px !important; }
+
+  /* Espace en bas pour ne pas masquer le dernier match */
+  .content { padding-bottom: 80px !important; }
+}
 </style>
 </head>
 <body>
@@ -634,7 +667,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
     <div class="betslip">
       <div class="betslip-header">
-        <div class="betslip-title">Mon bulletin <div class="bet-count" id="betCount">0</div></div>
+        <div class="betslip-title">Coupon de pari <div class="bet-count" id="betCount">0</div></div>
         <button class="clear-btn" onclick="clearAll()">Tout effacer</button>
       </div>
       <div class="betslip-body" id="betslipBody">
@@ -913,6 +946,7 @@ function renderBetslip() {
   if(!keys.length){
     body.innerHTML=`<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>`;
     footer.style.display='none';
+    syncMobileSlip();
     return;
   }
   footer.style.display='block';
@@ -1269,8 +1303,8 @@ function syncMobileSlip() {
       ? 'mobile-slip-btn has-bets'
       : 'mobile-slip-btn empty';
     btn.innerHTML = keys.length > 0
-      ? '🎯 Mon bulletin <span class="slip-badge">' + keys.length + '</span>'
-      : '🎯 Mon bulletin <span class="slip-badge">0</span>';
+      ? '🎯 Coupon de pari <span class="slip-badge">' + keys.length + '</span>'
+      : '🎯 Coupon de pari <span class="slip-badge">0</span>';
     btn.onclick = openMobileSlip;
   }
 
@@ -1320,12 +1354,7 @@ function syncMobileSlip() {
   if (el('ptsTotalMobile'))     el('ptsTotalMobile').textContent    = (ptsR+ptsS).toFixed(2) + ' pts';
 }
 
-// Hook renderBetslip pour sync mobile
-const _origRenderBetslipDesktop = renderBetslip;
-function renderBetslip() {
-  _origRenderBetslipDesktop();
-  syncMobileSlip();
-}
+// sync mobile appelé dans renderBetslip directement
 
 renderMatches();
 window.addEventListener('load', ()=>{ openLogin(); });
@@ -1376,7 +1405,7 @@ window.addEventListener('load', ()=>{ openLogin(); });
 <div class="mobile-slip-drawer" id="mobileSlipDrawer">
   <div class="mobile-slip-drawer-handle"></div>
   <div class="mobile-slip-drawer-header">
-    <div class="mobile-slip-drawer-title">Mon bulletin <div class="bet-count" id="betCountMobile">0</div></div>
+    <div class="mobile-slip-drawer-title">Coupon de pari <div class="bet-count" id="betCountMobile">0</div></div>
     <button class="mobile-slip-close" onclick="closeMobileSlip()">×</button>
   </div>
   <div class="mobile-slip-drawer-body" id="betslipBodyMobile"></div>
@@ -1397,7 +1426,7 @@ window.addEventListener('load', ()=>{ openLogin(); });
 </div>
 
 <button class="mobile-slip-btn empty" id="mobileSlipBtn" onclick="openMobileSlip()">
-  🎯 Mon bulletin <span class="slip-badge" id="betCountMobileBtn">0</span>
+  🎯 Coupon de pari <span class="slip-badge" id="betCountMobileBtn">0</span>
 </button>
 </body>
 </html>
