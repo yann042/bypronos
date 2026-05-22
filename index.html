@@ -905,6 +905,7 @@ function renderMatches() {
 // ── Interactions paris ────────────────────────
 // ══════════════════════════════════════════════
 function selectResult(matchId, cls) {
+  if(!currentPlayer){ openLogin(); return; }
   if(matchState[matchId] && matchState[matchId].resultCls===cls) {
     delete matchState[matchId];
     Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
@@ -918,6 +919,7 @@ function selectResult(matchId, cls) {
 }
 
 function toggleScore(matchId, h, a) {
+  if(!currentPlayer){ openLogin(); return; }
   const key=`${matchId}_${h}_${a}`;
   const m=matches.find(x=>x.id===matchId);
   if(!m) return;
@@ -1103,9 +1105,11 @@ function doLoginName(name) {
   // Restaurer paris en cours
   betslip={};
   matchState={};
-  const saved=players[name].current||{};
-  if(saved.betslip) Object.assign(betslip,saved.betslip);
-  if(saved.matchState) Object.assign(matchState,saved.matchState);
+  try {
+    const saved=players[name].current||{};
+    if(saved.betslip && typeof saved.betslip==='object') Object.assign(betslip, JSON.parse(JSON.stringify(saved.betslip)));
+    if(saved.matchState && typeof saved.matchState==='object') Object.assign(matchState, JSON.parse(JSON.stringify(saved.matchState)));
+  } catch(e){ betslip={}; matchState={}; }
   renderMatches();
   renderBetslip();
 }
