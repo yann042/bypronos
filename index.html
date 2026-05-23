@@ -687,6 +687,21 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .mtr-away{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt);justify-content:flex-end;overflow:hidden}
 .mtr-home img,.mtr-away img{width:18px;height:18px;object-fit:contain;flex-shrink:0}
 .mtr-vs{font-size:10px;color:var(--txt2);font-weight:600;text-align:center}
+
+@media (max-width: 768px) {
+  .match-card { margin-bottom: 5px !important; border-radius: 6px !important; }
+  .match-header { padding: 2px 8px !important; }
+  .match-teams-row { padding: 2px 8px !important; }
+  .match-body { padding: 3px 6px 4px !important; }
+  .result-row { gap: 3px !important; margin-top: 2px !important; }
+  .result-btn { padding: 4px 3px !important; border-radius: 5px !important; }
+  .rb-label { font-size: 9px !important; margin-bottom: 0 !important; }
+  .rb-odd { font-size: 16px !important; line-height: 1 !important; }
+  .mtr-home, .mtr-away { font-size: 11px !important; }
+  .mtr-vs { font-size: 10px !important; }
+  .league { font-size: 9px !important; }
+  .match-time { font-size: 9px !important; padding: 1px 6px !important; }
+}
 </style>
 </head>
 <body>
