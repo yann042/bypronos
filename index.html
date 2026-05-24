@@ -702,6 +702,31 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .league { font-size: 9px !important; }
   .match-time { font-size: 9px !important; padding: 1px 6px !important; }
 }
+
+.match-live-block{padding:6px 10px;display:flex;align-items:center;justify-content:space-between}
+.live-score-display{display:flex;align-items:center;gap:10px;flex:1;justify-content:center}
+.live-team{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--txt);flex:1;display:flex;align-items:center}
+.live-team.away{justify-content:flex-end}
+.live-score{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--acc-win);min-width:70px;text-align:center;line-height:1}
+.live-minute{background:var(--acc3);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;animation:pulse 1.5s infinite}
+.match-locked{text-align:center;padding:4px;font-size:10px;color:var(--txt2);border-top:1px solid var(--bord);font-style:italic}
+.match-card.is-live{border-color:rgba(232,93,74,.4) !important}
+.match-card.is-finished{border-color:var(--bord);opacity:.85}
+.live-status-dot{width:7px;height:7px;border-radius:50%;background:var(--acc3);animation:pulse 1.2s infinite;display:inline-block;margin-right:4px}
+
+.live-prono{margin:6px 10px;background:#f8f8f4;border:1px solid #dde0d8;border-radius:7px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.live-prono-left{display:flex;flex-direction:column;gap:2px}
+.live-prono-label{font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase}
+.live-prono-score{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
+.live-prono-result{font-size:10px;font-weight:600;color:var(--txt2)}
+.live-pts-block{text-align:right;display:flex;flex-direction:column;gap:2px}
+.live-pts-label{font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase}
+.live-pts-value{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.live-pts-value.pts-max{color:#056b52}
+.live-pts-value.pts-result{color:#0a8a6a}
+.live-pts-value.pts-bonus{color:#c45a00}
+.live-pts-value.pts-zero{color:var(--acc3)}
+.live-pts-detail{font-size:10px;color:var(--txt2)}
 </style>
 </head>
 <body>
@@ -853,6 +878,26 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 </div>
 
 <script>
+// Vérifie si un match a démarré selon l'heure locale
+// MODE TEST — simuler matchs en cours
+const TEST_MODE = true;
+function isMatchStarted(timeStr) {
+  if (TEST_MODE) return timeStr === '13:00' || timeStr === '15:00';
+  const now = new Date();
+  const [h, m] = timeStr.split(':').map(Number);
+  const kickoff = new Date(now);
+  kickoff.setHours(h, m, 0, 0);
+  return now >= kickoff;
+}
+function isMatchFinished(timeStr) {
+  if (TEST_MODE) return timeStr === '13:00';
+  const now = new Date();
+  const [h, m] = timeStr.split(':').map(Number);
+  const end = new Date(now);
+  end.setHours(h + 2, m + 15, 0, 0);
+  return now >= end;
+}
+
 const LOGOS = {"Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
 
 function getLogo(name) {
@@ -865,18 +910,32 @@ function getLogo(name) {
 // ══════════════════════════════════════════════
 // ── Données matchs ────────────────────────────
 // ══════════════════════════════════════════════
+// ── Clé API RapidAPI / Sofascore ─────────────────────────────────
+const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
+const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
+
+// IDs Sofascore des matchs (à mettre à jour chaque journée)
+// Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
 const matches = [
-  {id:1,  home:'Lorient',       away:'Le Havre',   time:'13:00', odds:[2.80,3.10,2.55]},
-  {id:2,  home:'Marseille',     away:'Rennes',     time:'15:00', odds:[1.75,3.50,4.80]},
-  {id:3,  home:'Strasbourg',    away:'Monaco',     time:'15:00', odds:[3.20,3.30,2.15]},
-  {id:4,  home:'Brest',         away:'Angers',     time:'15:00', odds:[2.10,3.20,3.60]},
-  {id:5,  home:'Paris FC',      away:'Paris SG',   time:'17:05', odds:[8.50,5.00,1.18]},
-  {id:6,  home:'Lille',         away:'Auxerre',    time:'17:05', odds:[1.65,3.60,5.20]},
-  {id:7,  home:'Nice',          away:'Metz',       time:'19:05', odds:[1.55,3.80,6.00]},
-  {id:8,  home:'Nantes',        away:'Toulouse',   time:'19:05', odds:[2.40,3.20,3.00]},
-  {id:9,  home:'Lyon',          away:'Lens',       time:'20:45', odds:[2.05,3.30,3.80]},
-  {id:10, home:'Saint-Etienne', away:'Rodez',      time:'20:45', odds:[2.20,3.10,3.40]},
+  {id:1,  home:'Lorient',       away:'Le Havre',   time:'13:00', odds:[2.80,3.10,2.55], sofaId:null},
+  {id:2,  home:'Marseille',     away:'Rennes',     time:'15:00', odds:[1.75,3.50,4.80], sofaId:null},
+  {id:3,  home:'Strasbourg',    away:'Monaco',     time:'15:00', odds:[3.20,3.30,2.15], sofaId:null},
+  {id:4,  home:'Brest',         away:'Angers',     time:'15:00', odds:[2.10,3.20,3.60], sofaId:null},
+  {id:5,  home:'Paris FC',      away:'Paris SG',   time:'17:05', odds:[8.50,5.00,1.18], sofaId:null},
+  {id:6,  home:'Lille',         away:'Auxerre',    time:'17:05', odds:[1.65,3.60,5.20], sofaId:null},
+  {id:7,  home:'Nice',          away:'Metz',       time:'19:05', odds:[1.55,3.80,6.00], sofaId:null},
+  {id:8,  home:'Nantes',        away:'Toulouse',   time:'19:05', odds:[2.40,3.20,3.00], sofaId:null},
+  {id:9,  home:'Lyon',          away:'Lens',       time:'20:45', odds:[2.05,3.30,3.80], sofaId:null},
+  {id:10, home:'Saint-Etienne', away:'Rodez',      time:'20:45', odds:[2.20,3.10,3.40], sofaId:null},
 ];
+
+// État live des matchs
+const liveData = {
+  1: { homeScore: 2, awayScore: 1, minute: 67 }, // Lorient-Le Havre (terminé)
+  2: { homeScore: 1, awayScore: 1, minute: 54 }, // Marseille-Rennes (en cours)
+  3: { homeScore: 0, awayScore: 0, minute: 23 }, // Strasbourg-Monaco (en cours)
+  4: { homeScore: 1, awayScore: 0, minute: 38 }, // Brest-Angers (en cours)
+};
 
 const SCORES = {
   win:  [{h:1,a:0},{h:2,a:0},{h:2,a:1},{h:3,a:0},{h:3,a:1},{h:3,a:2},{h:4,a:0},{h:4,a:1},{h:4,a:2},{h:4,a:3},{h:5,a:0},{h:5,a:1},{h:5,a:2},{h:5,a:3},{h:5,a:4}],
@@ -907,6 +966,51 @@ function deduceResult(m, h, a) {
 }
 function hasGoodGap(b, realH, realA) {
   return (b.h - b.a) === (realH - realA);
+}
+
+// Rendu HTML du rappel pronostic en live
+function renderLiveProno(matchId, hs, as) {
+  const betKey = Object.keys(betslip).find(k => k.startsWith(matchId + '_'));
+  if (!betKey) return '';
+  const b = betslip[betKey];
+  const livePts = calcLivePts(b, hs, as);
+  if (!livePts) return '';
+  const ptsClass = 'pts-' + livePts.type;
+  const ptsSign  = livePts.pts > 0 ? '+' : '';
+  return '<div class="live-prono">' +
+    '<div class="live-prono-left">' +
+      '<span class="live-prono-label">Votre pronostic</span>' +
+      '<span class="live-prono-score">' + b.h + ' - ' + b.a + '</span>' +
+      '<span class="live-prono-result">' + b.resultLabel + '</span>' +
+    '</div>' +
+    '<div class="live-pts-block">' +
+      '<span class="live-pts-label">Points actuels</span>' +
+      '<span class="live-pts-value ' + ptsClass + '">' + ptsSign + livePts.pts.toFixed(2) + '</span>' +
+      '<span class="live-pts-detail">' + livePts.label + '</span>' +
+    '</div>' +
+  '</div>';
+}
+
+// Calcul des points actuels selon le score live
+function calcLivePts(b, liveH, liveA) {
+  if (liveH === '?' || liveA === undefined) return null;
+  const h = parseInt(liveH), a = parseInt(liveA);
+  if (isNaN(h) || isNaN(a)) return null;
+
+  const exactScore  = b.h === h && b.a === a;
+  const goodResult  = (b.h > b.a && h > a) || (b.h === b.a && h === a) || (b.h < b.a && h < a);
+  const isDrawProno = b.h === b.a;
+  const goodGap     = !isDrawProno && goodResult && hasGoodGap(b, h, a);
+
+  if (exactScore) {
+    return { pts: b.resultOdd + b.scoreOdd, type: 'max', label: '🎯 Score exact !' };
+  } else if (goodResult && goodGap) {
+    return { pts: b.resultOdd + 0.5, type: 'bonus', label: '✅ Bon résultat + bon écart' };
+  } else if (goodResult) {
+    return { pts: b.resultOdd, type: 'result', label: '✅ Bon résultat' };
+  } else {
+    return { pts: -1, type: 'zero', label: '❌ Mauvais résultat' };
+  }
 }
 
 function calcPoints(b, realH, realA) {
@@ -1019,12 +1123,38 @@ function buildCard(m) {
   const homeName = m.home;
   const awayName = m.away;
 
-  return `<div class="match-card" data-id="${m.id}">
+  const started  = isMatchStarted(m.time);
+  const finished = isMatchFinished(m.time);
+  const live     = liveData[m.id];
+  const cardCls  = finished ? 'is-finished' : started ? 'is-live' : '';
+
+  // Mode live : afficher score et minute
+  let liveBlock = '';
+  if (started) {
+    const hs = live ? live.homeScore : '?';
+    const as = live ? live.awayScore : '?';
+    const min = live ? live.minute : (finished ? 'FIN' : '...');
+    const dot = !finished ? '<span class="live-status-dot"></span>' : '';
+    const homeLogoHtml = homeLogo ? `<img src="${homeLogo}" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:6px" onerror="this.style.display='none'">` : '';
+  const awayLogoHtml = awayLogo ? `<img src="${awayLogo}" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-left:6px" onerror="this.style.display='none'">` : '';
+
+  liveBlock = `<div class="match-live-block">
+      <div class="live-score-display">
+        <div class="live-team">${dot}${homeLogoHtml}<span>${homeName}</span></div>
+        <div class="live-score">${hs} - ${as}</div>
+        <div class="live-team away"><span>${awayName}</span>${awayLogoHtml}</div>
+      </div>
+    </div>
+    <div class="match-locked">${finished ? '✅ Match terminé — paris clôturés' : '🔴 En cours — paris clôturés'}</div>
+    ${renderLiveProno(m.id, hs, as)}`;
+  }
+
+  return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <div class="match-header">
       <div class="league"><span>🇫🇷</span> Ligue 1</div>
-      <span class="match-time">🕐 ${m.time}</span>
+      <span class="match-time">${started ? (finished ? '✅ FIN' : '<span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>') : '🕐 ' + m.time}</span>
     </div>
-    <div class="match-teams-row">
+    ${!started ? `<div class="match-teams-row">
       <div class="mtr-home">
         ${homeLogo ? `<img src="${homeLogo}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px" onerror="this.style.display='none'">` : ''}
         <span>${homeName}</span>
@@ -1034,15 +1164,10 @@ function buildCard(m) {
         <span>${awayName}</span>
         ${awayLogo ? `<img src="${awayLogo}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-left:5px" onerror="this.style.display='none'">` : ''}
       </div>
-    </div>
+    </div>` : ''}
     <div class="match-body">
-      <div class="teams" style="display:none">
-        <div class="team"><div class="team-name">${homeName}</div><div class="team-info">Domicile</div></div>
-        <div class="vs-box">vs</div>
-        <div class="team right"><div class="team-name">${awayName}</div><div class="team-info">Extérieur</div></div>
-      </div>
-      ${resultRow}
-      ${scoreBlock}
+      <div class="teams" style="display:none"></div>
+      ${started ? liveBlock : resultRow + scoreBlock}
     </div>
   </div>`;
 }
@@ -1050,6 +1175,44 @@ function buildCard(m) {
 function renderMatches() {
   document.getElementById('matchList').innerHTML = matches.map(buildCard).join('');
 }
+
+// ── Fetch scores live via Sofascore RapidAPI ──────────────────────
+async function fetchLiveScores() {
+  const started = matches.filter(m => isMatchStarted(m.time) && !isMatchFinished(m.time));
+  if (!started.length) return;
+
+  for (const m of started) {
+    if (!m.sofaId) continue; // pas d'ID Sofascore défini
+    try {
+      const res = await fetch(`https://sofascore.p.rapidapi.com/matches/${m.sofaId}/score`, {
+        headers: {
+          'x-rapidapi-host': RAPIDAPI_HOST,
+          'x-rapidapi-key':  RAPIDAPI_KEY
+        }
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.score) {
+        liveData[m.id] = {
+          homeScore: data.score.current?.home ?? '?',
+          awayScore: data.score.current?.away ?? '?',
+          minute: data.time?.played ?? '?',
+          status: data.status?.type ?? 'inprogress'
+        };
+      }
+    } catch(e) { console.warn('Live fetch error:', e); }
+  }
+  renderMatches();
+}
+
+// Polling toutes les 60 secondes
+setInterval(() => {
+  renderMatches(); // mise à jour heure locale
+  fetchLiveScores();
+}, 60000);
+
+// Premier appel immédiat
+fetchLiveScores();
 
 // ══════════════════════════════════════════════
 // ── Interactions paris ────────────────────────
