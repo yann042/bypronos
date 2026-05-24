@@ -870,6 +870,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 <div class="notif" id="notif"></div>
 <button onclick="sessionReset()" style="position:fixed;bottom:5px;left:5px;z-index:9999;background:#e85d4a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔄 Changer joueur</button>
+<button onclick="localStorage.clear();location.reload()" style="position:fixed;bottom:5px;left:130px;z-index:9999;background:#555;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🗑 Reset total</button>
 
 <!-- Leaderboard modal -->
 <div class="leaderboard-overlay" id="lbOverlay" onclick="closeLbIfOutside(event)">
@@ -899,7 +900,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 // MODE TEST — simuler matchs en cours
 const TEST_MODE = true;
 function isMatchStarted(timeStr, matchId) {
-  if (TEST_MODE) return matchId === 1; // Lorient en live
+  if (TEST_MODE) return false; // tous ouverts
   const now = new Date();
   const [h, m] = timeStr.split(':').map(Number);
   const kickoff = new Date(now);
