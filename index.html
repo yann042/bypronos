@@ -727,6 +727,21 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .live-pts-value.pts-bonus{color:#c45a00}
 .live-pts-value.pts-zero{color:var(--acc3)}
 .live-pts-detail{font-size:10px;color:var(--txt2)}
+
+.match-header { position: relative; }
+.header-prono-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; }
+.header-prono-badge { font-size: 11px; font-weight: 700; color: #056b52; background: rgba(5,107,82,.1); border: 1px solid rgba(5,107,82,.25); border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
+.header-pts-badge { font-size: 11px; font-weight: 700; background: var(--bg3); border: 1px solid var(--bord); border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
+
+.all-pronos{margin:4px 10px 6px;border-top:1px solid var(--bord);padding-top:6px}
+.all-pronos-title{font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.all-pronos-list{display:flex;flex-wrap:wrap;gap:4px}
+.prono-chip{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;border:1px solid var(--bord);background:var(--bg3)}
+.prono-chip .chip-name{color:var(--txt2)}
+.prono-chip .chip-score{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--txt)}
+.prono-chip .chip-pts{font-size:10px;font-weight:700;border-radius:8px;padding:0 5px}
+.prono-chip .chip-pts.pos{background:#057a3a;color:#fff}
+.prono-chip .chip-pts.neg{background:#cc2200;color:#fff}
 </style>
 </head>
 <body>
@@ -740,9 +755,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <button class="nav-btn" onclick="showView('ranking',this)">🏆 Classement</button>
     </nav>
     <div class="header-right">
-      <button class="ranking-btn" onclick="openLeaderboard()">🏆 <span id="headerPts">0 pts</span></button>
-      <div class="balance" id="balanceDisplay">1 250,00 &euro;</div>
-      <button class="deposit-btn">+ D&eacute;p&ocirc;t</button>
+      <div class="player-badge" id="playerBadge" onclick="sessionReset()" title="Changer de joueur">
+        <div class="avatar" id="playerAvatar">?</div>
+        <span id="playerName">Connexion</span>
+      </div>
     </div>
   </div>
 
@@ -853,6 +869,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div><!-- /view-ranking -->
 
 <div class="notif" id="notif"></div>
+<button onclick="sessionReset()" style="position:fixed;bottom:5px;left:5px;z-index:9999;background:#e85d4a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔄 Changer joueur</button>
 
 <!-- Leaderboard modal -->
 <div class="leaderboard-overlay" id="lbOverlay" onclick="closeLbIfOutside(event)">
@@ -881,16 +898,16 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
 const TEST_MODE = true;
-function isMatchStarted(timeStr) {
-  if (TEST_MODE) return timeStr === '13:00' || timeStr === '15:00';
+function isMatchStarted(timeStr, matchId) {
+  if (TEST_MODE) return matchId === 1; // Lorient en live
   const now = new Date();
   const [h, m] = timeStr.split(':').map(Number);
   const kickoff = new Date(now);
   kickoff.setHours(h, m, 0, 0);
   return now >= kickoff;
 }
-function isMatchFinished(timeStr) {
-  if (TEST_MODE) return timeStr === '13:00';
+function isMatchFinished(timeStr, matchId) {
+  if (TEST_MODE) return false; // aucun match terminé en mode test
   const now = new Date();
   const [h, m] = timeStr.split(':').map(Number);
   const end = new Date(now);
@@ -931,10 +948,7 @@ const matches = [
 
 // État live des matchs
 const liveData = {
-  1: { homeScore: 2, awayScore: 1, minute: 67 }, // Lorient-Le Havre (terminé)
-  2: { homeScore: 1, awayScore: 1, minute: 54 }, // Marseille-Rennes (en cours)
-  3: { homeScore: 0, awayScore: 0, minute: 23 }, // Strasbourg-Monaco (en cours)
-  4: { homeScore: 1, awayScore: 0, minute: 38 }, // Brest-Angers (en cours)
+  1: { homeScore: 1, awayScore: 1, minute: 54 }, // Lorient-Le Havre en live test
 };
 
 const SCORES = {
@@ -969,10 +983,77 @@ function hasGoodGap(b, realH, realA) {
 }
 
 // Rendu HTML du rappel pronostic en live
+function getAllPronosHtml(matchId, hs, as) {
+  try {
+    const mid = parseInt(matchId);
+    const players = loadPlayers();
+    const chips = [];
+    Object.entries(players).forEach(([name, data]) => {
+      const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
+      if (!vb) return;
+      const isMe = name === currentPlayer;
+      const pts = calcLivePts(vb, hs, as);
+      let ptsHtml = '';
+      if (pts) {
+        const sign = pts.pts > 0 ? '+' : '';
+        const cls  = pts.pts > 0 ? 'pos' : 'neg';
+        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + pts.pts.toFixed(1) + '</span>';
+      }
+      const meStyle = isMe ? 'border-color:#056b52;background:rgba(5,107,82,.08)' : '';
+      chips.push('<div class="prono-chip" style="' + meStyle + '">' +
+        '<span class="chip-name">' + (isMe ? '👤' : '') + name + '</span>' +
+        '<span class="chip-score">' + vb.h + '-' + vb.a + '</span>' +
+        ptsHtml +
+      '</div>');
+    });
+    if (!chips.length) return '';
+    return '<div class="all-pronos">' +
+      '<div class="all-pronos-title">Pronostics des joueurs</div>' +
+      '<div class="all-pronos-list">' + chips.join('') + '</div>' +
+    '</div>';
+  } catch(e) { return ''; }
+}
+
+function getPronoHeader(matchId) {
+  if (!currentPlayer) return '';
+  try {
+    const mid = parseInt(matchId);
+    const players = loadPlayers();
+    const p = players[currentPlayer];
+    const vb = p && p.validatedBets && (p.validatedBets[mid] || p.validatedBets[String(mid)]);
+    if (!vb) return '';
+    // Chercher le score live si disponible
+    const live = liveData[matchId];
+    let ptsHtml = '';
+    if (live) {
+      const pts = calcLivePts(vb, live.homeScore, live.awayScore);
+      if (pts) {
+        const sign = pts.pts > 0 ? '+' : '';
+        const isPos = pts.pts > 0;
+        const bg  = isPos ? '#057a3a' : '#cc2200';
+        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 8px;font-size:11px">' + sign + pts.pts.toFixed(2) + ' pts</span>';
+      }
+    }
+    let out = '<span class="header-prono-badge">🎯 Mon prono : ' + vb.h + '-' + vb.a + '</span>';
+    if (ptsHtml) out += ' ' + ptsHtml;
+    return out;
+  } catch(e) { return ''; }
+}
+
 function renderLiveProno(matchId, hs, as) {
+  // Chercher d'abord dans le betslip actif, puis dans les paris validés
   const betKey = Object.keys(betslip).find(k => k.startsWith(matchId + '_'));
-  if (!betKey) return '';
-  const b = betslip[betKey];
+  let b = betKey ? betslip[betKey] : null;
+
+  if (!b && currentPlayer) {
+    const players = loadPlayers();
+    const p = players[currentPlayer];
+    const mid2 = parseInt(matchId);
+    if (p && p.validatedBets && (p.validatedBets[mid2] || p.validatedBets[String(mid2)])) {
+      b = p.validatedBets[mid2] || p.validatedBets[String(mid2)];
+    }
+  }
+  if (!b) return '';
   const livePts = calcLivePts(b, hs, as);
   if (!livePts) return '';
   const ptsClass = 'pts-' + livePts.type;
@@ -1123,8 +1204,8 @@ function buildCard(m) {
   const homeName = m.home;
   const awayName = m.away;
 
-  const started  = isMatchStarted(m.time);
-  const finished = isMatchFinished(m.time);
+  const started  = isMatchStarted(m.time, m.id);
+  const finished = isMatchFinished(m.time, m.id);
   const live     = liveData[m.id];
   const cardCls  = finished ? 'is-finished' : started ? 'is-live' : '';
 
@@ -1146,12 +1227,14 @@ function buildCard(m) {
       </div>
     </div>
     <div class="match-locked">${finished ? '✅ Match terminé — paris clôturés' : '🔴 En cours — paris clôturés'}</div>
-    ${renderLiveProno(m.id, hs, as)}`;
+    ${renderLiveProno(m.id, hs, as)}
+    ${getAllPronosHtml(m.id, hs, as)}`;
   }
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <div class="match-header">
       <div class="league"><span>🇫🇷</span> Ligue 1</div>
+      <div class="header-prono-center">${getPronoHeader(m.id)}</div>
       <span class="match-time">${started ? (finished ? '✅ FIN' : '<span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>') : '🕐 ' + m.time}</span>
     </div>
     ${!started ? `<div class="match-teams-row">
@@ -1340,6 +1423,19 @@ function placeBets() {
     p.season.days[day].bets+=1;
   });
   p.current={};
+  // Sauvegarder les paris validés pour le live
+  if(!p.validatedBets) p.validatedBets={};
+  keys.forEach(k=>{
+    const b=betslip[k];
+    p.validatedBets[parseInt(b.matchId)]={
+      h:b.h, a:b.a,
+      resultLabel:b.resultLabel,
+      resultCls:b.resultCls,
+      resultShort:b.resultShort,
+      scoreOdd:b.scoreOdd,
+      resultOdd:b.resultOdd
+    };
+  });
   savePlayers(players);
   const totalPts=keys.reduce((s,k)=>s+calcPoints(betslip[k]).total,0);
   showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' — max '+totalPts.toFixed(2)+' pts potentiels');
@@ -1516,6 +1612,19 @@ function renderRanking() {
 // ══════════════════════════════════════════════
 // ── Notif & Init ─────────────────────────────
 // ══════════════════════════════════════════════
+function sessionReset() {
+  currentPlayer = null;
+  betslip = {};
+  matchState = {};
+  const pn = document.getElementById('playerName');
+  const pa = document.getElementById('playerAvatar');
+  if (pn) pn.textContent = 'Connexion';
+  if (pa) pa.textContent = '?';
+  renderMatches();
+  renderBetslip();
+  openLogin();
+}
+
 function showNotif(msg) {
   const n=document.getElementById('notif');
   n.textContent=msg;
