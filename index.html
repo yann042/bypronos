@@ -742,6 +742,51 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .prono-chip .chip-pts{font-size:10px;font-weight:700;border-radius:8px;padding:0 5px}
 .prono-chip .chip-pts.pos{background:#057a3a;color:#fff}
 .prono-chip .chip-pts.neg{background:#cc2200;color:#fff}
+
+/* ── Animation but ── */
+.goal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
+.goal-overlay.show{animation:goalAnim 2.5s ease forwards}
+@keyframes goalAnim{
+  0%{opacity:0;transform:scale(.5)}
+  15%{opacity:1;transform:scale(1.1)}
+  30%{transform:scale(1)}
+  70%{opacity:1}
+  100%{opacity:0;transform:scale(1)}
+}
+.goal-card{background:linear-gradient(135deg,#057a3a,#0a8a6a);border-radius:20px;padding:24px 40px;text-align:center;box-shadow:0 10px 60px rgba(5,122,58,.6);border:2px solid rgba(255,255,255,.3)}
+.goal-emoji{font-size:52px;display:block;margin-bottom:8px;animation:bounce 0.4s ease infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.goal-title{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:#fff;letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.3);display:block}
+.goal-team{font-size:16px;color:rgba(255,255,255,.85);font-weight:600;margin-top:4px;display:block}
+.goal-score{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:#fff;margin-top:8px;display:block;letter-spacing:1px}
+/* Confettis */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:9997;overflow:hidden}
+.confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* ── Cadran score style tableau de stade ── */
+.live-score{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--acc-win);min-width:80px;text-align:center;line-height:1;display:flex;align-items:center;justify-content:center;gap:4px}
+.score-digit{display:inline-flex;align-items:center;justify-content:center;background:#1a1a1a;color:#f7c948;font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;width:34px;height:40px;border-radius:6px;border:1px solid #333;box-shadow:inset 0 2px 8px rgba(0,0,0,.5);position:relative;overflow:hidden;transition:none}
+.score-digit.flip{animation:digitFlip .4s ease forwards}
+@keyframes digitFlip{
+  0%{transform:rotateX(0deg);color:#f7c948}
+  25%{transform:rotateX(-90deg);color:#fff}
+  50%{transform:rotateX(-90deg);color:#fff}
+  75%{transform:rotateX(0deg);color:#fff}
+  100%{transform:rotateX(0deg);color:#f7c948}
+}
+.score-sep{color:#f7c948;font-size:28px;font-weight:700;margin:0 2px}
+
+/* ── Score slide effet ── */
+.score-num{display:inline-block;overflow:hidden;height:36px;vertical-align:middle;position:relative;min-width:20px}
+.score-num-inner{display:flex;flex-direction:column;transition:transform 0.5s cubic-bezier(.25,.8,.25,1)}
+.score-num-inner span{height:36px;line-height:36px;display:block;text-align:center}
+
+@media (max-width: 768px) {
+  .header-prono-center { position: static; transform: none; flex: 1; display: flex; justify-content: center; gap: 4px; }
+  .header-prono-badge { font-size: 10px; padding: 1px 6px; }
+  .match-header { flex-wrap: nowrap; gap: 4px; }
+}
 </style>
 </head>
 <body>
@@ -869,6 +914,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div><!-- /view-ranking -->
 
 <div class="notif" id="notif"></div>
+<div class="goal-overlay" id="goalOverlay">
+  <div class="goal-card">
+    <span class="goal-emoji">⚽</span>
+    <span class="goal-title" id="goalTitle">BUUUT !</span>
+    <span class="goal-team" id="goalTeam"></span>
+    <span class="goal-score" id="goalScore"></span>
+  </div>
+</div>
+<div class="confetti-container" id="confettiContainer"></div>
 <button onclick="sessionReset()" style="position:fixed;bottom:5px;left:5px;z-index:9999;background:#e85d4a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔄 Changer joueur</button>
 <button onclick="localStorage.clear();location.reload()" style="position:fixed;bottom:5px;left:130px;z-index:9999;background:#555;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🗑 Reset total</button>
 
@@ -900,7 +954,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 // MODE TEST — simuler matchs en cours
 const TEST_MODE = true;
 function isMatchStarted(timeStr, matchId) {
-  if (TEST_MODE) return false; // tous ouverts
+  if (TEST_MODE) return matchId === 1; // Lorient en live
   const now = new Date();
   const [h, m] = timeStr.split(':').map(Number);
   const kickoff = new Date(now);
@@ -1032,7 +1086,7 @@ function getPronoHeader(matchId) {
         const sign = pts.pts > 0 ? '+' : '';
         const isPos = pts.pts > 0;
         const bg  = isPos ? '#057a3a' : '#cc2200';
-        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 8px;font-size:11px">' + sign + pts.pts.toFixed(2) + ' pts</span>';
+        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + pts.pts.toFixed(1) + 'pts</span>';
       }
     }
     let out = '<span class="header-prono-badge">🎯 Mon prono : ' + vb.h + '-' + vb.a + '</span>';
@@ -1223,12 +1277,15 @@ function buildCard(m) {
   liveBlock = `<div class="match-live-block">
       <div class="live-score-display">
         <div class="live-team">${dot}${homeLogoHtml}<span>${homeName}</span></div>
-        <div class="live-score">${hs} - ${as}</div>
+        <div class="live-score">
+          <span class="score-num" id="sn-h-${m.id}"><span class="score-num-inner"><span>${hs}</span></span></span>
+          <span style="margin:0 4px">-</span>
+          <span class="score-num" id="sn-a-${m.id}"><span class="score-num-inner"><span>${as}</span></span></span>
+        </div>
         <div class="live-team away"><span>${awayName}</span>${awayLogoHtml}</div>
       </div>
     </div>
     <div class="match-locked">${finished ? '✅ Match terminé — paris clôturés' : '🔴 En cours — paris clôturés'}</div>
-    ${renderLiveProno(m.id, hs, as)}
     ${getAllPronosHtml(m.id, hs, as)}`;
   }
 
@@ -1258,6 +1315,23 @@ function buildCard(m) {
 
 function renderMatches() {
   document.getElementById('matchList').innerHTML = matches.map(buildCard).join('');
+}
+
+// MODE TEST : simuler un but après 5 secondes
+if (typeof testGoalTriggered === 'undefined') {
+  var testGoalTriggered = false;
+  setTimeout(() => {
+    if (TEST_MODE && !testGoalTriggered) {
+      testGoalTriggered = true;
+      const m = matches.find(x => x.id === 1);
+      if (m && liveData[1]) {
+        checkGoals(1, 2, 1, m.home, m.away); // Lorient marque → 2-1
+        liveData[1].homeScore = 2;
+        liveData[1].minute = 67;
+        renderMatches();
+      }
+    }
+  }, 5000);
 }
 
 // ── Fetch scores live via Sofascore RapidAPI ──────────────────────
@@ -1333,6 +1407,10 @@ function toggleScore(matchId, h, a) {
   renderMatches();
   renderBetslip();
   autosave();
+  // Ouvrir le tiroir mobile automatiquement si un score est sélectionné
+  if (Object.keys(betslip).length > 0 && window.innerWidth <= 768) {
+    openMobileSlip();
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -1624,6 +1702,95 @@ function sessionReset() {
   renderMatches();
   renderBetslip();
   openLogin();
+}
+
+// Stocke les derniers scores connus pour détecter les buts
+const lastScores = {};
+
+function triggerGoalAnimation(homeName, awayName, newH, newA, oldH, oldA, matchId) {
+  const scoringTeam = newH > oldH ? homeName : awayName;
+
+  // Animation cadran pour le chiffre qui change
+  animateScoreDigit('sn-h-' + matchId, oldH, newH);
+  animateScoreDigit('sn-a-' + matchId, oldA, newA);
+
+  // Overlay but
+  const overlay = document.getElementById('goalOverlay');
+  const titleEl = document.getElementById('goalTitle');
+  const teamEl  = document.getElementById('goalTeam');
+  const scoreEl = document.getElementById('goalScore');
+
+  titleEl.textContent = '⚽ BUUUT !';
+  teamEl.textContent  = scoringTeam.toUpperCase();
+  scoreEl.textContent = newH + ' - ' + newA;
+
+  launchConfetti();
+  overlay.classList.remove('show');
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 2600);
+}
+
+function animateScoreDigit(elemId, oldVal, newVal) {
+  if (oldVal === newVal) return;
+  // Convertir l'ID sd- en sn-
+  const wrapper = document.getElementById(elemId);
+  if (!wrapper) return;
+  const inner = wrapper.querySelector('.score-num-inner');
+  if (!inner) return;
+
+  let current = parseInt(oldVal) || 0;
+  const target = parseInt(newVal) || 0;
+
+  const step = () => {
+    if (current >= target) return;
+    current++;
+    // Ajouter le nouveau chiffre en bas
+    const newSpan = document.createElement('span');
+    newSpan.textContent = current;
+    inner.appendChild(newSpan);
+    // Slide vers le haut
+    inner.style.transition = 'transform 0.45s cubic-bezier(.25,.8,.25,1)';
+    const h = 36;
+    const count = inner.children.length;
+    inner.style.transform = 'translateY(-' + ((count-1)*h) + 'px)';
+    setTimeout(() => {
+      if (current < target) step();
+    }, 500);
+  };
+  step();
+}
+
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  const colors = ['#057a3a','#f7c948','#e85d4a','#00d4aa','#fff','#a855f7'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.cssText = [
+      'left:' + Math.random()*100 + '%',
+      'background:' + colors[Math.floor(Math.random()*colors.length)],
+      'width:' + (6+Math.random()*8) + 'px',
+      'height:' + (6+Math.random()*8) + 'px',
+      'animation-duration:' + (1.5+Math.random()*2) + 's',
+      'animation-delay:' + (Math.random()*0.5) + 's',
+      'border-radius:' + (Math.random()>0.5?'50%':'2px')
+    ].join(';');
+    container.appendChild(c);
+  }
+  setTimeout(() => container.innerHTML = '', 3500);
+}
+
+function checkGoals(matchId, newH, newA, homeName, awayName) {
+  const key = 'match_' + matchId;
+  if (lastScores[key] !== undefined) {
+    const old = lastScores[key];
+    if (newH > old.h || newA > old.a) {
+      triggerGoalAnimation(homeName, awayName, newH, newA, old.h, old.a, matchId);
+    }
+  }
+  lastScores[key] = { h: newH, a: newA };
 }
 
 function showNotif(msg) {
