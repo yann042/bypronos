@@ -1174,21 +1174,19 @@ function renderLiveProno(matchId, hs, as) {
     }
   }
   if (!b) return '';
-  const livePts = calcLivePts(b, hs, as);
-  if (!livePts) return '';
-  const ptsClass = 'pts-' + livePts.type;
-  const ptsSign  = livePts.pts > 0 ? '+' : '';
+  const livePts = (hs !== '?' && as !== '?') ? calcLivePts(b, hs, as) : null;
+  const ptsClass = livePts ? 'pts-' + livePts.type : '';
+  const ptsSign  = livePts && livePts.pts > 0 ? '+' : '';
+  const ptsBlock = livePts
+    ? '<div class="live-pts-block"><span class="live-pts-label">Points actuels</span><span class="live-pts-value ' + ptsClass + '">' + ptsSign + livePts.pts.toFixed(2) + '</span><span class="live-pts-detail">' + livePts.label + '</span></div>'
+    : '<div class="live-pts-block"><span class="live-pts-label">Points potentiels</span><span class="live-pts-value" style="color:#056b52">+' + (b.resultOdd + b.scoreOdd).toFixed(2) + ' max</span></div>';
   return '<div class="live-prono">' +
     '<div class="live-prono-left">' +
       '<span class="live-prono-label">Votre pronostic</span>' +
       '<span class="live-prono-score">' + b.h + ' - ' + b.a + '</span>' +
       '<span class="live-prono-result">' + b.resultLabel + '</span>' +
     '</div>' +
-    '<div class="live-pts-block">' +
-      '<span class="live-pts-label">Points actuels</span>' +
-      '<span class="live-pts-value ' + ptsClass + '">' + ptsSign + livePts.pts.toFixed(2) + '</span>' +
-      '<span class="live-pts-detail">' + livePts.label + '</span>' +
-    '</div>' +
+    ptsBlock +
   '</div>';
 }
 
@@ -1388,7 +1386,7 @@ function buildCard(m) {
     <div class="match-body">
       <div class="teams" style="display:none"></div>
       ${started ? liveBlock : resultRow + scoreBlock}
-      ${!started ? renderPronoBelow(m.id) : ''}
+      ${!started ? renderLiveProno(m.id, '?', '?') + getAllPronosHtml(m.id, '?', '?') : ''}
     </div>
   </div>`;
 }
