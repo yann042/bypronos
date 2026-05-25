@@ -1208,12 +1208,10 @@ function renderLiveProno(matchId, hs, as) {
   }
 
   const resultIcon = (livePts && livePts.type === 'zero') ? '❌' : '✅';
-  const gainsLabel = livePts ? 'Gains' : 'Gains possibles';
-  const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap">' +
-    '<span style="font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase;white-space:nowrap">' + gainsLabel + '</span>' +
+  const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap">' +
     '<span style="background:' + resultBg + ';border:1px solid ' + resultColor + '33;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + ' pts</span>' +
     '<span style="color:#aaa;font-size:10px">+</span>' +
-    '<span style="background:' + scoreBg + ';border:1px solid ' + scoreColor + '44;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:' + scoreColor + '">🏅 ' + ptsScore + ' pts</span>' +
+    '<span style="background:' + scoreBg + ';border:1px solid ' + scoreColor + '44;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:' + scoreColor + '">🎯 ' + ptsScore + ' pts</span>' +
     '<span style="color:#aaa;font-size:10px">=</span>' +
     '<span style="background:' + totalBg + ';border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + ' pts</span>' +
   '</span>';
@@ -1356,7 +1354,7 @@ function buildCard(m) {
           <span class="recap-score">🎯 ${b.h}-${b.a} · ${b.resultLabel}</span>
           <div class="recap-pts">
             <span class="recap-pt-item result">✅ ${ptsR} pts résultat</span>
-            <span class="recap-pt-item score">🏅 ${ptsS} pts score</span>
+            <span class="recap-pt-item score">🎯 ${ptsS} pts score</span>
             <span class="recap-pt-item total">= ${ptsMax} pts max</span>
           </div>
         </div>
