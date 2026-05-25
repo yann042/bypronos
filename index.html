@@ -1361,8 +1361,7 @@ function buildCard(m) {
         <div class="live-team away"><span>${awayName}</span>${awayLogoHtml}</div>
       </div>
     </div>
-    ${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}
-    ${renderPronoBelow(m.id)}`;
+    ${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}`;
   }
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
@@ -1385,6 +1384,7 @@ function buildCard(m) {
     <div class="match-body">
       <div class="teams" style="display:none"></div>
       ${started ? liveBlock : resultRow + scoreBlock}
+      ${renderPronoBelow(m.id)}
     </div>
   </div>`;
 }
@@ -1583,7 +1583,6 @@ function placeBetForMatch(matchId) {
     };
     delete betslip[k];
   });
-  delete matchState[matchId];
   p.current = {};
   savePlayers(players);
 
