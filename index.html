@@ -2202,15 +2202,42 @@ function syncMobileSlip() {
 
 renderMatches();
 
+// ── Fonctions Firebase sync ──────────────────────────────────────
+async function syncFromFirebase() {
+  if (!window.fbLoadPlayers) return;
+  try {
+    const fbPlayers = await window.fbLoadPlayers();
+    if (fbPlayers && Object.keys(fbPlayers).length > 0) {
+      const localPlayers = loadPlayers();
+      const merged = Object.assign({}, localPlayers, fbPlayers);
+      localStorage.setItem('apexbet_players', JSON.stringify(merged));
+      renderMatches();
+      renderBetslip();
+      console.log('✅ Sync Firebase OK - ' + Object.keys(fbPlayers).length + ' joueur(s)');
+    }
+  } catch(e) { console.warn('Sync error:', e); }
+}
+
+function watchFirebase() {
+  if (!window.fbWatchPlayers) return;
+  window.fbWatchPlayers((fbPlayers) => {
+    if (!fbPlayers) return;
+    const localPlayers = loadPlayers();
+    const merged = Object.assign({}, localPlayers, fbPlayers);
+    localStorage.setItem('apexbet_players', JSON.stringify(merged));
+    renderMatches();
+    renderBetslip();
+  });
+}
+
 // Démarrer Firebase sync
+window.addEventListener('firebaseReady', () => {
+  syncFromFirebase();
+  watchFirebase();
+});
 if (window.firebaseReady) {
   syncFromFirebase();
   watchFirebase();
-} else {
-  window.addEventListener('firebaseReady', () => {
-    syncFromFirebase();
-    watchFirebase();
-  });
 }
 
 window.addEventListener('load', ()=>{ openLogin(); });
