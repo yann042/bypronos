@@ -1273,9 +1273,18 @@ let rankTab    = 'season';
 // ══════════════════════════════════════════════
 function buildCard(m) {
   const state = matchState[m.id] || {resultCls: null};
-  const selWin  = state.resultCls === 'win'  ? 'sel-win'  : '';
-  const selDraw = state.resultCls === 'draw' ? 'sel-draw' : '';
-  const selLose = state.resultCls === 'lose' ? 'sel-lose' : '';
+  // Chercher le resultCls dans validatedBets si matchState est vide
+  let displayCls = state.resultCls;
+  if (!displayCls && currentPlayer) {
+    try {
+      const _p = loadPlayers()[currentPlayer];
+      const _vb = _p && _p.validatedBets && (_p.validatedBets[m.id] || _p.validatedBets[String(m.id)]);
+      if (_vb && _vb.resultCls) displayCls = _vb.resultCls;
+    } catch(e) {}
+  }
+  const selWin  = displayCls === 'win'  ? 'sel-win'  : '';
+  const selDraw = displayCls === 'draw' ? 'sel-draw' : '';
+  const selLose = displayCls === 'lose' ? 'sel-lose' : '';
   const homeLogo = getLogo(m.home);
   const awayLogo = getLogo(m.away);
   const rbLogoImg = (url, name) => url
@@ -1621,9 +1630,14 @@ function placeBetForMatch(matchId) {
     delete betslip[k];
   });
   p.current = {};
-  savePlayers(players);
-  // Rétracter le bloc score exact après validation
+  // Sauvegarder le resultCls dans validatedBets pour la couleur du bouton
+  const savedCls = matchState[matchId] ? matchState[matchId].resultCls : null;
+  if (savedCls && p.validatedBets[parseInt(matchId)]) {
+    p.validatedBets[parseInt(matchId)].resultCls = savedCls;
+  }
+  // Vider matchState pour replier le scoreBlock
   delete matchState[matchId];
+  savePlayers(players);
 
   const m = matches.find(x => x.id === matchId);
   showNotif('✅ Pari validé sur ' + (m ? m.home + ' - ' + m.away : 'le match'));
