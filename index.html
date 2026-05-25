@@ -27,7 +27,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
-.main{display:grid;grid-template-columns:220px 1fr 300px;height:calc(100vh - 56px);overflow:hidden}
+.main{display:grid;grid-template-columns:220px 1fr;height:calc(100vh - 56px);overflow:hidden}
 
 /* Sidebar */
 .sidebar{background:var(--bg2);border-right:1px solid var(--bord);padding:12px 8px;overflow-y:auto}
@@ -125,7 +125,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .score-step-hint{font-size:11px;color:var(--txt2);margin-top:8px;display:flex;align-items:center;gap:4px}
 
 /* Betslip */
-.betslip{background:var(--bg2);border-left:1px solid var(--bord);display:flex;flex-direction:column;height:100%}
+.betslip{display:none}
 .betslip-header{padding:14px 16px;border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .betslip-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;display:flex;align-items:center;gap:8px}
 .bet-count{background:var(--acc);color:#0d1117;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -479,7 +479,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .betslip { display: none; }
 
   /* ── Bouton flottant bulletin ── */
-  .mobile-slip-btn {
+  .mobile-slip-btn { display:none !important;
     display: flex;
     position: fixed;
     bottom: 80px;
@@ -517,7 +517,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .mobile-slip-btn.empty { background: var(--bg3); color: var(--txt2); box-shadow: none; }
 
   /* ── Tiroir bulletin mobile ── */
-  .mobile-slip-drawer {
+  .mobile-slip-drawer { display:none !important;
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -580,7 +580,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
     flex-shrink: 0;
   }
   /* Overlay sombre derrière le tiroir */
-  .mobile-slip-overlay {
+  .mobile-slip-overlay { display:none !important;
     display: none;
     position: fixed;
     inset: 0;
@@ -591,13 +591,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 }
 
 @media (min-width: 769px) {
-  .mobile-slip-btn, .mobile-slip-drawer, .mobile-slip-overlay { display: none !important; }
+  .mobile-slip-btn, .mobile-slip-drawer, .mobile-slip-overlay { display:none !important; display: none !important; }
 }
 
 @media (max-width: 768px) {
 
   /* Bouton bulletin plus compact */
-  .mobile-slip-btn {
+  .mobile-slip-btn { display:none !important;
     bottom: 16px !important;
     padding: 10px 18px !important;
     font-size: 14px !important;
@@ -787,6 +787,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .header-prono-badge { font-size: 10px; padding: 1px 6px; }
   .match-header { flex-wrap: nowrap; gap: 4px; }
 }
+
+.score-step-footer{margin-top:10px;background:#f8f9f6;border:1px solid #d8ddd5;border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.score-step-recap{display:flex;flex-direction:column;gap:2px;flex:1}
+.recap-score{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
+.recap-pts{font-size:11px;color:var(--txt2);display:flex;gap:6px;flex-wrap:wrap}
+.recap-pt-item{font-weight:600}
+.recap-pt-item.result{color:#057a3a}
+.recap-pt-item.score{color:#8b6000}
+.recap-pt-item.total{color:#056b52;font-size:12px;font-weight:700}
+.btn-valider{background:#057a3a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0}
+.btn-valider:hover{opacity:.88}
 </style>
 </head>
 <body>
@@ -1244,15 +1255,32 @@ function buildCard(m) {
       </div>`;
     }
 
-    const hintKey = Object.keys(betslip).find(k => k.startsWith(m.id + '_'));
-    const hintHtml = hintKey
-      ? `<div class="score-step-hint">✅ Score sélectionné — visible dans le bulletin</div>`
-      : `<div class="score-step-hint">👆 Cliquez sur un score pour l'ajouter au bulletin</div>`;
+    const betKey = Object.keys(betslip).find(k => k.startsWith(m.id + '_'));
+    let footerHtml = '';
+    if (betKey) {
+      const b = betslip[betKey];
+      const ptsR = b.resultOdd.toFixed(2);
+      const ptsS = b.scoreOdd.toFixed(2);
+      const ptsMax = (b.resultOdd + b.scoreOdd).toFixed(2);
+      footerHtml = `<div class="score-step-footer">
+        <div class="score-step-recap">
+          <span class="recap-score">🎯 ${b.h}-${b.a} · ${b.resultLabel}</span>
+          <div class="recap-pts">
+            <span class="recap-pt-item result">✅ ${ptsR} pts résultat</span>
+            <span class="recap-pt-item score">🏅 ${ptsS} pts score</span>
+            <span class="recap-pt-item total">= ${ptsMax} pts max</span>
+          </div>
+        </div>
+        <button class="btn-valider" onclick="placeBetForMatch(${m.id})">VALIDER ✓</button>
+      </div>`;
+    } else {
+      footerHtml = '<div class="score-step-hint">👆 Cliquez sur un score pour valider</div>';
+    }
 
     scoreBlock = `<div class="score-step ${pillCls}">
       <div class="score-step-label ${pillCls}">${clsLabel[scoreKey]}</div>
       <div class="score-pills">${pills}${otherPill}</div>
-      ${hintHtml}
+      ${footerHtml}
     </div>`;
   }
 
@@ -1469,6 +1497,46 @@ function removeBet(key) {
 function clearAll() {
   betslip={};
   matchState={};
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+// Valider uniquement le pari d'un match spécifique
+function placeBetForMatch(matchId) {
+  if (!currentPlayer) { showNotif('⚠️ Connectez-vous dabord !'); openLogin(); return; }
+  const keys = Object.keys(betslip).filter(k => k.startsWith(matchId + '_'));
+  if (!keys.length) return;
+
+  const players = loadPlayers();
+  if (!players[currentPlayer]) players[currentPlayer] = {season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
+  const p = players[currentPlayer];
+  const day = 'Journée en cours';
+  if (!p.season.days[day]) p.season.days[day] = {ptsResult:0,ptsScore:0,bets:0};
+  if (!p.validatedBets) p.validatedBets = {};
+
+  keys.forEach(k => {
+    const b = betslip[k];
+    const pts = calcPoints(b);
+    p.season.ptsResult += pts.result;
+    p.season.ptsScore  += pts.score;
+    p.season.bets      += 1;
+    p.season.days[day].ptsResult += pts.result;
+    p.season.days[day].ptsScore  += pts.score;
+    p.season.days[day].bets      += 1;
+    p.validatedBets[parseInt(b.matchId)] = {
+      h:b.h, a:b.a,
+      resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
+      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd
+    };
+    delete betslip[k];
+  });
+  delete matchState[matchId];
+  p.current = {};
+  savePlayers(players);
+
+  const m = matches.find(x => x.id === matchId);
+  showNotif('✅ Pari validé sur ' + (m ? m.home + ' - ' + m.away : 'le match'));
   renderMatches();
   renderBetslip();
   autosave();
