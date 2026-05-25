@@ -192,7 +192,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 /* ── Login overlay ── */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
-.login-box{background:var(--bg2);border:1px solid var(--bord);border-radius:14px;padding:36px 32px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.login-box{position:relative;z-index:10000;background:var(--bg2);border:1px solid var(--bord);border-radius:14px;padding:36px 32px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .login-logo{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:6px}
 .login-logo span{color:var(--txt)}
 .login-sub{font-size:13px;color:var(--txt2);margin-bottom:24px}
@@ -802,6 +802,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pronos-row{display:flex;align-items:center;gap:6px;padding:5px 10px;flex-wrap:wrap;border-top:1px solid var(--bord);margin-top:4px}
 .pronos-row-label{font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}.pronos-row-label.mine{color:#056b52;background:#fff;border:1px solid #056b52;border-radius:8px;padding:1px 6px;font-size:9px}
 .pronos-row-divider{width:1px;height:14px;background:var(--bord);flex-shrink:0}
+
+/* ── Modale ligue ── */
+.league-tabs{display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid var(--bord)}
+.league-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer !important;pointer-events:all !important;background:var(--bg3);color:var(--txt2);transition:all .15s;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;user-select:none}
+.league-tab.active{background:#056b52;color:#fff}
+.league-badge{display:inline-block;background:#056b52;color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;margin-left:6px}
+.league-info{background:rgba(5,107,82,.08);border:1px solid rgba(5,107,82,.2);border-radius:8px;padding:8px 12px;font-size:12px;color:#056b52;font-weight:600;margin-top:8px;text-align:center}
 </style>
 
   <!-- Firebase SDK compat -->
@@ -1003,6 +1010,52 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div>
 </div>
 
+
+<script>
+// ── Fonctions ligue globales (chargées en premier) ────────────────
+window.switchLeagueTab = function(tab) {
+  var tabJoin = document.getElementById('tabJoin');
+  var tabCreate = document.getElementById('tabCreate');
+  var panelJoin = document.getElementById('panelJoin');
+  var panelCreate = document.getElementById('panelCreate');
+  if (tabJoin) tabJoin.classList.toggle('active', tab === 'join');
+  if (tabCreate) tabCreate.classList.toggle('active', tab === 'create');
+  if (panelJoin) panelJoin.style.display = tab === 'join' ? '' : 'none';
+  if (panelCreate) panelCreate.style.display = tab === 'create' ? '' : 'none';
+};
+
+window.doCreateLeague = async function() {
+  var FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
+  var name = document.getElementById('leagueNameInput').value.trim();
+  var admin = document.getElementById('loginInputCreate').value.trim();
+  if (!name || !admin) { alert('⚠️ Remplis tous les champs !'); return; }
+  var clean = name.toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,6);
+  var rand = Math.random().toString(36).substring(2,6).toUpperCase();
+  var code = clean + rand;
+  var config = { name: name, admin: admin, createdAt: Date.now(), code: code };
+  await fetch(FB_URL + '/ligues/' + code + '/config.json', {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(config)
+  });
+  localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: name, isAdmin: true }));
+  document.getElementById('loginOverlay').style.display = 'none';
+  alert('🎉 Ligue "' + name + '" créée !\n\nCode à partager : ' + code + '\n\nPartagez ce code à vos amis !');
+  if (window.doLoginName) window.doLoginName(admin);
+  else location.reload();
+};
+
+window.doJoinLeague = async function() {
+  var FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
+  var code = (document.getElementById('leagueCodeInput').value || '').trim().toUpperCase();
+  var name = (document.getElementById('loginInput').value || '').trim();
+  if (!code || !name) { alert('⚠️ Remplis tous les champs !'); return; }
+  var res = await fetch(FB_URL + '/ligues/' + code + '/config.json').then(function(r){ return r.json(); });
+  if (!res || !res.name) { alert('❌ Code de ligue invalide !'); return; }
+  localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: res.name, isAdmin: res.admin === name }));
+  document.getElementById('loginOverlay').style.display = 'none';
+  if (window.doLoginName) window.doLoginName(name);
+  else location.reload();
+};
+</script>
 <script>
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
@@ -1054,6 +1107,38 @@ const matches = [
   {id:9,  home:'Lyon',          away:'Lens',       time:'20:45', odds:[2.05,3.30,3.80], sofaId:null},
   {id:10, home:'Saint-Etienne', away:'Rodez',      time:'20:45', odds:[2.20,3.10,3.40], sofaId:null},
 ];
+
+// ── Ligue courante ───────────────────────────────────────────────
+let currentLeague = null; // { code, name, isAdmin }
+
+// ── 2. Structure Firebase avec ligues ────────────────────────────
+// /ligues/{code}/players/{nom} → paris du joueur
+// /ligues/{code}/config → { name, admin, matches, createdAt }
+
+function getLeagueUrl() {
+  if (!currentLeague) return FB_URL + '/players';
+  return FB_URL + '/ligues/' + currentLeague.code + '/players';
+}
+
+function savePlayers_league(data) {
+  const url = getLeagueUrl() + '.json';
+  fetch(url, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(() => console.log('🔥 Firebase ligue OK:', currentLeague ? currentLeague.code : 'global'))
+  .catch(e => console.warn('Firebase error:', e));
+}
+
+function loadPlayersFromLeague() {
+  const url = getLeagueUrl() + '.json';
+  return fetch(url)
+    .then(r => r.json())
+    .then(d => d || {})
+    .catch(() => ({}));
+}
 
 // État live des matchs
 const liveData = {
@@ -1761,15 +1846,7 @@ function loadPlayers() {
 }
 function savePlayers(data) {
   localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
-  // Sync Firebase via REST
-  fetch(FB_URL + '/players.json', {
-    method: 'PUT',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-  })
-  .then(r => r.json())
-  .then(d => console.log('🔥 Firebase REST OK:', Object.keys(data)))
-  .catch(e => console.warn('Firebase error:', e));
+  savePlayers_league(data);
 }
 function autosave() {
   if(!currentPlayer) return;
@@ -1842,10 +1919,74 @@ function doLogin() {
   doLoginName(val);
 }
 
+// switchLeagueTab défini dans script séparé
+
+function generateCode(name) {
+  const clean = name.toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,6);
+  const rand = Math.random().toString(36).substring(2,6).toUpperCase();
+  return clean + rand;
+}
+
+window.doCreateLeague = async function() {
+  const name = document.getElementById('leagueNameInput').value.trim();
+  const admin = document.getElementById('loginInputCreate').value.trim();
+  if (!name || !admin) { showNotif('⚠️ Remplis tous les champs !'); return; }
+
+  const code = generateCode(name);
+  const config = { name, admin, createdAt: Date.now(), code };
+
+  // Sauver la config dans Firebase
+  await fetch(FB_URL + '/ligues/' + code + '/config.json', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(config)
+  });
+
+  currentLeague = { code, name, isAdmin: true };
+  localStorage.setItem('bypronos_league', JSON.stringify(currentLeague));
+
+  document.getElementById('loginOverlay').style.display = 'none';
+  showNotif('✅ Ligue créée ! Code : ' + code);
+
+  // Afficher le code à l'admin
+  setTimeout(() => {
+    alert('🎉 Ligue "' + name + '" créée !
+
+Code à partager : ' + code + '
+
+Partagez ce code à vos amis pour qu'ils rejoignent la ligue !');
+  }, 500);
+
+  doLoginName(admin);
+}
+
+window.doJoinLeague = async function() {
+  const code = document.getElementById('leagueCodeInput').value.trim().toUpperCase();
+  const name = document.getElementById('loginInput').value.trim();
+  if (!code || !name) { showNotif('⚠️ Remplis tous les champs !'); return; }
+
+  // Vérifier que la ligue existe
+  const res = await fetch(FB_URL + '/ligues/' + code + '/config.json').then(r => r.json());
+  if (!res || !res.name) {
+    showNotif('❌ Code de ligue invalide !');
+    return;
+  }
+
+  currentLeague = { code, name: res.name, isAdmin: res.admin === name };
+  localStorage.setItem('bypronos_league', JSON.stringify(currentLeague));
+
+  document.getElementById('loginOverlay').style.display = 'none';
+  showNotif('✅ Bienvenue dans "' + res.name + '" !');
+  doLoginName(name);
+}
+
 function doLoginName(name) {
   currentPlayer=name;
   document.getElementById('loginOverlay').style.display='none';
   document.getElementById('playerName').textContent=name;
+  // Afficher le nom de la ligue
+  const lb = document.getElementById('leagueBadge');
+  if (lb && currentLeague) lb.textContent = '· ' + currentLeague.name;
   document.getElementById('playerAvatar').textContent=name.charAt(0).toUpperCase();
   const players=loadPlayers();
   if(!players[name]) players[name]={season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
@@ -2238,7 +2379,7 @@ function loadPlayersFromFirebase() {
 
 async function syncFromFirebase() {
   try {
-    const fbPlayers = await loadPlayersFromFirebase();
+    const fbPlayers = currentLeague ? await loadPlayersFromLeague() : await loadPlayersFromFirebase();
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
       const localPlayers = loadPlayers();
       const merged = Object.assign({}, localPlayers, fbPlayers);
@@ -2287,11 +2428,26 @@ window.addEventListener('load', ()=>{ openLogin(); });
 <!-- ── Login overlay ─────────────────────────── -->
 <div class="login-overlay" id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center">
   <div class="login-box">
-    <div class="login-logo">BY<span> PRONOS</span></div>
-    <div class="login-sub">Entrez votre prénom pour jouer</div>
-    <label class="login-label">Votre prénom</label>
-    <input class="login-input" id="loginInput" type="text" placeholder="Ex: Thomas" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" onclick="doLogin()">JOUER →</button>
+    <div class="login-logo">BY <span>PRONOS</span></div>
+    <p class="login-sub">Entrez votre pseudo pour jouer</p>
+    <div class="league-tabs">
+      <div class="league-tab active" id="tabJoin" onclick="window.switchLeagueTab('join')">REJOINDRE</div>
+      <div class="league-tab" id="tabCreate" onclick="window.switchLeagueTab('create')">CRÉER</div>
+    </div>
+    <div id="panelJoin">
+      <label class="login-label">CODE DE LIGUE</label>
+      <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: AMIS2024" maxlength="12" style="text-transform:uppercase;margin-bottom:10px" oninput="this.value=this.value.toUpperCase()">
+      <label class="login-label">VOTRE PSEUDO</label>
+      <input class="login-input" id="loginInput" type="text" placeholder="Ex: Torpedo42" maxlength="20" onkeydown="if(event.key==='Enter')window.doJoinLeague()">
+      <button class="login-btn" onclick="window.doJoinLeague()">REJOINDRE →</button>
+    </div>
+    <div id="panelCreate" style="display:none">
+      <label class="login-label">NOM DE VOTRE LIGUE</label>
+      <input class="login-input" id="leagueNameInput" type="text" placeholder="Ex: Les Potes du Lundi" maxlength="30" style="margin-bottom:10px">
+      <label class="login-label">VOTRE PSEUDO (admin)</label>
+      <input class="login-input" id="loginInputCreate" type="text" placeholder="Ex: LeChef" maxlength="20">
+      <button class="login-btn" style="background:#c45a00" onclick="window.doCreateLeague()">CRÉER MA LIGUE →</button>
+    </div>
     <div class="login-players" id="loginPlayers" style="display:none">
       <div class="login-players-label">Joueurs enregistrés</div>
       <div id="loginPlayersList"></div>
