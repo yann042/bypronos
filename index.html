@@ -1585,6 +1585,8 @@ function placeBetForMatch(matchId) {
   });
   p.current = {};
   savePlayers(players);
+  // Rétracter le bloc score exact après validation
+  delete matchState[matchId];
 
   const m = matches.find(x => x.id === matchId);
   showNotif('✅ Pari validé sur ' + (m ? m.home + ' - ' + m.away : 'le match'));
