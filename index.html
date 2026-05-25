@@ -1177,7 +1177,7 @@ function renderLiveProno(matchId, hs, as) {
   const ptsTxt = livePts
     ? (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2) + ' pts · ' + livePts.label
     : '+' + (b.resultOdd + b.scoreOdd).toFixed(2) + ' pts max';
-  return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#f8f8f4;border:1px solid #d8ddd5;border-radius:7px;padding:5px 12px">' +
+  return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:5px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06)">' +
     '<div style="display:flex;align-items:center;gap:8px">' +
       '<span style="font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase">Mon prono</span>' +
       '<span style="font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:700;color:#1a1f1a">' + b.h + '-' + b.a + '</span>' +
