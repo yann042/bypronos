@@ -1363,7 +1363,9 @@ function buildCard(m) {
         <div class="live-team away"><span>${awayName}</span>${awayLogoHtml}</div>
       </div>
     </div>
-    ${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}`;
+    ${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}
+    ${renderLiveProno(m.id, hs, as)}
+    ${getAllPronosHtml(m.id, hs, as)}`;
   }
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
@@ -1386,7 +1388,6 @@ function buildCard(m) {
     <div class="match-body">
       <div class="teams" style="display:none"></div>
       ${started ? liveBlock : resultRow + scoreBlock}
-      ${renderPronoBelow(m.id)}
     </div>
   </div>`;
 }
