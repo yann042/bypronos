@@ -730,7 +730,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 .match-header { position: relative; }
 .header-prono-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; }
-.header-prono-badge { font-size: 11px; font-weight: 700; color: #056b52; background: rgba(5,107,82,.1); border: 1px solid rgba(5,107,82,.25); border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
+.header-prono-badge { font-size: 11px; font-weight: 700; color: #056b52; background: #ffffff; border: 2px solid #056b52; border-radius: 10px; padding: 1px 8px; white-space: nowrap; box-shadow: 0 1px 4px rgba(5,107,82,.2); }
 .header-pts-badge { font-size: 11px; font-weight: 700; background: var(--bg3); border: 1px solid var(--bord); border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
 
 .all-pronos{margin:4px 10px 6px;border-top:1px solid var(--bord);padding-top:6px}
@@ -806,8 +806,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <div class="header">
     <div class="logo">BY<span> PRONOS</span></div>
     <nav class="nav">
-      <button class="nav-btn active" onclick="showView('sports',this)">Sports</button>
-      <button class="nav-btn" onclick="showView('live',this)">🔴 Live</button>
+      <button class="nav-btn active" onclick="showView('sports',this)">Pronos</button>
       <button class="nav-btn" onclick="showView('ranking',this)">🏆 Classement</button>
     </nav>
     <div class="header-right">
