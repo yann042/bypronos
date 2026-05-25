@@ -2219,9 +2219,8 @@ renderMatches();
 
 // ── Fonctions Firebase sync ──────────────────────────────────────
 async function syncFromFirebase() {
-  if (!window.fbLoadPlayers) return;
   try {
-    const fbPlayers = await window.fbLoadPlayers();
+    const fbPlayers = await loadPlayersFromFirebase();
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
       const localPlayers = loadPlayers();
       const merged = Object.assign({}, localPlayers, fbPlayers);
@@ -2234,15 +2233,24 @@ async function syncFromFirebase() {
 }
 
 function watchFirebase() {
-  if (!window.fbWatchPlayers) return;
-  window.fbWatchPlayers((fbPlayers) => {
-    if (!fbPlayers) return;
-    const localPlayers = loadPlayers();
-    const merged = Object.assign({}, localPlayers, fbPlayers);
-    localStorage.setItem('apexbet_players', JSON.stringify(merged));
-    renderMatches();
-    renderBetslip();
-  });
+  // Polling toutes les 10s via REST
+  setInterval(async () => {
+    try {
+      const fbPlayers = await loadPlayersFromFirebase();
+      if (fbPlayers && Object.keys(fbPlayers).length > 0) {
+        const localPlayers = loadPlayers();
+        const merged = Object.assign({}, localPlayers, fbPlayers);
+        const current = JSON.stringify(localPlayers);
+        const next = JSON.stringify(merged);
+        if (current !== next) {
+          localStorage.setItem('apexbet_players', next);
+          renderMatches();
+          renderBetslip();
+          console.log('🔄 Mise à jour Firebase détectée');
+        }
+      }
+    } catch(e) {}
+  }, 10000);
 }
 
 // Démarrer Firebase sync
