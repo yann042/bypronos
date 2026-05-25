@@ -1060,7 +1060,8 @@ function getAllPronosHtml(matchId, hs, as) {
     Object.entries(players).forEach(([name, data]) => {
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
-      const isMe = name === currentPlayer;
+      if (name === currentPlayer) return; // exclure mon prono
+      const isMe = false;
       const pts = calcLivePts(vb, hs, as);
       let ptsHtml = '';
       if (pts) {
@@ -1176,14 +1177,53 @@ function renderLiveProno(matchId, hs, as) {
   const ptsCol = livePts ? (livePts.pts > 0 ? '#057a3a' : '#cc2200') : '#057a3a';
   const ptsTxt = livePts
     ? (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2) + ' pts · ' + livePts.label
-    : '+' + (b.resultOdd + b.scoreOdd).toFixed(2) + ' pts max';
+    : '';
+  // Calcul détaillé des pts selon le score live ou potentiel
+  let ptsResult, ptsScore, ptsTotal, resultBg, resultColor, scoreBg, scoreColor, totalBg;
+
+  if (livePts) {
+    // En live : calculer les pts réels pour chaque composante
+    const goodResult = livePts.type === 'max' || livePts.type === 'result' || livePts.type === 'bonus';
+    const exactScore = livePts.type === 'max';
+    const hasBonus   = livePts.type === 'bonus';
+    const isBad      = livePts.type === 'zero';
+
+    ptsResult = isBad ? '-1' : ('+' + b.resultOdd.toFixed(2));
+    ptsScore  = exactScore ? ('+' + b.scoreOdd.toFixed(2)) : (hasBonus ? '+0.5' : '0');
+    ptsTotal  = (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2);
+
+    resultBg    = isBad ? '#fff0ee' : '#eef7f2';
+    resultColor = isBad ? '#cc2200' : '#056b52';
+    scoreBg     = exactScore ? '#fff8ee' : (hasBonus ? '#fff8ee' : '#f5f5f5');
+    scoreColor  = exactScore ? '#8b6000' : (hasBonus ? '#c45a00' : '#aaa');
+    totalBg     = isBad ? '#cc2200' : '#056b52';
+  } else {
+    // Pré-match : pts potentiels max
+    ptsResult   = '+' + b.resultOdd.toFixed(2);
+    ptsScore    = '+' + b.scoreOdd.toFixed(2);
+    ptsTotal    = '+' + (b.resultOdd + b.scoreOdd).toFixed(2);
+    resultBg    = '#eef7f2'; resultColor = '#056b52';
+    scoreBg     = '#fff8ee'; scoreColor  = '#8b6000';
+    totalBg     = '#056b52';
+  }
+
+  const resultIcon = (livePts && livePts.type === 'zero') ? '❌' : '✅';
+  const gainsLabel = livePts ? 'Gains' : 'Gains possibles';
+  const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+    '<span style="font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase;white-space:nowrap">' + gainsLabel + '</span>' +
+    '<span style="background:' + resultBg + ';border:1px solid ' + resultColor + '33;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + ' pts</span>' +
+    '<span style="color:#aaa;font-size:10px">+</span>' +
+    '<span style="background:' + scoreBg + ';border:1px solid ' + scoreColor + '44;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:' + scoreColor + '">🏅 ' + ptsScore + ' pts</span>' +
+    '<span style="color:#aaa;font-size:10px">=</span>' +
+    '<span style="background:' + totalBg + ';border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + ' pts</span>' +
+  '</span>';
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:5px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06)">' +
     '<div style="display:flex;align-items:center;gap:8px">' +
       '<span style="font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase">Mon prono</span>' +
       '<span style="font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:700;color:#1a1f1a">' + b.h + '-' + b.a + '</span>' +
       '<span style="font-size:10px;color:#5a6a5a">· ' + b.resultLabel + '</span>' +
     '</div>' +
-    '<span style="font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:700;color:' + ptsCol + ';white-space:nowrap">' + ptsTxt + '</span>' +
+    ptsBubbles +
   '</div>';
 }
 
