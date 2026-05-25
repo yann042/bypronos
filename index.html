@@ -730,7 +730,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 .match-header { position: relative; }
 .header-prono-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; }
-.header-prono-badge { font-size: 11px; font-weight: 700; color: #056b52; background: #ffffff; border: 2px solid #056b52; border-radius: 10px; padding: 1px 8px; white-space: nowrap; box-shadow: 0 1px 4px rgba(5,107,82,.2); }
+.header-prono-badge { font-size: 11px; font-weight: 700; color: #056b52; background: #ffffff; border: 1px solid #056b52; border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
 .header-pts-badge { font-size: 11px; font-weight: 700; background: var(--bg3); border: 1px solid var(--bord); border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
 
 .all-pronos{margin:4px 10px 6px;border-top:1px solid var(--bord);padding-top:6px}
@@ -798,6 +798,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .recap-pt-item.total{color:#056b52;font-size:12px;font-weight:700}
 .btn-valider{background:#057a3a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0}
 .btn-valider:hover{opacity:.88}
+
+.pronos-row{display:flex;align-items:center;gap:6px;padding:5px 10px;flex-wrap:wrap;border-top:1px solid var(--bord);margin-top:4px}
+.pronos-row-label{font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}.pronos-row-label.mine{color:#056b52;background:#fff;border:1px solid #056b52;border-radius:8px;padding:1px 6px;font-size:9px}
+.pronos-row-divider{width:1px;height:14px;background:var(--bord);flex-shrink:0}
 </style>
 </head>
 <body>
@@ -1079,6 +1083,55 @@ function getAllPronosHtml(matchId, hs, as) {
   } catch(e) { return ''; }
 }
 
+function ptsChip(vb, matchId) {
+  const live = liveData[parseInt(matchId)];
+  if (!live) return '';
+  const pts = calcLivePts(vb, live.homeScore, live.awayScore);
+  if (!pts) return '';
+  const sign = pts.pts > 0 ? '+' : '';
+  const bg   = pts.pts > 0 ? '#057a3a' : '#cc2200';
+  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + pts.pts.toFixed(1) + '</span>';
+}
+
+function renderPronoBelow(matchId) {
+  try {
+    const mid = parseInt(matchId);
+    const players = loadPlayers();
+    const myProno = currentPlayer && players[currentPlayer] &&
+      players[currentPlayer].validatedBets &&
+      (players[currentPlayer].validatedBets[mid] || players[currentPlayer].validatedBets[String(mid)]);
+
+    const others = [];
+    Object.entries(players).forEach(([name, data]) => {
+      if (name === currentPlayer) return;
+      const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
+      if (!vb) return;
+      others.push('<span style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--bord);border-radius:10px;padding:2px 8px">' +
+        '<span style="font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:.5px;text-transform:uppercase">' + name + '</span>' +
+        '<span style="font-size:12px;font-weight:700;color:var(--txt)">🎯 ' + vb.h + '-' + vb.a + '</span>' +
+        ptsChip(vb, mid) +
+      '</span>');
+    });
+
+    if (!myProno && !others.length) return '';
+
+    let html = '<div class="pronos-row">';
+    if (myProno) {
+      html += '<span style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #056b52;border-radius:10px;padding:2px 8px">' +
+        '<span style="font-size:9px;font-weight:700;color:#056b52;letter-spacing:.5px;text-transform:uppercase">Mon prono</span>' +
+        '<span style="font-size:12px;font-weight:700;color:#056b52">🎯 ' + myProno.h + '-' + myProno.a + '</span>' +
+        ptsChip(myProno, mid) +
+      '</span>';
+    }
+    if (myProno && others.length) html += '<span class="pronos-row-divider"></span>';
+    if (others.length) {
+      html += others.join('');
+    }
+    html += '</div>';
+    return html;
+  } catch(e) { return ''; }
+}
+
 function getPronoHeader(matchId) {
   if (!currentPlayer) return '';
   try {
@@ -1309,13 +1362,13 @@ function buildCard(m) {
       </div>
     </div>
     ${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}
-    ${getAllPronosHtml(m.id, hs, as)}`;
+    ${renderPronoBelow(m.id)}`;
   }
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <div class="match-header">
       <div class="league"><span>🇫🇷</span> Ligue 1</div>
-      <div class="header-prono-center">${getPronoHeader(m.id)}</div>
+
       <span class="match-time">${started ? (finished ? '✅ FIN' : '<span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>') : '🕐 ' + m.time}</span>
     </div>
     ${!started ? `<div class="match-teams-row">
