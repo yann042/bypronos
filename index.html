@@ -1106,20 +1106,22 @@ function renderPronoBelow(matchId) {
       if (name === currentPlayer) return;
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
-      others.push('<span style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--bord);border-radius:10px;padding:2px 8px">' +
-        '<span style="font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:.5px;text-transform:uppercase">' + name + '</span>' +
-        '<span style="font-size:12px;font-weight:700;color:var(--txt)">🎯 ' + vb.h + '-' + vb.a + '</span>' +
+      others.push(
+        '<span style="font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:.5px;text-transform:uppercase;margin-right:3px">' + name + '</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--bord);border-radius:10px;padding:2px 8px">' +
+        '<span style="font-size:12px;font-weight:700;color:var(--txt)">' + vb.h + '-' + vb.a + '</span>' +
         ptsChip(vb, mid) +
-      '</span>');
+        '</span>'
+      );
     });
 
     if (!myProno && !others.length) return '';
 
     let html = '<div class="pronos-row">';
     if (myProno) {
-      html += '<span style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #056b52;border-radius:10px;padding:2px 8px">' +
-        '<span style="font-size:9px;font-weight:700;color:#056b52;letter-spacing:.5px;text-transform:uppercase">Mon prono</span>' +
-        '<span style="font-size:12px;font-weight:700;color:#056b52">🎯 ' + myProno.h + '-' + myProno.a + '</span>' +
+      html += '<span style="font-size:9px;font-weight:700;color:#056b52;letter-spacing:.5px;text-transform:uppercase;margin-right:3px">Mon prono</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #056b52;border-radius:10px;padding:2px 8px">' +
+        '<span style="font-size:12px;font-weight:700;color:#056b52">' + myProno.h + '-' + myProno.a + '</span>' +
         ptsChip(myProno, mid) +
       '</span>';
     }
