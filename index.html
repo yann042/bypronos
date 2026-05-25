@@ -1208,18 +1208,18 @@ function renderLiveProno(matchId, hs, as) {
   }
 
   const resultIcon = (livePts && livePts.type === 'zero') ? '❌' : '✅';
-  const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:2px;flex-wrap:nowrap;flex-shrink:0">' +
-    '<span style="background:' + resultBg + ';border-radius:12px;padding:1px 5px;font-size:9px;font-weight:700;color:' + resultColor + '">' + resultIcon + ptsResult + '</span>' +
-    '<span style="color:#ccc;font-size:8px">+</span>' +
-    '<span style="background:' + scoreBg + ';border-radius:12px;padding:1px 5px;font-size:9px;font-weight:700;color:' + scoreColor + '">🎯' + ptsScore + '</span>' +
-    '<span style="color:#ccc;font-size:8px">=</span>' +
-    '<span style="background:' + totalBg + ';border-radius:12px;padding:1px 5px;font-size:9px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
+  const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:3px;flex-wrap:nowrap;flex-shrink:0">' +
+    '<span style="background:' + resultBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + '</span>' +
+    '<span style="color:#ccc;font-size:10px">+</span>' +
+    '<span style="background:' + scoreBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + scoreColor + '">🎯 ' + ptsScore + '</span>' +
+    '<span style="color:#ccc;font-size:10px">=</span>' +
+    '<span style="background:' + totalBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
   '</span>';
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
     '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap">' +
       '<span style="font-size:8px;font-weight:700;color:#8a9a88;letter-spacing:.5px;text-transform:uppercase">Mon prono</span>' +
       '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:#1a1f1a">' + b.h + '-' + b.a + '</span>' +
-      '<span style="font-size:9px;color:#5a6a5a;overflow:hidden;text-overflow:ellipsis;max-width:90px;white-space:nowrap">· ' + b.resultLabel + '</span>' +
+      
     '</div>' +
     ptsBubbles +
   '</div>';
