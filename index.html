@@ -1209,11 +1209,11 @@ function renderLiveProno(matchId, hs, as) {
 
   const resultIcon = (livePts && livePts.type === 'zero') ? '❌' : '✅';
   const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:2px;flex-wrap:nowrap;flex-shrink:0">' +
-    '<span style="background:' + resultBg + ';border:1px solid ' + resultColor + '33;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + '</span>' +
-    '<span style="color:#ccc;font-size:9px">+</span>' +
-    '<span style="background:' + scoreBg + ';border:1px solid ' + scoreColor + '44;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;color:' + scoreColor + '">🎯 ' + ptsScore + '</span>' +
-    '<span style="color:#ccc;font-size:9px">=</span>' +
-    '<span style="background:' + totalBg + ';border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
+    '<span style="background:' + resultBg + ';border-radius:12px;padding:1px 5px;font-size:9px;font-weight:700;color:' + resultColor + '">' + resultIcon + ptsResult + '</span>' +
+    '<span style="color:#ccc;font-size:8px">+</span>' +
+    '<span style="background:' + scoreBg + ';border-radius:12px;padding:1px 5px;font-size:9px;font-weight:700;color:' + scoreColor + '">🎯' + ptsScore + '</span>' +
+    '<span style="color:#ccc;font-size:8px">=</span>' +
+    '<span style="background:' + totalBg + ';border-radius:12px;padding:1px 5px;font-size:9px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
   '</span>';
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
     '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap">' +
