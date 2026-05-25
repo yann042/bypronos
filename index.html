@@ -978,6 +978,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="confetti-container" id="confettiContainer"></div>
 <button onclick="sessionReset()" style="position:fixed;bottom:5px;left:5px;z-index:9999;background:#e85d4a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔄 Changer joueur</button>
 <button onclick="localStorage.clear();location.reload()" style="position:fixed;bottom:5px;left:130px;z-index:9999;background:#555;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🗑 Reset total</button>
+<button onclick="testFirebase()" style="position:fixed;bottom:5px;left:240px;z-index:9999;background:#f97316;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔥 Test Firebase</button>
 
 <!-- Leaderboard modal -->
 <div class="leaderboard-overlay" id="lbOverlay" onclick="closeLbIfOutside(event)">
@@ -1898,6 +1899,20 @@ function renderRanking() {
 // ══════════════════════════════════════════════
 // ── Notif & Init ─────────────────────────────
 // ══════════════════════════════════════════════
+function testFirebase() {
+  console.log('fbSavePlayers:', typeof window.fbSavePlayers);
+  console.log('firebaseReady:', window.firebaseReady);
+  const testData = { test: { name: 'test', ts: Date.now() } };
+  if (window.fbSavePlayers) {
+    window.fbSavePlayers(testData);
+    console.log('✅ Test envoyé à Firebase !');
+    alert('Test envoyé ! Vérifie Firebase dans 5 secondes.');
+  } else {
+    console.error('❌ fbSavePlayers non défini !');
+    alert('❌ fbSavePlayers non défini - Firebase pas chargé');
+  }
+}
+
 function sessionReset() {
   currentPlayer = null;
   betslip = {};
