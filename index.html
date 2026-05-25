@@ -1761,6 +1761,15 @@ function loadPlayers() {
 }
 function savePlayers(data) {
   localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  // Sync Firebase via REST
+  fetch(FB_URL + '/players.json', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(d => console.log('🔥 Firebase REST OK:', Object.keys(data)))
+  .catch(e => console.warn('Firebase error:', e));
 }
 function autosave() {
   if(!currentPlayer) return;
