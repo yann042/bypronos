@@ -1388,6 +1388,7 @@ function buildCard(m) {
     <div class="match-body">
       <div class="teams" style="display:none"></div>
       ${started ? liveBlock : resultRow + scoreBlock}
+      ${!started ? renderPronoBelow(m.id) : ''}
     </div>
   </div>`;
 }
