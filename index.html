@@ -2218,6 +2218,15 @@ function syncMobileSlip() {
 renderMatches();
 
 // ── Fonctions Firebase sync ──────────────────────────────────────
+const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
+
+function loadPlayersFromFirebase() {
+  return fetch(FB_URL + '/players.json')
+    .then(r => r.json())
+    .then(d => d || {})
+    .catch(e => { console.warn('Firebase load error:', e); return {}; });
+}
+
 async function syncFromFirebase() {
   try {
     const fbPlayers = await loadPlayersFromFirebase();
