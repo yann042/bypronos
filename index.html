@@ -803,6 +803,49 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pronos-row-label{font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}.pronos-row-label.mine{color:#056b52;background:#fff;border:1px solid #056b52;border-radius:8px;padding:1px 6px;font-size:9px}
 .pronos-row-divider{width:1px;height:14px;background:var(--bord);flex-shrink:0}
 </style>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCKGmv4pnhQpRPkGxgsLz0OF4QyN1DrzJY",
+      authDomain: "bypronos.firebaseapp.com",
+      databaseURL: "https://bypronos-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "bypronos",
+      storageBucket: "bypronos.firebasestorage.app",
+      messagingSenderId: "665766330430",
+      appId: "1:665766330430:web:7115fad36faa4e923fd16f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    // ── Fonctions Firebase globales ─────────────────────────────
+    window.fbSavePlayers = async function(players) {
+      try {
+        await set(ref(db, 'players'), players);
+      } catch(e) { console.warn('Firebase save error:', e); }
+    };
+
+    window.fbLoadPlayers = async function() {
+      try {
+        const snap = await get(ref(db, 'players'));
+        return snap.exists() ? snap.val() : {};
+      } catch(e) { console.warn('Firebase load error:', e); return {}; }
+    };
+
+    window.fbWatchPlayers = function(callback) {
+      onValue(ref(db, 'players'), (snap) => {
+        callback(snap.exists() ? snap.val() : {});
+      });
+    };
+
+    window.firebaseReady = true;
+    window.dispatchEvent(new Event('firebaseReady'));
+    console.log('✅ Firebase connecté !');
+  </script>
 </head>
 <body>
 <div class="app">
@@ -2162,6 +2205,18 @@ function syncMobileSlip() {
 // sync mobile appelé dans renderBetslip directement
 
 renderMatches();
+
+// Démarrer Firebase sync
+if (window.firebaseReady) {
+  syncFromFirebase();
+  watchFirebase();
+} else {
+  window.addEventListener('firebaseReady', () => {
+    syncFromFirebase();
+    watchFirebase();
+  });
+}
+
 window.addEventListener('load', ()=>{ openLogin(); });
 </script>
 
