@@ -1161,10 +1161,8 @@ function getPronoHeader(matchId) {
 }
 
 function renderLiveProno(matchId, hs, as) {
-  // Chercher d'abord dans le betslip actif, puis dans les paris validés
   const betKey = Object.keys(betslip).find(k => k.startsWith(matchId + '_'));
   let b = betKey ? betslip[betKey] : null;
-
   if (!b && currentPlayer) {
     const players = loadPlayers();
     const p = players[currentPlayer];
@@ -1175,18 +1173,17 @@ function renderLiveProno(matchId, hs, as) {
   }
   if (!b) return '';
   const livePts = (hs !== '?' && as !== '?') ? calcLivePts(b, hs, as) : null;
-  const ptsClass = livePts ? 'pts-' + livePts.type : '';
-  const ptsSign  = livePts && livePts.pts > 0 ? '+' : '';
-  const ptsBlock = livePts
-    ? '<div class="live-pts-block"><span class="live-pts-label">Points actuels</span><span class="live-pts-value ' + ptsClass + '">' + ptsSign + livePts.pts.toFixed(2) + '</span><span class="live-pts-detail">' + livePts.label + '</span></div>'
-    : '<div class="live-pts-block"><span class="live-pts-label">Points potentiels</span><span class="live-pts-value" style="color:#056b52">+' + (b.resultOdd + b.scoreOdd).toFixed(2) + ' max</span></div>';
-  return '<div class="live-prono">' +
-    '<div class="live-prono-left">' +
-      '<span class="live-prono-label">Votre pronostic</span>' +
-      '<span class="live-prono-score">' + b.h + ' - ' + b.a + '</span>' +
-      '<span class="live-prono-result">' + b.resultLabel + '</span>' +
+  const ptsCol = livePts ? (livePts.pts > 0 ? '#057a3a' : '#cc2200') : '#057a3a';
+  const ptsTxt = livePts
+    ? (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2) + ' pts · ' + livePts.label
+    : '+' + (b.resultOdd + b.scoreOdd).toFixed(2) + ' pts max';
+  return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#f8f8f4;border:1px solid #d8ddd5;border-radius:7px;padding:5px 12px">' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
+      '<span style="font-size:9px;font-weight:700;color:#8a9a88;letter-spacing:1px;text-transform:uppercase">Mon prono</span>' +
+      '<span style="font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:700;color:#1a1f1a">' + b.h + '-' + b.a + '</span>' +
+      '<span style="font-size:10px;color:#5a6a5a">· ' + b.resultLabel + '</span>' +
     '</div>' +
-    ptsBlock +
+    '<span style="font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:700;color:' + ptsCol + ';white-space:nowrap">' + ptsTxt + '</span>' +
   '</div>';
 }
 
