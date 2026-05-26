@@ -27,7 +27,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
-.main{display:grid;grid-template-columns:220px 1fr;height:calc(100vh - 56px);overflow:hidden}
+.main{display:grid;grid-template-columns:1fr;height:calc(100vh - 56px);overflow:hidden}
 
 /* Sidebar */
 .sidebar{background:var(--bg2);border-right:1px solid var(--bord);padding:12px 8px;overflow-y:auto}
@@ -860,6 +860,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .hamburger-btn { display: none; }
   .sidebar-overlay { display: none !important; }
 }
+
+.comp-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
+.comp-btn:hover{border-color:var(--acc);color:var(--acc)}
+.comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
 </style>
 
   <!-- Firebase SDK compat -->
@@ -905,7 +909,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="app">
 
   <div class="header">
-    <button class="hamburger-btn" onclick="toggleSidebar()" title="Menu">☰</button>
     <div class="logo">BY<span> PRONOS</span> <span id="leagueBadge" style="font-size:11px;font-weight:600;opacity:.8"></span></div>
     <nav class="nav">
       <button class="nav-btn active" onclick="showView('sports',this)">Pronos</button>
@@ -921,33 +924,22 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <div id="view-sports" class="view-panel">
   <div class="main">
-    <div class="sidebar" id="sidebar">
-      <h3>Sport</h3>
-      <div class="sport-item active"><span class="sport-icon">⚽</span><span class="sport-name">Football</span><span class="sport-count">10</span></div>
-      <h3 style="margin-top:10px">Compétition</h3>
-      <div class="sport-item active"><span class="sport-icon">🇫🇷</span><span class="sport-name">Ligue 1</span><span class="sport-count">10</span></div>
-      <h3 style="margin-top:10px">Matchs</h3>
-      <div class="sport-item" onclick="scrollToMatch(1,this)"><span class="sport-icon">⚽</span><span class="sport-name">Lorient - Le Havre</span></div>
-      <div class="sport-item" onclick="scrollToMatch(2,this)"><span class="sport-icon">⚽</span><span class="sport-name">Marseille - Rennes</span></div>
-      <div class="sport-item" onclick="scrollToMatch(3,this)"><span class="sport-icon">⚽</span><span class="sport-name">Strasbourg - Monaco</span></div>
-      <div class="sport-item" onclick="scrollToMatch(4,this)"><span class="sport-icon">⚽</span><span class="sport-name">Brest - Angers</span></div>
-      <div class="sport-item" onclick="scrollToMatch(5,this)"><span class="sport-icon">⚽</span><span class="sport-name">Paris FC - Paris SG</span></div>
-      <div class="sport-item" onclick="scrollToMatch(6,this)"><span class="sport-icon">⚽</span><span class="sport-name">Lille - Auxerre</span></div>
-      <div class="sport-item" onclick="scrollToMatch(7,this)"><span class="sport-icon">⚽</span><span class="sport-name">Nice - Metz</span></div>
-      <div class="sport-item" onclick="scrollToMatch(8,this)"><span class="sport-icon">⚽</span><span class="sport-name">Nantes - Toulouse</span></div>
-      <div class="sport-item" onclick="scrollToMatch(9,this)"><span class="sport-icon">⚽</span><span class="sport-name">Lyon - Lens</span></div>
-      <div class="sport-item" onclick="scrollToMatch(10,this)"><span class="sport-icon">⚽</span><span class="sport-name">Saint-Étienne - Rodez</span></div>
-    </div>
+    
 
     <div class="content">
-      <div class="boost-banner">
-        <div style="font-size:22px">⚡</div>
-        <div>
-          <div class="boost-text">Boost score exact — Paris FC 0-3 Paris SG</div>
-          <div class="boost-sub">Cote boostée à 9.50 (normale 7.80) · Offre limitée</div>
-        </div>
-      </div>
-      <div class="section-title">🇫🇷 Ligue 1 — Journée du jour</div>
+      
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+  <button class="comp-btn active" id="compBtn1" onclick="selectComp('ligue1',this)">
+    <img src="https://api.sofascore.app/api/v1/unique-tournament/34/image" onerror="this.style.display='none'" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px">Ligue 1
+  </button>
+  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue2',this)">
+    <img src="https://api.sofascore.app/api/v1/unique-tournament/182/image" onerror="this.style.display='none'" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px">Ligue 2
+  </button>
+  <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">
+    <img src="https://api.sofascore.app/api/v1/unique-tournament/17/image" onerror="this.style.display='none'" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px">Premier League
+  </button>
+</div>
+<div class="section-title" id="sectionTitle">🇫🇷 Ligue 1 — Journée du jour</div>
       <div id="matchList"></div>
     </div>
 
@@ -1026,7 +1018,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div><!-- /view-ranking -->
 
 <div class="notif" id="notif"></div>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
     <span class="goal-emoji">⚽</span>
@@ -1875,6 +1866,19 @@ function placeBets() {
 // ══════════════════════════════════════════════
 // ── Navigation vues ──────────────────────────
 // ══════════════════════════════════════════════
+function selectComp(comp, btn) {
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const titles = {
+    ligue1: '🇫🇷 Ligue 1 — Journée du jour',
+    ligue2: '🇫🇷 Ligue 2 — Journée du jour',
+    premier: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League — Journée du jour'
+  };
+  const titleEl = document.getElementById('sectionTitle');
+  if (titleEl) titleEl.textContent = titles[comp] || '';
+  // À terme : charger les matchs de la compétition sélectionnée
+}
+
 function showView(view, btn) {
   document.querySelectorAll('.view-panel').forEach(p=>p.style.display='none');
   document.getElementById('view-'+view).style.display='block';
