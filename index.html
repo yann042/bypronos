@@ -929,15 +929,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
     <div class="content">
       
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-  <button class="comp-btn active" id="compBtn1" onclick="selectComp('ligue1',this)">
-    <img src="https://api.sofascore.app/api/v1/unique-tournament/34/image" onerror="this.style.display='none'" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px">Ligue 1
-  </button>
-  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue2',this)">
-    <img src="https://api.sofascore.app/api/v1/unique-tournament/182/image" onerror="this.style.display='none'" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px">Ligue 2
-  </button>
-  <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">
-    <img src="https://api.sofascore.app/api/v1/unique-tournament/17/image" onerror="this.style.display='none'" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px">Premier League
-  </button>
+  <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
+  <button class="comp-btn" id="compBtn1" onclick="selectComp('ligue1',this)">🇫🇷 Ligue 1</button>
+  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue2',this)">🇫🇷 Ligue 2</button>
+  <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
 </div>
 <div class="section-title" id="sectionTitle">🇫🇷 Ligue 1 — Journée du jour</div>
       <div id="matchList"></div>
@@ -1870,6 +1865,7 @@ function selectComp(comp, btn) {
   document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const titles = {
+    all:    '⚽ Tous les matchs — Journée du jour',
     ligue1: '🇫🇷 Ligue 1 — Journée du jour',
     ligue2: '🇫🇷 Ligue 2 — Journée du jour',
     premier: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League — Journée du jour'
