@@ -1888,6 +1888,8 @@ function scrollToMatch(id, el) {
   el.classList.add('active');
   const card=document.querySelector(`.match-card[data-id="${id}"]`);
   if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+  // Fermer la sidebar sur mobile après sélection
+  if (window.innerWidth <= 768) toggleSidebar();
 }
 
 // ══════════════════════════════════════════════
