@@ -983,9 +983,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div>
 </div>
 <div class="confetti-container" id="confettiContainer"></div>
-<button onclick="sessionReset()" style="position:fixed;bottom:5px;left:5px;z-index:9999;background:#e85d4a;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔄 Changer joueur</button>
-<button onclick="localStorage.clear();location.reload()" style="position:fixed;bottom:5px;left:130px;z-index:9999;background:#555;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🗑 Reset total</button>
-<button onclick="testFirebase()" style="position:fixed;bottom:5px;left:240px;z-index:9999;background:#f97316;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;opacity:.7">🔥 Test Firebase</button>
+
+
+
 
 <!-- Leaderboard modal -->
 <div class="leaderboard-overlay" id="lbOverlay" onclick="closeLbIfOutside(event)">
@@ -1227,9 +1227,11 @@ function renderPronoBelow(matchId) {
       players[currentPlayer].validatedBets &&
       (players[currentPlayer].validatedBets[mid] || players[currentPlayer].validatedBets[String(mid)]);
 
+    const matchStarted = isMatchStarted(matches.find(m => parseInt(m.id) === mid)?.time, mid);
     const others = [];
     Object.entries(players).forEach(([name, data]) => {
       if (name === currentPlayer) return;
+      if (!matchStarted) return; // masquer les autres en pré-match
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
       others.push(
