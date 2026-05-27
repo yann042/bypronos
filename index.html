@@ -948,6 +948,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
     <div class="logo">BY<span> PRONOS</span> <span id="leagueBadge" style="font-size:11px;font-weight:600;opacity:.8"></span></div>
     <nav class="nav">
       <button class="nav-btn active" onclick="window.showView('sports',this)" style="display:flex;align-items:center;justify-content:center"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;background:var(--acc);color:#fff;border-radius:4px;padding:2px 5px;letter-spacing:.5px;line-height:1">1X2</span></button>
+      <button class="nav-btn" id="navLive" onclick="window.showView('live',this)"><span style="background:#e03030;color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:.5px">LIVE</span></button>
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
     </nav>
     <div class="header-right">
@@ -966,11 +967,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
   <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
-  <button class="comp-btn" id="compBtn1" onclick="selectComp('ligue1',this)">🇫🇷 Ligue 1</button>
-  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue2',this)">🇫🇷 Ligue 2</button>
+  <button class="comp-btn" id="compBtn1" onclick="selectComp('worldcup',this)">🌍 Coupe du Monde</button>
+  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 Ligue 1</button>
   <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
 </div>
-<div class="section-title" id="sectionTitle">🇫🇷 Ligue 1 — Journée du jour</div>
+<div class="section-title" id="sectionTitle">🌍 Coupe du Monde 2026</div>
       <div id="matchList"></div>
     </div>
 
@@ -1008,21 +1009,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <div id="view-live" class="view-panel" style="display:none">
     <div class="live-view">
       <div class="live-header">
-        <div class="live-title">🔴 Scores en direct — Ligue 1</div>
-        <div class="live-sub">Données temps réel via ScoreAxis · actualisation automatique</div>
+        <div class="live-title">🔴 Live — Coupe du Monde 2026</div>
+        <div class="live-sub">Scores en temps réel · actualisation toutes les 3 min</div>
       </div>
-      <div class="live-widget-wrap">
-        <!-- Widget ScoreAxis Livescore Ligue 1 -->
-        <div class="scoreaxis-widget" style="width:100%;height:auto;font-size:14px;background-color:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:10px;overflow:auto">
-          <script src="https://widgets.scoreaxis.com/api/football/livescore/league/61?lang=fr&teamLogo=1&header=1&links=1&font=heebo&fontSize=14&rowDensity=110&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23161b22&textColor=%23e6edf3&linkColor=%2300d4aa&borderColor=%2330363d&tabColor=%2321262d" async></script>
-          <div style="padding:6px 12px;font-weight:500;font-size:11px;color:#8b949e">Données live par <a href="https://www.scoreaxis.com/" style="color:#00d4aa" target="_blank">ScoreAxis</a></div>
-        </div>
-        <div class="live-fallback" id="liveFallback">
-          <div class="live-fallback-ico">⚽</div>
-          <p>Chargement des scores en direct…</p>
-          <p class="live-fallback-sub">Si le widget ne s'affiche pas, <a href="https://www.flashscore.fr/football/france/ligue-1/" target="_blank" rel="noopener">ouvrir Flashscore Ligue 1 ↗</a></p>
-        </div>
-      </div>
+      <div id="liveScoreList" style="padding:10px"></div>
     </div>
   </div><!-- /view-live -->
 
@@ -1143,30 +1133,39 @@ window.doJoinLeague = async function() {
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
 const TEST_MODE = true;
-function isMatchStarted(timeStr, matchId) {
-  if (TEST_MODE) return matchId === 1; // Lorient en live
-  const now = new Date();
+function parseKickoff(dateStr, timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
-  const kickoff = new Date(now);
-  kickoff.setHours(h, m, 0, 0);
-  return now >= kickoff;
-}
-function isMatchFinished(timeStr, matchId) {
-  if (TEST_MODE) return false; // aucun match terminé en mode test
-  const now = new Date();
-  const [h, m] = timeStr.split(':').map(Number);
-  const end = new Date(now);
-  end.setHours(h + 2, m + 15, 0, 0);
-  return now >= end;
+  const d = dateStr ? new Date(dateStr) : new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
 }
 
-function isMatchExpired(timeStr) {
-  // Masquer le bloc 1h après la fin du match (2h15 + 1h = 3h15 après le début)
+function isMatchStarted(timeStr, matchId) {
+  if (TEST_MODE) return matchId === 1;
+  const match = matches.find(x => x.id === matchId);
+  const kickoff = parseKickoff(match?.date, timeStr);
+  return new Date() >= kickoff;
+}
+
+function isMatchFinished(timeStr, matchId) {
   if (TEST_MODE) return false;
+  const match = matches.find(x => x.id === matchId);
+  const end = parseKickoff(match?.date, timeStr);
+  end.setMinutes(end.getMinutes() + 135); // +2h15
+  return new Date() >= end;
+}
+
+function isMatchExpired(timeStr, matchId) {
+  if (TEST_MODE) return false;
+  const match = matches.find(x => x.id === (matchId || -1));
+  const kickoff = parseKickoff(match?.date, timeStr);
+  const expire = new Date(kickoff);
+  expire.setMinutes(expire.getMinutes() + 195); // +3h15 après le coup d'envoi
   const now = new Date();
-  const [h, m] = timeStr.split(':').map(Number);
-  const expire = new Date(now);
-  expire.setHours(h + 3, m + 15, 0, 0);
+  // Si le match date d'un autre jour → on ne l'affiche pas non plus
+  const today = now.toISOString().slice(0, 10);
+  const matchDate = match?.date || today;
+  if (matchDate !== today) return true;
   return now >= expire;
 }
 
@@ -1185,22 +1184,27 @@ function getLogo(name) {
 // ── Données matchs ────────────────────────────
 // ══════════════════════════════════════════════
 // ── Clé API RapidAPI / Sofascore ─────────────────────────────────
-const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
+const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915'; // Sofascore (backup)
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
+const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1'; // API-Football (principal)
+const APIFOOTBALL_HOST = 'https://v3.football.api-sports.io';
+const WC2026_LEAGUE_ID = 1; // ID Coupe du Monde 2026 sur API-Football
+const WC2026_SEASON = 2026;
 
 // IDs Sofascore des matchs (à mettre à jour chaque journée)
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
 const matches = [
-  {id:1,  home:'Lorient',       away:'Le Havre',   time:'13:00', odds:[2.80,3.10,2.55], sofaId:null},
-  {id:2,  home:'Marseille',     away:'Rennes',     time:'15:00', odds:[1.75,3.50,4.80], sofaId:null},
-  {id:3,  home:'Strasbourg',    away:'Monaco',     time:'15:00', odds:[3.20,3.30,2.15], sofaId:null},
-  {id:4,  home:'Brest',         away:'Angers',     time:'15:00', odds:[2.10,3.20,3.60], sofaId:null},
-  {id:5,  home:'Paris FC',      away:'Paris SG',   time:'17:05', odds:[8.50,5.00,1.18], sofaId:null},
-  {id:6,  home:'Lille',         away:'Auxerre',    time:'17:05', odds:[1.65,3.60,5.20], sofaId:null},
-  {id:7,  home:'Nice',          away:'Metz',       time:'19:05', odds:[1.55,3.80,6.00], sofaId:null},
-  {id:8,  home:'Nantes',        away:'Toulouse',   time:'19:05', odds:[2.40,3.20,3.00], sofaId:null},
-  {id:9,  home:'Lyon',          away:'Lens',       time:'20:45', odds:[2.05,3.30,3.80], sofaId:null},
-  {id:10, home:'Saint-Etienne', away:'Rodez',      time:'20:45', odds:[2.20,3.10,3.40], sofaId:null},
+  // ── Coupe du Monde 2026 — Journée 1 (11-13 juin) ──────────────
+  {id:1,  home:'Mexique',          away:'Afrique du Sud',   date:'2026-06-11', time:'21:00', odds:[1.90,3.40,4.20], sofaId:null},
+  {id:2,  home:'Corée du Sud',     away:'Rép. Tchèque',    date:'2026-06-12', time:'04:00', odds:[2.60,3.10,2.80], sofaId:null},
+  {id:3,  home:'Canada',           away:'Bosnie-Herzég.',   date:'2026-06-12', time:'21:00', odds:[1.80,3.50,4.50], sofaId:null},
+  {id:4,  home:'États-Unis',       away:'Paraguay',         date:'2026-06-13', time:'03:00', odds:[1.70,3.50,5.00], sofaId:null},
+  {id:5,  home:'Qatar',            away:'Suisse',           date:'2026-06-13', time:'21:00', odds:[5.50,4.00,1.55], sofaId:null},
+  {id:6,  home:'Brésil',           away:'Maroc',            date:'2026-06-14', time:'00:00', odds:[1.75,3.60,4.80], sofaId:null},
+  {id:7,  home:'Haïti',            away:'Écosse',           date:'2026-06-14', time:'03:00', odds:[4.50,3.50,1.80], sofaId:null},
+  {id:8,  home:'Australie',        away:'Turquie',          date:'2026-06-14', time:'06:00', odds:[2.80,3.20,2.60], sofaId:null},
+  {id:9,  home:'Allemagne',        away:'Curaçao',          date:'2026-06-14', time:'19:00', odds:[1.10,8.00,22.0], sofaId:null},
+  {id:10, home:'Pays-Bas',         away:'Japon',            date:'2026-06-14', time:'22:00', odds:[1.90,3.50,4.20], sofaId:null},
 ];
 
 // ── Ligue courante ───────────────────────────────────────────────
@@ -1236,9 +1240,9 @@ function loadPlayersFromLeague() {
 }
 
 // État live des matchs
-const liveData = {
-  1: { homeScore: 1, awayScore: 1, minute: 54 }, // Lorient-Le Havre en live test
-};
+const liveData = {};
+
+// Pas de scores finaux pré-chargés pour la Coupe du Monde — récupérés via API live
 
 
 
@@ -1255,6 +1259,14 @@ const SCORES = {
 // ── Calculs cotes & résultat ──────────────────
 // ══════════════════════════════════════════════
 function scoreOdd(m, h, a) {
+  // Utiliser les vraies cotes bookmaker si disponibles (API-Football)
+  const key = h + '-' + a;
+  const altKey = h + ':' + a;
+  if (m.exactScoreOdds) {
+    const realOdd = m.exactScoreOdds[key] || m.exactScoreOdds[altKey];
+    if (realOdd) return Math.round(realOdd * 10) / 10;
+  }
+  // Sinon calcul probabiliste
   const [o1,oN,o2] = m.odds;
   const p1=1/o1, pN=1/oN, p2=1/o2, tot=p1+pN+p2;
   const lh=1.35*(p1/tot+0.5*pN/tot), la=1.35*(p2/tot+0.5*pN/tot);
@@ -1611,7 +1623,7 @@ function buildCard(m) {
 
   const started  = isMatchStarted(m.time, m.id);
   const finished = isMatchFinished(m.time, m.id);
-  if (isMatchExpired(m.time)) return '';
+  if (isMatchExpired(m.time, m.id)) return '';
   const live     = liveData[m.id];
   const cardCls  = finished ? 'is-finished' : started ? 'is-live' : '';
 
@@ -1639,7 +1651,7 @@ function buildCard(m) {
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <div class="match-header">
-      <div class="league"><span>🇫🇷</span> Ligue 1</div>
+      <div class="league"><span>🌍</span> Coupe du Monde</div>
 
       <span class="match-time">${finished ? '✅ Terminé' : started ? '<span style="font-size:10px;color:var(--acc3);font-weight:700;margin-right:4px">En direct</span><span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>' : '🕐 À venir · ' + m.time}</span>
     </div>
@@ -1684,8 +1696,104 @@ if (typeof testGoalTriggered === 'undefined') {
 }
 
 // ── Fetch scores live via Sofascore RapidAPI ──────────────────────
-// ── Résolution automatique des sofaId ────────────────────────────
-async function resolveSofaIds() {
+// ── Chargement automatique des matchs via API-Football ───────────
+async function fetchUpcomingMatches() {
+  console.log('🔄 Chargement des matchs via API-Football...');
+  const headers = { 'x-apisports-key': APIFOOTBALL_KEY };
+
+  // 1. Matchs à venir dans les 10 prochains jours
+  let apiMatches = [];
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const next = new Date(Date.now() + 10*24*60*60*1000).toISOString().slice(0, 10);
+    const res = await fetch(
+      `${APIFOOTBALL_HOST}/fixtures?league=${WC2026_LEAGUE_ID}&season=${WC2026_SEASON}&from=${today}&to=${next}&status=NS`,
+      { headers }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      apiMatches = (data.response || []).slice(0, 10).map((f, i) => {
+        const kickoff = new Date(f.fixture.date);
+        return {
+          id: i + 1,
+          fixtureId: f.fixture.id,
+          home: f.teams.home.name,
+          away: f.teams.away.name,
+          date: kickoff.toISOString().slice(0, 10),
+          time: kickoff.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/Paris' }),
+          sofaId: null,
+          odds: [2.00, 3.20, 3.50]
+        };
+      });
+      console.log(`✅ ${apiMatches.length} matchs chargés`);
+    }
+  } catch(e) { console.warn('API-Football fixtures error:', e); }
+
+  if (!apiMatches.length) { console.warn('⚠️ Aucun match récupéré'); return; }
+
+  // 2. Cotes 1X2 + scores exacts par fixture
+  try {
+    for (const m of apiMatches) {
+      if (!m.fixtureId) continue;
+      const oddsRes = await fetch(
+        `${APIFOOTBALL_HOST}/odds?fixture=${m.fixtureId}&bookmaker=8`,
+        { headers }
+      );
+      if (!oddsRes.ok) continue;
+      const bets = oddsRes.ok ? ((await oddsRes.json()).response?.[0]?.bookmakers?.[0]?.bets || []) : [];
+      const h2h = bets.find(b => b.name === 'Match Winner');
+      if (h2h) {
+        m.odds = [
+          Math.round(parseFloat(h2h.values.find(v => v.value === 'Home')?.odd || 2) * 100) / 100,
+          Math.round(parseFloat(h2h.values.find(v => v.value === 'Draw')?.odd || 3.2) * 100) / 100,
+          Math.round(parseFloat(h2h.values.find(v => v.value === 'Away')?.odd || 3.5) * 100) / 100
+        ];
+      }
+      const exact = bets.find(b => b.name === 'Exact Score');
+      if (exact) {
+        m.exactScoreOdds = {};
+        exact.values.forEach(v => { m.exactScoreOdds[v.value] = parseFloat(v.odd); });
+      }
+    }
+    console.log('✅ Cotes 1X2 + scores exacts récupérées');
+  } catch(e) { console.warn('API-Football odds error:', e); }
+
+  matches.length = 0;
+  apiMatches.forEach(m => matches.push(m));
+
+  try {
+    const leagueCode = localStorage.getItem('bypronos_league');
+    if (leagueCode && typeof db !== 'undefined') {
+      db.ref(`leagues/${leagueCode}/matches`).set(matches);
+    }
+  } catch(e) {}
+
+  renderMatches();
+  console.log('✅ Matchs mis à jour :', matches.map(m => m.home + ' vs ' + m.away).join(', '));
+}
+
+
+// ── Chargement des matchs depuis Firebase (si déjà sauvegardés) ───
+async function loadMatchesFromFirebase() {
+  try {
+    const leagueCode = localStorage.getItem('bypronos_league');
+    if (!leagueCode || typeof db === 'undefined') return false;
+    const snap = await db.ref(`leagues/${leagueCode}/matches`).once('value');
+    const saved = snap.val();
+    if (saved && Array.isArray(saved) && saved.length) {
+      matches.length = 0;
+      saved.forEach(m => matches.push(m));
+      console.log('✅ Matchs chargés depuis Firebase');
+      renderMatches();
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// ── resolveSofaIds désactivé (remplacé par API-Football) ─────────
+async function resolveSofaIds() { return; // désactivé
+ async function _unused() {
   if (TEST_MODE) return;
   const today = new Date();
   const yyyy = today.getFullYear();
@@ -1747,57 +1855,40 @@ async function resolveSofaIds() {
   } catch(e) {}
 }
 
-// ── Récupération scores live ──────────────────────────────────────
+// ── Récupération scores live via API-Football ────────────────────
 async function fetchLiveScores() {
-  const started = matches.filter(m => isMatchStarted(m.time) && !isMatchFinished(m.time));
+  const started = matches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
   if (!started.length) return;
 
-  // Essayer d'abord l'endpoint live global (1 seul appel API)
+  const headers = { 'x-apisports-key': APIFOOTBALL_KEY };
+
   try {
-    const res = await fetch(`https://sofascore.p.rapidapi.com/matches/live`, {
-      headers: { 'x-rapidapi-host': RAPIDAPI_HOST, 'x-rapidapi-key': RAPIDAPI_KEY }
-    });
+    // Un seul appel pour tous les matchs live de la Coupe du Monde
+    const res = await fetch(
+      `${APIFOOTBALL_HOST}/fixtures?league=${WC2026_LEAGUE_ID}&season=${WC2026_SEASON}&live=all`,
+      { headers }
+    );
     if (res.ok) {
       const data = await res.json();
-      (data.events || []).forEach(ev => {
+      (data.response || []).forEach(f => {
         const match = matches.find(m =>
-          m.sofaId === ev.id ||
-          ((ev.homeTeam?.name||'').includes(m.home) || m.home.includes((ev.homeTeam?.name||'').split(' ')[0])) &&
-          ((ev.awayTeam?.name||'').includes(m.away) || m.away.includes((ev.awayTeam?.name||'').split(' ')[0]))
+          m.fixtureId === f.fixture.id ||
+          (f.teams.home.name.includes(m.home) || m.home.includes(f.teams.home.name.split(' ')[0])) &&
+          (f.teams.away.name.includes(m.away) || m.away.includes(f.teams.away.name.split(' ')[0]))
         );
         if (!match) return;
-        const hs = ev.homeScore?.current ?? ev.homeScore?.display ?? '?';
-        const as = ev.awayScore?.current ?? ev.awayScore?.display ?? '?';
-        const min = ev.time?.played ?? ev.time?.currentPeriodStartTimestamp ?? '?';
-        const finished = ev.status?.type === 'finished';
+        const hs = f.goals.home ?? '?';
+        const as = f.goals.away ?? '?';
+        const min = f.fixture.status.elapsed ?? '?';
+        const finished = f.fixture.status.short === 'FT';
         liveData[match.id] = { homeScore: hs, awayScore: as, minute: min, finished };
-        // Stocker score final dans validatedBets si match terminé
         if (finished) saveFinalScore(match.id, hs, as);
       });
       renderMatches();
-      return;
+      // Rafraîchir la vue live si active
+      if (document.getElementById('view-live')?.style.display !== 'none') renderLiveView();
     }
-  } catch(e) {}
-
-  // Fallback : appel individuel par sofaId
-  for (const m of started) {
-    if (!m.sofaId) continue;
-    try {
-      const res = await fetch(`https://sofascore.p.rapidapi.com/matches/${m.sofaId}/score`, {
-        headers: { 'x-rapidapi-host': RAPIDAPI_HOST, 'x-rapidapi-key': RAPIDAPI_KEY }
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data?.score) {
-        const hs = data.score.current?.home ?? '?';
-        const as = data.score.current?.away ?? '?';
-        const finished = data.status?.type === 'finished';
-        liveData[m.id] = { homeScore: hs, awayScore: as, minute: data.time?.played ?? '?', finished };
-        if (finished) saveFinalScore(m.id, hs, as);
-      }
-    } catch(e) { console.warn('Live fetch error:', e); }
-  }
-  renderMatches();
+  } catch(e) { console.warn('API-Football live error:', e); }
 }
 
 // ── Sauvegarde score final dans validatedBets ─────────────────────
@@ -1815,14 +1906,55 @@ function saveFinalScore(matchId, homeScore, awayScore) {
   if (changed) { savePlayers(players); autosave(); }
 }
 
-// Polling toutes les 60 secondes
-setInterval(() => {
-  renderMatches();
-  fetchLiveScores();
-}, 60000);
+// Polling intelligent — seulement si un match est en cours
+function startSmartPolling() {
+  setInterval(() => {
+    renderMatches();
+    // Vérifier si au moins un match est actuellement en cours
+    const liveNow = matches.some(m =>
+      isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id)
+    );
+    if (liveNow) {
+      fetchLiveScores(); // 1 seul appel API pour tous les matchs live
+    }
+  }, 180000); // toutes les 3 minutes (au lieu de 60s) = -66% de requêtes
+}
+startSmartPolling();
 
 // Au démarrage : résoudre les sofaIds puis fetch
-resolveSofaIds().then(() => fetchLiveScores());
+// Au démarrage : charger matchs depuis Firebase ou Sofascore, puis scores live
+(async () => {
+  const fromFirebase = await loadMatchesFromFirebase();
+  if (!fromFirebase) {
+    // Verrou Firebase : seul le premier joueur appelle The Odds API
+    try {
+      const leagueCode = localStorage.getItem('bypronos_league');
+      if (leagueCode && typeof db !== 'undefined') {
+        const lockRef = db.ref(`leagues/${leagueCode}/matchesLock`);
+        const snap = await lockRef.once('value');
+        const lock = snap.val();
+        const now = Date.now();
+        // Si verrou absent ou expiré depuis plus de 30s → on prend le verrou
+        if (!lock || now - lock > 30000) {
+          await lockRef.set(now);
+          await fetchUpcomingMatches();
+          await lockRef.remove(); // libère le verrou
+        } else {
+          // Un autre joueur est en train de charger → attendre 3s et recharger depuis Firebase
+          console.log('⏳ Chargement en cours par un autre joueur, attente...');
+          await new Promise(r => setTimeout(r, 3000));
+          await loadMatchesFromFirebase();
+        }
+      } else {
+        await fetchUpcomingMatches();
+      }
+    } catch(e) {
+      await fetchUpcomingMatches(); // fallback si erreur Firebase
+    }
+  }
+  await resolveSofaIds();
+  fetchLiveScores();
+})();
 
 // ══════════════════════════════════════════════
 // ── Interactions paris ────────────────────────
@@ -2036,6 +2168,7 @@ window.selectComp = function selectComp(comp, btn) {
   btn.classList.add('active');
   const titles = {
     all:    '⚽ Tous les matchs — Journée du jour',
+    worldcup: '🌍 Coupe du Monde 2026',
     ligue1: '🇫🇷 Ligue 1 — Journée du jour',
     ligue2: '🇫🇷 Ligue 2 — Journée du jour',
     premier: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League — Journée du jour'
@@ -2051,6 +2184,7 @@ window.showView = function showView(view, btn) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderResultsView();
+  if(view==='live') renderLiveView();
 }
 
 function scrollToMatch(id, el) {
@@ -2252,6 +2386,68 @@ window.switchRankTab = function switchRankTab(tab) {
 window.switchRankDay = function switchRankDay(day) {
   rankDay = day;
   renderRankingPanel();
+}
+
+function renderLiveView() {
+  const el = document.getElementById('liveScoreList');
+  if (!el) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const todayMatches = matches.filter(m => m.date === today);
+
+  if (!todayMatches.length) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt2)">' +
+      '<div style="font-size:48px;margin-bottom:12px">⚽</div>' +
+      '<div style="font-size:16px;font-weight:700">Aucun match aujourd'hui</div>' +
+      '<div style="font-size:12px;margin-top:6px">Les prochains matchs sont dans l'onglet Pronos</div>' +
+    '</div>';
+    return;
+  }
+
+  el.innerHTML = todayMatches.map(m => {
+    const live = liveData[m.id];
+    const started = isMatchStarted(m.time, m.id);
+    const finished = isMatchFinished(m.time, m.id);
+    const homeLogo = getLogo(m.home);
+    const awayLogo = getLogo(m.away);
+    const logoImg = url => url ? `<img src="${url}" style="width:32px;height:32px;object-fit:contain">` : '<span style="width:32px;display:inline-block"></span>';
+
+    let scoreBlock, statusBlock;
+    if (!started) {
+      scoreBlock = `<span style="font-size:18px;font-weight:700;color:var(--txt2);padding:0 16px">${m.time}</span>`;
+      statusBlock = `<span style="font-size:10px;color:var(--txt2)">🕐 À venir</span>`;
+    } else if (finished) {
+      scoreBlock = `<span style="font-size:28px;font-weight:800;color:var(--txt);padding:0 16px">${live ? live.homeScore + ' - ' + live.awayScore : '? - ?'}</span>`;
+      statusBlock = `<span style="font-size:10px;color:var(--txt2)">✅ Terminé</span>`;
+    } else {
+      const score = live ? live.homeScore + ' - ' + live.awayScore : '? - ?';
+      const min = live?.minute ? live.minute + "'" : '...';
+      scoreBlock = `<span style="font-size:28px;font-weight:800;color:var(--acc);padding:0 16px">${score}</span>`;
+      statusBlock = `<span style="font-size:10px;font-weight:700;color:var(--acc3)">🔴 En direct ${min}</span>`;
+    }
+
+    return `<div style="background:var(--bg2);border:1px solid var(--bord);border-radius:12px;margin-bottom:10px;padding:16px 12px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1">
+          ${logoImg(homeLogo)}
+          <span style="font-size:12px;font-weight:700;text-align:center">${m.home}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          ${scoreBlock}
+          ${statusBlock}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1">
+          ${logoImg(awayLogo)}
+          <span style="font-size:12px;font-weight:700;text-align:center">${m.away}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Actualiser le badge si matchs en cours
+  const liveCount = todayMatches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id)).length;
+  const navLive = document.getElementById('navLive');
+  if (navLive) navLive.textContent = liveCount > 0 ? `🔴 ${liveCount}` : '🔴';
 }
 
 function renderResultsView() {
