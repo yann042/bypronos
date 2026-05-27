@@ -865,10 +865,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .comp-btn:hover{border-color:var(--acc);color:var(--acc)}
 .comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
 
-.results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;height:100%;overflow:hidden}
-@media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto;height:auto;padding:10px}}
+.results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;min-height:100%}
+@media(max-width:768px){.results-view{grid-template-columns:1fr;padding:10px}}
 .results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;min-height:200px}
-@media(max-width:768px){.results-panel{min-height:150px;max-height:400px}}
+@media(max-width:768px){.results-panel{min-height:150px}}
 .results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 .results-panel-body{overflow-y:auto;flex:1;padding:8px}
 
@@ -1912,7 +1912,7 @@ window.showView = function showView(view, btn) {
   document.getElementById('view-'+view).style.display='block';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  if(view==='ranking') renderRanking();
+  if(view==='ranking') renderResultsView();
 }
 
 function scrollToMatch(id, el) {
