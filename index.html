@@ -1159,14 +1159,19 @@ function isMatchExpired(timeStr, matchId) {
   if (TEST_MODE) return false;
   const match = matches.find(x => x.id === (matchId || -1));
   const kickoff = parseKickoff(match?.date, timeStr);
-  const expire = new Date(kickoff);
-  expire.setMinutes(expire.getMinutes() + 195); // +3h15 après le coup d'envoi
   const now = new Date();
-  // Si le match date d'un autre jour → on ne l'affiche pas non plus
+  const matchDate = match?.date || now.toISOString().slice(0, 10);
   const today = now.toISOString().slice(0, 10);
-  const matchDate = match?.date || today;
-  if (matchDate !== today) return true;
-  return now >= expire;
+  // Matchs futurs → jamais expirés
+  if (matchDate > today) return false;
+  // Matchs d'aujourd'hui → expirés 3h15 après le coup d'envoi
+  if (matchDate === today) {
+    const expire = new Date(kickoff);
+    expire.setMinutes(expire.getMinutes() + 195);
+    return now >= expire;
+  }
+  // Matchs passés → toujours expirés (cachés)
+  return true;
 }
 
 const LOGOS = {"Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
