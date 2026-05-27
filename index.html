@@ -2209,7 +2209,7 @@ function renderHistoryPanel() {
     const m = matches.find(x => String(x.id) === String(mid));
     const homeLogo = m ? getLogo(m.home) : null;
     const awayLogo = m ? getLogo(m.away) : null;
-    const logoHtml = (url, nm) => url ? '<img src="' + url + '" alt="' + nm + '" style="width:16px;height:16px;object-fit:contain;vertical-align:middle" onerror="this.style.display='none'">' : '';
+    const logoHtml = (url, nm) => url ? '<img src=' + url + ' style="width:16px;height:16px;object-fit:contain;vertical-align:middle">' : '';
     const matchName = m
       ? logoHtml(homeLogo, m.home) + ' ' + m.home + ' - ' + logoHtml(awayLogo, m.away) + ' ' + m.away
       : 'Match #' + mid;
