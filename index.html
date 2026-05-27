@@ -1839,10 +1839,15 @@ function placeBetForMatch(matchId) {
     delete betslip[k];
   });
   p.current = {};
-  // Sauvegarder le resultCls dans validatedBets pour la couleur du bouton
+  // Sauvegarder le resultCls et le score final dans validatedBets
   const savedCls = matchState[matchId] ? matchState[matchId].resultCls : null;
   if (savedCls && p.validatedBets[parseInt(matchId)]) {
     p.validatedBets[parseInt(matchId)].resultCls = savedCls;
+  }
+  const liveNow = liveData[parseInt(matchId)];
+  if (liveNow && p.validatedBets[parseInt(matchId)]) {
+    p.validatedBets[parseInt(matchId)].finalH = liveNow.homeScore;
+    p.validatedBets[parseInt(matchId)].finalA = liveNow.awayScore;
   }
   // Vider matchState pour replier le scoreBlock
   delete matchState[matchId];
@@ -2212,15 +2217,31 @@ function renderHistoryPanel() {
     const homeLogo = m ? getLogo(m.home) : null;
     const awayLogo = m ? getLogo(m.away) : null;
     const logoHtml = (url, nm) => url ? '<img src=' + url + ' style="width:16px;height:16px;object-fit:contain;vertical-align:middle">' : '';
-    const matchName = m
-      ? logoHtml(homeLogo) + ' ' + m.home + ' - ' + m.away + ' ' + logoHtml(awayLogo)
-      : 'Match #' + mid;
     const live = liveData[parseInt(mid)];
-    const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
+    const storedFinalH = pronos[0]?.bet?.finalH;
+    const storedFinalA = pronos[0]?.bet?.finalA;
+    const scoreStr = storedFinalH !== undefined
+      ? storedFinalH + '-' + storedFinalA
+      : live ? live.homeScore + '-' + live.awayScore : '?-?';
     const dayLabel = pronos[0]?.bet?.day || '';
+    const matchName = m
+      ? '<div style="display:flex;align-items:center;padding:4px 0;margin-bottom:2px;gap:4px">' +
+          '<div class="mtr-home" style="flex:0 1 auto">' +
+            (homeLogo ? '<img src=' + homeLogo + ' style="width:18px;height:18px;object-fit:contain;flex-shrink:0">' : '') +
+            '<span>' + m.home + '</span>' +
+          '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:var(--acc);white-space:nowrap;padding:0 6px">' + scoreStr + '</div>' +
+          '<div style="display:flex;align-items:center;gap:5px;margin-left:auto;font-size:11px;font-weight:700">' +
+            '<span>' + m.away + '</span>' +
+            (awayLogo ? '<img src=' + awayLogo + ' style="width:18px;height:18px;object-fit:contain;flex-shrink:0">' : '') +
+          '</div>' +
+        '</div>'
+      : 'Match #' + mid;
     const pronosHtml = pronos.map(({ name, bet }) => {
       const isMe = name === currentPlayer;
-      const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
+      const finalH = bet.finalH !== undefined ? bet.finalH : (live ? live.homeScore : null);
+      const finalA = bet.finalA !== undefined ? bet.finalA : (live ? live.awayScore : null);
+      const pts = (finalH !== null && finalA !== null) ? calcLivePts(bet, finalH, finalA) : null;
       let ptsHtml;
       if (!pts) {
         ptsHtml = '<span style="color:var(--txt2);font-size:10px">en attente</span>';
@@ -2253,8 +2274,8 @@ function renderHistoryPanel() {
     }).join('');
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
-        '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
-        '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
+        (dayLabel ? '<span style="font-size:9px;color:var(--txt2);font-weight:500;padding:0 4px">📅 ' + dayLabel + '</span>' : '') +
+        matchName +
       '</div>' + pronosHtml + '</div>';
   }).join('');
 }
