@@ -188,7 +188,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .place-btn{width:100%;background:var(--acc);color:#0d1117;border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .15s;margin-top:12px}
 .place-btn:hover{opacity:.9}
 
-.view-panel{height:calc(100vh - 56px);overflow:hidden;position:relative}
+.view-panel{height:calc(100vh - 56px);overflow-y:auto;overflow-x:hidden;position:relative}
 
 /* ── Login overlay ── */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
@@ -866,8 +866,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
 
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;height:100%;overflow:hidden}
-@media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto}}
-.results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+@media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto;height:auto;padding:10px}}
+.results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;min-height:200px}
+@media(max-width:768px){.results-panel{min-height:150px;max-height:400px}}
 .results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 .results-panel-body{overflow-y:auto;flex:1;padding:8px}
 
@@ -1017,23 +1018,25 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue Classement ──────────────────────── -->
   <div id="view-ranking" class="view-panel" style="display:none">
-    <div class="ranking-view">
-      <div class="ranking-header">
-        <div class="ranking-title">🏆 Classement des joueurs</div>
-        <div class="ranking-tabs">
-          <button class="ranking-tab active" onclick="switchRankTab('season',this)">Saison complète</button>
-          <button class="ranking-tab" onclick="switchRankTab('day',this)">Journée en cours</button>
+      <div class="results-view">
+        <!-- Classement -->
+        <div class="results-panel">
+          <div class="results-panel-header">
+            🏆 Classement
+            <div style="display:flex;gap:4px">
+              <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
+              <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee',this)">Journée</button>
+            </div>
+          </div>
+          <div class="results-panel-body" id="rankingList"></div>
+        </div>
+        <!-- Historique -->
+        <div class="results-panel">
+          <div class="results-panel-header">📋 Historique des paris</div>
+          <div class="history-filters" id="historyFilters"></div>
+          <div class="results-panel-body" id="historyList"></div>
         </div>
       </div>
-      <div class="journee-badge">📅 Journée en cours — Ligue 1 · <span id="rankDayLabel">Paris non encore validés</span></div>
-      <table class="ranking-table" id="rankingTable">
-        <thead><tr>
-          <th>#</th><th>Joueur</th><th>Paris</th><th>Pts résultat</th><th>Pts score</th><th>Total</th>
-        </tr></thead>
-        <tbody id="rankingBody">
-          <tr><td colspan="6"><div class="ranking-empty"><div class="ico">🏆</div><p>Aucun joueur enregistré.<br>Connectez-vous et validez vos paris pour apparaître.</p></div></td></tr>
-        </tbody>
-      </table>
     </div>
   </div><!-- /view-ranking -->
 
