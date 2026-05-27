@@ -230,7 +230,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .rank-pos.bronze{color:#cd7f32}
 .rank-name{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
 .rank-name .you-badge{background:var(--acc);color:#0d1117;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;letter-spacing:.5px}
-.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--acc2)}
+.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
 .rank-detail{font-size:11px;color:var(--txt2)}
 .rank-bets{font-size:12px;color:var(--txt2)}
 .ranking-empty{text-align:center;padding:60px 20px;color:var(--txt2)}
@@ -875,19 +875,19 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 /* Classement */
 .ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:#f7f7f7;border:1px solid #e0e0e0}
 .ranking-row.gold{background:#ffffff !important;border:3px solid #c9960a !important;padding:12px 14px}
-.ranking-row.silver{background:linear-gradient(135deg,#f4f4f4,#e8e8e8);border:1.5px solid #b0b0b0}
-.ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0);border:1.5px solid #c08040}
+.ranking-row.silver{background:#f7f7f7;border:1px solid #e0e0e0}
+.ranking-row.bronze{background:#f7f7f7;border:1px solid #e0e0e0}
 .ranking-row.gold .rank-name{color:#c9960a;font-weight:800;font-size:15px}
-.ranking-row.silver .rank-name{color:#505050;font-weight:800}
-.ranking-row.bronze .rank-name{color:#7a4a10;font-weight:800}
+.ranking-row.silver .rank-name{color:var(--txt);font-weight:700}
+.ranking-row.bronze .rank-name{color:var(--txt);font-weight:700}
 .ranking-row.gold .rank-pts{color:#c9960a;font-size:22px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.15)}
-.ranking-row.silver .rank-pts{color:#808080;font-size:20px}
-.ranking-row.bronze .rank-pts{color:#a0622a;font-size:20px}
+.ranking-row.silver .rank-pts{color:var(--txt);font-size:18px}
+.ranking-row.bronze .rank-pts{color:var(--txt);font-size:18px}
 .ranking-row.gold .rank-pos{font-size:26px}
 .ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
-.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#056b52}
+
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--bord);flex-shrink:0}
