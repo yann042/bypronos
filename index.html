@@ -936,8 +936,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <div class="header">
     <div class="logo">BY<span> PRONOS</span> <span id="leagueBadge" style="font-size:11px;font-weight:600;opacity:.8"></span></div>
     <nav class="nav">
-      <button class="nav-btn active" onclick="showView('sports',this)">Pronos</button>
-      <button class="nav-btn" onclick="showView('ranking',this)">📊 Résultats</button>
+      <button class="nav-btn active" onclick="window.showView('sports',this)">Pronos</button>
+      <button class="nav-btn" onclick="window.showView('ranking',this)">📊 Résultats</button>
     </nav>
     <div class="header-right">
       <div class="player-badge" id="playerBadge" onclick="sessionReset()" title="Changer de joueur">
@@ -2143,11 +2143,13 @@ function renderHistoryPanel() {
   // Filtres joueurs
   const filtersEl = document.getElementById('historyFilters');
   if (filtersEl) {
-    filtersEl.innerHTML = '<button class="history-filter-btn' + (historyFilterPlayer === 'all' ? ' active' : '') + '" onclick="setHistoryFilter('all')">Tous</button>' +
-      playerNames.map(n =>
-        '<button class="history-filter-btn' + (historyFilterPlayer === n ? ' active' : '') + '" onclick="setHistoryFilter('' + n + '')">' +
-        (n === currentPlayer ? '👤 ' : '') + n + '</button>'
-      ).join('');
+    var allActive = historyFilterPlayer === 'all' ? ' active' : '';
+    var btns = '<button class="history-filter-btn' + allActive + '" onclick="setHistoryFilter(this,\'all\')">Tous</button>';
+    playerNames.forEach(function(n) {
+      var isActive = historyFilterPlayer === n ? ' active' : '';
+      btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,\'' + n + '\')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
+    });
+    filtersEl.innerHTML = btns;
   }
 
   // Historique des paris
