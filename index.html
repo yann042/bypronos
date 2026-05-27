@@ -1161,6 +1161,8 @@ function isMatchFinished(timeStr, matchId) {
 
 const LOGOS = {"Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
 
+
+function fmtPts(n) { return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function getLogo(name) {
   // Cherche une correspondance partielle
   for (const [key, url] of Object.entries(LOGOS)) {
@@ -1274,7 +1276,7 @@ function getAllPronosHtml(matchId, hs, as) {
       if (pts) {
         const sign = '';
         const cls  = pts.pts > 0 ? 'pos' : 'neg';
-        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + pts.pts.toFixed(1) + '</span>';
+        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + fmtPts(pts.pts) + '</span>';
       }
       const meStyle = isMe ? 'border-color:#056b52;background:rgba(5,107,82,.08)' : '';
       chips.push('<div class="prono-chip" style="' + meStyle + '">' +
@@ -1298,7 +1300,7 @@ function ptsChip(vb, matchId) {
   if (!pts) return '';
   const sign = '';
   const bg   = pts.pts > 0 ? '#057a3a' : '#cc2200';
-  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + pts.pts.toFixed(1) + '</span>';
+  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + fmtPts(pts.pts) + '</span>';
 }
 
 function renderPronoBelow(matchId) {
@@ -1361,7 +1363,7 @@ function getPronoHeader(matchId) {
         const sign = '';
         const isPos = pts.pts > 0;
         const bg  = isPos ? '#057a3a' : '#cc2200';
-        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + pts.pts.toFixed(1) + 'pts</span>';
+        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + fmtPts(pts.pts) + 'pts</span>';
       }
     }
     let out = '<span class="header-prono-badge">🎯 Mon prono : ' + vb.h + '-' + vb.a + '</span>';
@@ -1385,7 +1387,7 @@ function renderLiveProno(matchId, hs, as) {
   const livePts = (hs !== '?' && as !== '?') ? calcLivePts(b, hs, as) : null;
   const ptsCol = livePts ? (livePts.pts > 0 ? '#057a3a' : '#cc2200') : '#057a3a';
   const ptsTxt = livePts
-    ? livePts.pts.toFixed(2) + ' pts · ' + livePts.label
+    ? fmtPts(livePts.pts) + ' pts · ' + livePts.label
     : '';
   // Calcul détaillé des pts selon le score live ou potentiel
   let ptsResult, ptsScore, ptsTotal, resultBg, resultColor, scoreBg, scoreColor, totalBg;
@@ -1397,9 +1399,9 @@ function renderLiveProno(matchId, hs, as) {
     const hasBonus   = livePts.type === 'bonus';
     const isBad      = livePts.type === 'zero';
 
-    ptsResult = isBad ? '-1' : b.resultOdd.toFixed(2);
-    ptsScore  = exactScore ? b.scoreOdd.toFixed(2) : (hasBonus ? '0.5' : '0');
-    ptsTotal  = livePts.pts.toFixed(2);
+    ptsResult = isBad ? '-1' : fmtPts(b.resultOdd);
+    ptsScore  = exactScore ? fmtPts(b.scoreOdd) : (hasBonus ? '0.5' : '0');
+    ptsTotal  = fmtPts(livePts.pts);
 
     resultBg    = isBad ? '#fff0ee' : '#eef7f2';
     resultColor = isBad ? '#cc2200' : '#056b52';
@@ -1408,9 +1410,9 @@ function renderLiveProno(matchId, hs, as) {
     totalBg     = isBad ? '#cc2200' : '#056b52';
   } else {
     // Pré-match : pts potentiels max
-    ptsResult   = b.resultOdd.toFixed(2);
-    ptsScore    = b.scoreOdd.toFixed(2);
-    ptsTotal    = (b.resultOdd + b.scoreOdd).toFixed(2);
+    ptsResult   = fmtPts(b.resultOdd);
+    ptsScore    = fmtPts(b.scoreOdd);
+    ptsTotal    = fmtPts(b.resultOdd + b.scoreOdd);
     resultBg    = '#eef7f2'; resultColor = '#056b52';
     scoreBg     = '#fff8ee'; scoreColor  = '#8b6000';
     totalBg     = '#056b52';
@@ -1562,9 +1564,9 @@ function buildCard(m) {
     let footerHtml = '';
     if (betKey) {
       const b = betslip[betKey];
-      const ptsR = b.resultOdd.toFixed(2);
-      const ptsS = b.scoreOdd.toFixed(2);
-      const ptsMax = (b.resultOdd + b.scoreOdd).toFixed(2);
+      const ptsR = fmtPts(b.resultOdd);
+      const ptsS = fmtPts(b.scoreOdd);
+      const ptsMax = fmtPts(b.resultOdd + b.scoreOdd);
       footerHtml = `<div class="score-step-footer">
         <div class="score-step-recap">
           <span class="recap-score">🎯 ${b.h}-${b.a} · ${b.resultLabel}</span>
@@ -1760,8 +1762,8 @@ function renderBetslip() {
   if(footer) footer.style.display='block';
   if(body) body.innerHTML=keys.map(k=>{
     const b=betslip[k];
-    const ptsR=b.resultOdd.toFixed(2);
-    const ptsS=b.scoreOdd.toFixed(2);
+    const ptsR=fmtPts(b.resultOdd);
+    const ptsS=fmtPts(b.scoreOdd);
     const ptsMax=(b.resultOdd+b.scoreOdd).toFixed(2);
     return `<div class="bet-item">
       <button class="remove-bet" onclick="removeBet('${k}')" title="Supprimer">×</button>
@@ -1893,7 +1895,7 @@ function placeBets() {
   });
   savePlayers(players);
   const totalPts=keys.reduce((s,k)=>s+calcPoints(betslip[k]).total,0);
-  showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' — max '+totalPts.toFixed(2)+' pts potentiels');
+  showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' — max '+fmtPts(totalPts)+' pts potentiels');
   betslip={};
   matchState={};
   renderMatches();
@@ -2148,7 +2150,7 @@ function renderRankingPanel() {
       medalCell +
       '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
       (i === 0 ? '<span style="font-size:16px;margin-right:4px">🏆</span>' : '') +
-      '<span class="rank-pts">' + r.pts.toFixed(2) + ' pts</span>' +
+      '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
 
@@ -2211,7 +2213,7 @@ function renderHistoryPanel() {
     const awayLogo = m ? getLogo(m.away) : null;
     const logoHtml = (url, nm) => url ? '<img src=' + url + ' style="width:16px;height:16px;object-fit:contain;vertical-align:middle">' : '';
     const matchName = m
-      ? logoHtml(homeLogo, m.home) + ' ' + m.home + ' - ' + logoHtml(awayLogo, m.away) + ' ' + m.away
+      ? logoHtml(homeLogo) + ' ' + m.home + ' - ' + m.away + ' ' + logoHtml(awayLogo)
       : 'Match #' + mid;
     const live = liveData[parseInt(mid)];
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
@@ -2227,9 +2229,9 @@ function renderHistoryPanel() {
         const exactScore = pts.type === 'max';
         const hasBonus   = pts.type === 'bonus';
         const isBad      = pts.type === 'zero';
-        const ptsResult  = isBad ? '-1' : bet.resultOdd.toFixed(2);
-        const ptsScore   = exactScore ? bet.scoreOdd.toFixed(2) : (hasBonus ? '0.5' : '0');
-        const ptsTotal   = pts.pts.toFixed(2);
+        const ptsResult  = isBad ? '-1' : fmtPts(bet.resultOdd);
+        const ptsScore   = exactScore ? fmtPts(bet.scoreOdd) : (hasBonus ? '0.5' : '0');
+        const ptsTotal   = fmtPts(pts.pts);
         const resultBg   = isBad ? '#fff0ee' : '#eef7f2';
         const resultColor= isBad ? '#cc2200' : '#056b52';
         const scoreBg    = exactScore ? '#fff8ee' : (hasBonus ? '#fff8ee' : '#f5f5f5');
@@ -2297,7 +2299,7 @@ function renderRanking() {
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
       <td style="color:var(--acc);font-size:13px">+${r.ptsResult.toFixed(2)}</td>
       <td style="color:var(--acc2);font-size:13px">+${r.ptsScore.toFixed(2)}</td>
-      <td class="rank-pts">${r.total.toFixed(2)}</td>
+      <td class="rank-pts">${fmtPts(r.total)}</td>
     </tr>`;
   }).join('');
 }
@@ -2597,9 +2599,9 @@ function syncMobileSlip() {
 
   body.innerHTML = keys.map(k => {
     const b = betslip[k];
-    const ptsR = b.resultOdd.toFixed(2);
-    const ptsS = b.scoreOdd.toFixed(2);
-    const ptsMax = (b.resultOdd + b.scoreOdd).toFixed(2);
+    const ptsR = fmtPts(b.resultOdd);
+    const ptsS = fmtPts(b.scoreOdd);
+    const ptsMax = fmtPts(b.resultOdd + b.scoreOdd);
     return '<div class="bet-item">' +
       '<button class="remove-bet" onclick="removeBet(\'' + k + '\')" title="Supprimer">×</button>' +
       '<div class="bet-match">' + b.matchName + '</div>' +
