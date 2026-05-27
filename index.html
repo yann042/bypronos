@@ -1300,6 +1300,10 @@ function getAllPronosHtml(matchId, hs, as) {
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
       if (name === currentPlayer) return; // exclure mon prono
+      // Masquer les pronos des autres avant le début du match
+      const matchObj = matches.find(x => x.id === mid);
+      const started = matchObj && isMatchStarted(matchObj.time, matchObj.id);
+      if (!started) return;
       const isMe = false;
       const pts = calcLivePts(vb, hs, as);
       let ptsHtml = '';
