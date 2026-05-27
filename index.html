@@ -873,14 +873,16 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 
 /* Classement */
-.ranking-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--bg3);border:1px solid transparent}
-.ranking-row.gold{background:linear-gradient(90deg,rgba(255,215,0,.18),rgba(255,215,0,.06));border-color:rgba(255,215,0,.45)}
-.ranking-row.silver{background:linear-gradient(90deg,rgba(192,192,192,.18),rgba(192,192,192,.06));border-color:rgba(192,192,192,.4)}
-.ranking-row.bronze{background:linear-gradient(90deg,rgba(205,127,50,.18),rgba(205,127,50,.06));border-color:rgba(205,127,50,.38)}
-.ranking-row.gold .rank-name{color:#a07010}
-.ranking-row.silver .rank-name{color:#707070}
-.ranking-row.bronze .rank-name{color:#8b4513}
-.ranking-row.gold .rank-pts,.ranking-row.silver .rank-pts,.ranking-row.bronze .rank-pts{color:inherit}
+.ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:#f0f0ec;border:1px solid #d8d8d0}
+.ranking-row.gold{background:linear-gradient(135deg,#fffbe6,#fff3b0);border:1.5px solid #e6b800}
+.ranking-row.silver{background:linear-gradient(135deg,#f4f4f4,#e8e8e8);border:1.5px solid #b0b0b0}
+.ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0);border:1.5px solid #c08040}
+.ranking-row.gold .rank-name{color:#7a5c00;font-weight:800}
+.ranking-row.silver .rank-name{color:#505050;font-weight:800}
+.ranking-row.bronze .rank-name{color:#7a4a10;font-weight:800}
+.ranking-row.gold .rank-pts{color:#b8860b;font-size:20px}
+.ranking-row.silver .rank-pts{color:#808080;font-size:20px}
+.ranking-row.bronze .rank-pts{color:#a0622a;font-size:20px}
 .ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
