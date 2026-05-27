@@ -17,7 +17,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden}
 
 /* Header */
-.header{background:var(--bg2);border-bottom:1px solid var(--bord);padding:0 16px;display:flex;align-items:center;gap:16px}
+.header{background:var(--bg2);padding:0 16px;display:flex;align-items:center;gap:16px}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:4px;flex:1}
@@ -2145,6 +2145,7 @@ function renderRankingPanel() {
     return '<div class="ranking-row' + cls + '">' +
       medalCell +
       '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
+      (i === 0 ? '<span style="font-size:16px;margin-right:4px">🏆</span>' : '') +
       '<span class="rank-pts">+' + r.pts.toFixed(2) + ' pts</span>' +
     '</div>';
   }).join('');
