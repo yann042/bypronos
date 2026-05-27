@@ -868,16 +868,16 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;align-content:start}
 @media(max-width:768px){.results-view{grid-template-columns:1fr;padding:10px;gap:10px}}
 .results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
-.results-panel-body{overflow-y:auto;flex:1;padding:8px;max-height:60vh}
+.results-panel-body{overflow-y:auto;flex:1;padding:8px;max-height:60vh;background:#ffffff}
 @media(max-width:768px){.results-panel-body{max-height:none;overflow-y:visible}}
 .results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 
 /* Classement */
-.ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:#f0f0ec;border:1px solid #d8d8d0}
-.ranking-row.gold{background:linear-gradient(135deg,#e8a000,#f5c000,#fad84a);border:3px solid #b8780a;box-shadow:0 3px 16px rgba(184,120,10,.55);padding:12px 14px}
+.ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:#f7f7f7;border:1px solid #e0e0e0}
+.ranking-row.gold{background:#ffffff !important;border:3px solid #c9960a !important;padding:12px 14px}
 .ranking-row.silver{background:linear-gradient(135deg,#f4f4f4,#e8e8e8);border:1.5px solid #b0b0b0}
 .ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0);border:1.5px solid #c08040}
-.ranking-row.gold .rank-name{color:#3d2a00;font-weight:800;font-size:15px}
+.ranking-row.gold .rank-name{color:#c9960a;font-weight:800;font-size:15px}
 .ranking-row.silver .rank-name{color:#505050;font-weight:800}
 .ranking-row.bronze .rank-name{color:#7a4a10;font-weight:800}
 .ranking-row.gold .rank-pts{color:#c9960a;font-size:22px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.15)}
@@ -2139,9 +2139,12 @@ function renderRankingPanel() {
   const html = rows.map((r, i) => {
     const isMe = r.name === currentPlayer;
     const cls = (podiumCls[i] ? ' ' + podiumCls[i] : '') + (isMe ? ' me' : '');
+    const badge = i === 0
+      ? '<span style="font-size:9px;font-weight:800;letter-spacing:1px;color:#c9960a;background:rgba(201,153,10,.12);border:1px solid #c9960a;border-radius:10px;padding:1px 7px;margin-left:6px;text-transform:uppercase">Vainqueur</span>'
+      : '';
     return '<div class="ranking-row' + cls + '">' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
+      '<span class="rank-name" style="display:flex;align-items:center">' + (isMe ? '👤 ' : '') + r.name + badge + '</span>' +
       '<span class="rank-pts">+' + r.pts.toFixed(2) + ' pts</span>' +
     '</div>';
   }).join('');
