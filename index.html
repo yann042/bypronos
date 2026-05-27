@@ -1890,7 +1890,7 @@ function placeBets() {
 // ══════════════════════════════════════════════
 // ── Navigation vues ──────────────────────────
 // ══════════════════════════════════════════════
-function selectComp(comp, btn) {
+window.selectComp = function selectComp(comp, btn) {
   document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const titles = {
@@ -1904,7 +1904,7 @@ function selectComp(comp, btn) {
   // À terme : charger les matchs de la compétition sélectionnée
 }
 
-function showView(view, btn) {
+window.showView = function showView(view, btn) {
   document.querySelectorAll('.view-panel').forEach(p=>p.style.display='none');
   document.getElementById('view-'+view).style.display='block';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -2098,7 +2098,7 @@ function switchRankTab(tab, btn) {
 let historyFilterPlayer = 'all';
 let rankTab = 'saison';
 
-function switchRankTab(tab) {
+window.switchRankTab = function switchRankTab(tab) {
   rankTab = tab;
   document.getElementById('rankTabSaison').classList.toggle('active', tab === 'saison');
   document.getElementById('rankTabJournee').classList.toggle('active', tab === 'journee');
@@ -2199,13 +2199,11 @@ function renderHistoryPanel() {
   }).join('');
 }
 
-function setHistoryFilter(player) {
+function setHistoryFilter(btn, player) {
   historyFilterPlayer = player;
+  document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
   renderHistoryPanel();
-  // Mettre à jour les boutons filtres
-  document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.includes(player === 'all' ? 'Tous' : player));
-  });
 }
 
 function renderRanking() {
