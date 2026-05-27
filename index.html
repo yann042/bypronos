@@ -2139,12 +2139,12 @@ function renderRankingPanel() {
   const html = rows.map((r, i) => {
     const isMe = r.name === currentPlayer;
     const cls = (podiumCls[i] ? ' ' + podiumCls[i] : '') + (isMe ? ' me' : '');
-    const badge = i === 0
-      ? '<span style="font-size:9px;font-weight:800;letter-spacing:1px;color:#c9960a;background:rgba(201,153,10,.12);border:1px solid #c9960a;border-radius:10px;padding:1px 7px;margin-left:6px;text-transform:uppercase">Vainqueur</span>'
-      : '';
+    const medalCell = i === 0
+      ? '<span style="display:flex;flex-direction:column;align-items:center;gap:1px;width:28px;flex-shrink:0"><span class="rank-pos">🥇</span><span style="font-size:7px;font-weight:800;letter-spacing:.8px;color:#c9960a;text-transform:uppercase;line-height:1">Vainqueur</span></span>'
+      : '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>';
     return '<div class="ranking-row' + cls + '">' +
-      '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name" style="display:flex;align-items:center">' + (isMe ? '👤 ' : '') + r.name + badge + '</span>' +
+      medalCell +
+      '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
       '<span class="rank-pts">+' + r.pts.toFixed(2) + ' pts</span>' +
     '</div>';
   }).join('');
