@@ -864,6 +864,31 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .comp-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
 .comp-btn:hover{border-color:var(--acc);color:var(--acc)}
 .comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
+
+.results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;height:100%;overflow:hidden}
+@media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto}}
+.results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+.results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.results-panel-body{overflow-y:auto;flex:1;padding:8px}
+
+/* Classement */
+.ranking-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--bg3)}
+.ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
+.rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
+.rank-name{flex:1;font-weight:700;font-size:13px}
+.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#056b52}
+
+/* Historique */
+.history-filters{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--bord);flex-shrink:0}
+.history-filter-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s}
+.history-filter-btn.active{background:#056b52;color:#fff;border-color:#056b52}
+.history-match{border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.history-match-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700}
+.history-prono-row{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px}
+.history-player{font-weight:700;color:var(--txt2)}
+.history-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700}
+.history-pts.pos{color:#056b52;font-weight:700}
+.history-pts.neg{color:#cc2200;font-weight:700}
 </style>
 
   <!-- Firebase SDK compat -->
@@ -912,7 +937,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
     <div class="logo">BY<span> PRONOS</span> <span id="leagueBadge" style="font-size:11px;font-weight:600;opacity:.8"></span></div>
     <nav class="nav">
       <button class="nav-btn active" onclick="showView('sports',this)">Pronos</button>
-      <button class="nav-btn" onclick="showView('ranking',this)">🏆 Classement</button>
+      <button class="nav-btn" onclick="showView('ranking',this)">📊 Résultats</button>
     </nav>
     <div class="header-right">
       <div class="player-badge" id="playerBadge" onclick="sessionReset()" title="Changer de joueur">
@@ -1077,9 +1102,12 @@ window.doCreateLeague = async function() {
   });
   localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: name, isAdmin: true }));
   document.getElementById('loginOverlay').style.display = 'none';
-  alert('🎉 Ligue "' + name + '" créée !\n\nCode à partager : ' + code + '\n\nPartagez ce code à vos amis !');
-  if (window.doLoginName) window.doLoginName(admin);
-  else location.reload();
+  alert('🎉 Ligue "' + name + '" créée !\nCode : ' + code + '\nPartagez ce code à vos amis !');
+  var tryLoginAdmin = function() {
+    if (window.doLoginName) { window.doLoginName(admin); }
+    else { setTimeout(tryLoginAdmin, 100); }
+  };
+  tryLoginAdmin();
 };
 
 window.doJoinLeague = async function() {
@@ -1091,8 +1119,11 @@ window.doJoinLeague = async function() {
   if (!res || !res.name) { alert('❌ Code de ligue invalide !'); return; }
   localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: res.name, isAdmin: res.admin === name }));
   document.getElementById('loginOverlay').style.display = 'none';
-  if (window.doLoginName) window.doLoginName(name);
-  else location.reload();
+  var tryLogin = function() {
+    if (window.doLoginName) { window.doLoginName(name); }
+    else { setTimeout(tryLogin, 100); }
+  };
+  tryLogin();
 };
 </script>
 <script>
@@ -1432,8 +1463,6 @@ function calcPoints(b, realH, realA) {
 let betslip    = {};
 let matchState = {};
 let currentPlayer = null;
-let rankTab    = 'season';
-
 // ══════════════════════════════════════════════
 // ── Rendu matchs ─────────────────────────────
 // ══════════════════════════════════════════════
@@ -2033,7 +2062,7 @@ window.doJoinLeague = async function() {
   doLoginName(name);
 }
 
-function doLoginName(name) {
+window.doLoginName = function doLoginName(name) {
   currentPlayer=name;
   document.getElementById('loginOverlay').style.display='none';
   document.getElementById('playerName').textContent=name;
@@ -2064,6 +2093,119 @@ function switchRankTab(tab, btn) {
   document.querySelectorAll('.ranking-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderRanking();
+}
+
+let historyFilterPlayer = 'all';
+let rankTab = 'saison';
+
+function switchRankTab(tab) {
+  rankTab = tab;
+  document.getElementById('rankTabSaison').classList.toggle('active', tab === 'saison');
+  document.getElementById('rankTabJournee').classList.toggle('active', tab === 'journee');
+  renderResultsView();
+}
+
+function renderResultsView() {
+  renderRankingPanel();
+  renderHistoryPanel();
+}
+
+function renderRankingPanel() {
+  const players = loadPlayers();
+  const day = 'Journée en cours';
+  const rows = Object.entries(players)
+    .map(([name, data]) => {
+      const pts = rankTab === 'saison'
+        ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
+        : (data.season?.days?.[day] ? (data.season.days[day].ptsResult || 0) + (data.season.days[day].ptsScore || 0) : 0);
+      return { name, pts };
+    })
+    .sort((a, b) => b.pts - a.pts);
+
+  const medals = ['🥇','🥈','🥉'];
+  const html = rows.map((r, i) => {
+    const isMe = r.name === currentPlayer;
+    return '<div class="ranking-row' + (isMe ? ' me' : '') + '">' +
+      '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
+      '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
+      '<span class="rank-pts">+' + r.pts.toFixed(2) + ' pts</span>' +
+    '</div>';
+  }).join('');
+
+  const el = document.getElementById('rankingList');
+  if (el) el.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun joueur</div>';
+}
+
+function renderHistoryPanel() {
+  const players = loadPlayers();
+  const playerNames = Object.keys(players);
+
+  // Filtres joueurs
+  const filtersEl = document.getElementById('historyFilters');
+  if (filtersEl) {
+    filtersEl.innerHTML = '<button class="history-filter-btn' + (historyFilterPlayer === 'all' ? ' active' : '') + '" onclick="setHistoryFilter('all')">Tous</button>' +
+      playerNames.map(n =>
+        '<button class="history-filter-btn' + (historyFilterPlayer === n ? ' active' : '') + '" onclick="setHistoryFilter('' + n + '')">' +
+        (n === currentPlayer ? '👤 ' : '') + n + '</button>'
+      ).join('');
+  }
+
+  // Historique des paris
+  const histEl = document.getElementById('historyList');
+  if (!histEl) return;
+
+  const filtered = historyFilterPlayer === 'all' ? playerNames : [historyFilterPlayer];
+  const matchPronosMap = {};
+
+  filtered.forEach(name => {
+    const vb = players[name]?.validatedBets || {};
+    Object.entries(vb).forEach(([mid, bet]) => {
+      if (!matchPronosMap[mid]) matchPronosMap[mid] = [];
+      matchPronosMap[mid].push({ name, bet });
+    });
+  });
+
+  if (Object.keys(matchPronosMap).length === 0) {
+    histEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun pari trouvé</div>';
+    return;
+  }
+
+  histEl.innerHTML = Object.entries(matchPronosMap).map(([mid, pronos]) => {
+    const m = matches.find(x => String(x.id) === String(mid));
+    const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
+    const live = liveData[parseInt(mid)];
+    const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
+
+    const pronosHtml = pronos.map(({ name, bet }) => {
+      const isMe = name === currentPlayer;
+      const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
+      const ptsHtml = pts
+        ? '<span class="history-pts ' + (pts.pts > 0 ? 'pos' : 'neg') + '">' + (pts.pts > 0 ? '+' : '') + pts.pts.toFixed(2) + ' pts</span>'
+        : '<span style="color:var(--txt2);font-size:10px">en attente</span>';
+      return '<div class="history-prono-row">' +
+        '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
+        '<span class="history-score">' + bet.h + '-' + bet.a + '</span>' +
+        ptsHtml +
+      '</div>';
+    }).join('');
+
+    return '<div class="history-match">' +
+      '<div class="history-match-header">' +
+        '<span>' + matchName + '</span>' +
+        '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
+      '</div>' +
+      pronosHtml +
+    '</div>';
+  }).join('');
+}
+
+function setHistoryFilter(player) {
+  historyFilterPlayer = player;
+  renderHistoryPanel();
+  // Mettre à jour les boutons filtres
+  document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(player === 'all' ? 'Tous' : player));
+  });
 }
 
 function renderRanking() {
