@@ -894,8 +894,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .history-filter-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s}
 .history-filter-btn.active{background:#056b52;color:#fff;border-color:#056b52}
 .history-match{border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden}
-.history-match-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700}
-.history-prono-row{display:grid;grid-template-columns:1fr 48px 1fr;align-items:center;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px;gap:4px}
+.history-match-header{display:grid;grid-template-columns:1fr 60px 60px;align-items:center;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700;gap:6px}
+.history-prono-row{display:grid;grid-template-columns:1fr 60px 60px;align-items:center;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px;gap:6px}
 .history-player{font-weight:700;color:var(--txt2)}
 .history-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700}
 .history-pts.pos{color:#056b52;font-weight:700}
@@ -2301,40 +2301,33 @@ function renderHistoryPanel() {
       const finalH = bet.finalH !== undefined ? bet.finalH : (live ? live.homeScore : null);
       const finalA = bet.finalA !== undefined ? bet.finalA : (live ? live.awayScore : null);
       const pts = (finalH !== null && finalA !== null) ? calcLivePts(bet, finalH, finalA) : null;
-      let ptsHtml;
-      if (!pts) {
-        ptsHtml = '<span style="color:var(--txt2);font-size:10px">en attente</span>';
-      } else {
-        const goodResult = pts.type === 'max' || pts.type === 'result' || pts.type === 'bonus';
-        const exactScore = pts.type === 'max';
-        const hasBonus   = pts.type === 'bonus';
-        const isBad      = pts.type === 'zero';
-        const ptsResult  = isBad ? '-1' : fmtPts(bet.resultOdd);
-        const ptsScore   = exactScore ? fmtPts(bet.scoreOdd) : (hasBonus ? '0.5' : '0');
-        const ptsTotal   = fmtPts(pts.pts);
-        const resultBg   = isBad ? '#fff0ee' : '#eef7f2';
-        const resultColor= isBad ? '#cc2200' : '#056b52';
-        const scoreBg    = exactScore ? '#fff8ee' : (hasBonus ? '#fff8ee' : '#f5f5f5');
-        const scoreColor = exactScore ? '#8b6000' : (hasBonus ? '#c45a00' : '#aaa');
-        const totalBg    = isBad ? '#cc2200' : '#056b52';
-        const resultIcon = isBad ? '❌' : '✅';
-        ptsHtml = '<span style="display:inline-flex;align-items:center;gap:3px;flex-wrap:nowrap;flex-shrink:0">' +
-          '<span style="background:' + resultBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + '</span>' +
-          '<span style="color:#ccc;font-size:10px">+</span>' +
-          '<span style="background:' + scoreBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + scoreColor + '">🎯 ' + ptsScore + '</span>' +
-          '<span style="color:#ccc;font-size:10px">=</span>' +
-          '<span style="background:' + totalBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
+      const ptsDisplay = '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">' +
+        '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Pts</span>' +
+        (pts
+          ? '<span style="font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:800;color:' + (pts.pts > 0 ? '#056b52' : '#cc2200') + '">' + fmtPts(pts.pts) + '</span>'
+          : '<span style="color:var(--txt2);font-size:10px">—</span>'
+        ) +
         '</span>';
-      }
       return '<div class="history-prono-row">' +
         '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
-        '<span class="history-score" style="text-align:center">' + bet.h + '-' + bet.a + '</span>' +
-        '<span style="display:flex;justify-content:flex-end">' + ptsHtml + '</span></div>';
-    }).join('');
+        '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
+          '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Prono</span>' +
+          '<span class="history-score" style="color:var(--txt);font-weight:700">' + bet.h + '-' + bet.a + '</span>' +
+        '</span>' +
+        ptsDisplay +
+      '</div>';
+        }).join('');
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
         '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
-        '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
+        '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
+          '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Score final</span>' +
+          '<span style="color:#056b52;font-weight:800;font-family:Barlow Condensed,sans-serif;font-size:15px">' + scoreStr + '</span>' +
+        '</span>' +
+        '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">' +
+          '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Pts max</span>' +
+          '<span style="font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:700;color:var(--txt2)">' + (pronos[0] ? fmtPts(pronos[0].bet.resultOdd + pronos[0].bet.scoreOdd) : '—') + '</span>' +
+        '</span>' +
       '</div>' + pronosHtml + '</div>';
   }).join('');
 }
