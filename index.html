@@ -14,10 +14,10 @@
   --txt:#1a1f1a;--txt2:#5a6a5a;--bord:#d0d5cc;
 }
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;font-size:14px}
-.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden;background:var(--bg2)}
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden;background:var(--bg3)}
 
 /* Header */
-.header{background:var(--bg2);padding:0 16px;display:flex;align-items:center;gap:16px;height:56px}
+.header{background:var(--bg3);padding:0 16px;display:flex;align-items:center;gap:16px;height:56px}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:4px;flex:1}
@@ -1832,7 +1832,8 @@ function placeBetForMatch(matchId) {
     p.validatedBets[parseInt(b.matchId)] = {
       h:b.h, a:b.a,
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
-      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd
+      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
+      day: day
     };
     delete betslip[k];
   });
@@ -1887,7 +1888,8 @@ function placeBets() {
       resultCls:b.resultCls,
       resultShort:b.resultShort,
       scoreOdd:b.scoreOdd,
-      resultOdd:b.resultOdd
+      resultOdd:b.resultOdd,
+      day: day
     };
   });
   savePlayers(players);
@@ -2108,6 +2110,7 @@ function switchRankTab(tab, btn) {
 }
 
 let historyFilterPlayer = 'all';
+let historyFilterDay = 'all';
 let rankTab = 'saison';
 
 window.switchRankTab = function switchRankTab(tab) {
@@ -2158,19 +2161,38 @@ function renderHistoryPanel() {
   const players = loadPlayers();
   const playerNames = Object.keys(players);
 
-  // Filtres joueurs
+  // Collecter toutes les journées disponibles
+  const allDays = new Set();
+  playerNames.forEach(name => {
+    const vb = players[name]?.validatedBets || {};
+    Object.values(vb).forEach(bet => { if (bet.day) allDays.add(bet.day); });
+  });
+  const daysArr = Array.from(allDays).sort();
+
+  // Filtres
   const filtersEl = document.getElementById('historyFilters');
   if (filtersEl) {
     var allActive = historyFilterPlayer === 'all' ? ' active' : '';
-    var btns = '<button class="history-filter-btn' + allActive + '" onclick="setHistoryFilter(this,\'all\')">Tous</button>';
+    var btns = '<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">';
+    btns += '<button class="history-filter-btn' + allActive + '" onclick="setHistoryFilter(this,'all')">👥 Tous</button>';
     playerNames.forEach(function(n) {
       var isActive = historyFilterPlayer === n ? ' active' : '';
-      btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,\'' + n + '\')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
+      btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,'' + n + '')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
     });
+    btns += '</div>';
+    if (daysArr.length >= 1) {
+      btns += '<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;border-top:1px solid var(--bord);padding-top:6px;margin-top:2px">';
+      var dayAllActive = historyFilterDay === 'all' ? ' active' : '';
+      btns += '<button class="history-filter-btn' + dayAllActive + '" onclick="setHistoryDayFilter(this,'all')">📅 Toutes</button>';
+      daysArr.forEach(function(d) {
+        var isActive = historyFilterDay === d ? ' active' : '';
+        btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryDayFilter(this,'' + d.replace(/'/g,"\'") + '')">' + d + '</button>';
+      });
+      btns += '</div>';
+    }
     filtersEl.innerHTML = btns;
   }
 
-  // Historique des paris
   const histEl = document.getElementById('historyList');
   if (!histEl) return;
 
@@ -2180,6 +2202,7 @@ function renderHistoryPanel() {
   filtered.forEach(name => {
     const vb = players[name]?.validatedBets || {};
     Object.entries(vb).forEach(([mid, bet]) => {
+      if (historyFilterDay !== 'all' && bet.day !== historyFilterDay) return;
       if (!matchPronosMap[mid]) matchPronosMap[mid] = [];
       matchPronosMap[mid].push({ name, bet });
     });
@@ -2195,7 +2218,7 @@ function renderHistoryPanel() {
     const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
     const live = liveData[parseInt(mid)];
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
-
+    const dayLabel = pronos[0]?.bet?.day || '';
     const pronosHtml = pronos.map(({ name, bet }) => {
       const isMe = name === currentPlayer;
       const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
@@ -2208,10 +2231,9 @@ function renderHistoryPanel() {
         ptsHtml +
       '</div>';
     }).join('');
-
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
-        '<span>' + matchName + '</span>' +
+        '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
         '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
       '</div>' +
       pronosHtml +
@@ -2223,6 +2245,11 @@ function setHistoryFilter(btn, player) {
   historyFilterPlayer = player;
   document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  renderHistoryPanel();
+}
+
+function setHistoryDayFilter(btn, day) {
+  historyFilterDay = day;
   renderHistoryPanel();
 }
 
