@@ -895,7 +895,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .history-filter-btn.active{background:#056b52;color:#fff;border-color:#056b52}
 .history-match{border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden}
 .history-match-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700}
-.history-prono-row{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px}
+.history-prono-row{display:grid;grid-template-columns:1fr 48px 1fr;align-items:center;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px;gap:4px}
 .history-player{font-weight:700;color:var(--txt2)}
 .history-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700}
 .history-pts.pos{color:#056b52;font-weight:700}
@@ -1034,10 +1034,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
           <div class="results-panel-header">
             🏆 Classement
             <div style="display:flex;gap:4px">
-              <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
-              <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee',this)">Journée</button>
+              <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison')">Saison</button>
+              <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee')">Journée</button>
             </div>
           </div>
+          <div id="rankDayFilters" style="display:none;padding:6px 8px;border-bottom:1px solid var(--bord);display:flex;gap:6px;flex-wrap:wrap"></div>
           <div class="results-panel-body" id="rankingList"></div>
         </div>
         <!-- Historique -->
@@ -2147,12 +2148,19 @@ function switchRankTab(tab, btn) {
 let historyFilterPlayer = 'all';
 let historyFilterDay = 'all';
 let rankTab = 'saison';
+let rankDay = 'all';
 
 window.switchRankTab = function switchRankTab(tab) {
   rankTab = tab;
+  rankDay = 'all';
   document.getElementById('rankTabSaison').classList.toggle('active', tab === 'saison');
   document.getElementById('rankTabJournee').classList.toggle('active', tab === 'journee');
   renderResultsView();
+}
+
+window.switchRankDay = function switchRankDay(day) {
+  rankDay = day;
+  renderRankingPanel();
 }
 
 function renderResultsView() {
@@ -2162,12 +2170,49 @@ function renderResultsView() {
 
 function renderRankingPanel() {
   const players = loadPlayers();
-  const day = 'Journée en cours';
+
+  // Collecter toutes les journées disponibles depuis validatedBets
+  const allDays = new Set();
+  Object.values(players).forEach(data => {
+    Object.values(data.validatedBets || {}).forEach(bet => { if (bet.day) allDays.add(bet.day); });
+  });
+  const daysArr = Array.from(allDays).sort();
+
+  // Afficher/masquer le filtre journée
+  const filtersEl = document.getElementById('rankDayFilters');
+  if (filtersEl) {
+    if (rankTab === 'journee') {
+      filtersEl.style.display = 'flex';
+      var dayAllActive = rankDay === 'all' ? ' active' : '';
+      var btns = '<button class="history-filter-btn' + dayAllActive + '" onclick="window.switchRankDay(&apos;all&apos;)">📅 Toutes</button>';
+      daysArr.forEach(function(d) {
+        var isActive = rankDay === d ? ' active' : '';
+        btns += '<button class="history-filter-btn' + isActive + '" onclick="window.switchRankDay(&apos;' + d.replace(/'/g,'') + '&apos;)">' + d + '</button>';
+      });
+      filtersEl.innerHTML = btns;
+    } else {
+      filtersEl.style.display = 'none';
+    }
+  }
+
   const rows = Object.entries(players)
     .map(([name, data]) => {
-      const pts = rankTab === 'saison'
-        ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
-        : (data.season?.days?.[day] ? (data.season.days[day].ptsResult || 0) + (data.season.days[day].ptsScore || 0) : 0);
+      let pts = 0;
+      if (rankTab === 'saison') {
+        pts = data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0;
+      } else {
+        // Calculer pts depuis validatedBets filtrés par journée
+        const vb = data.validatedBets || {};
+        Object.values(vb).forEach(bet => {
+          if (rankDay !== 'all' && bet.day !== rankDay) return;
+          const fH = bet.finalH !== undefined ? bet.finalH : null;
+          const fA = bet.finalA !== undefined ? bet.finalA : null;
+          if (fH !== null && fA !== null) {
+            const p = calcLivePts(bet, fH, fA);
+            if (p) pts += p.pts;
+          }
+        });
+      }
       return { name, pts };
     })
     .sort((a, b) => b.pts - a.pts);
@@ -2243,9 +2288,6 @@ function renderHistoryPanel() {
   }
   histEl.innerHTML = Object.entries(matchPronosMap).map(([mid, pronos]) => {
     const m = matches.find(x => String(x.id) === String(mid));
-    const homeLogo = m ? getLogo(m.home) : null;
-    const awayLogo = m ? getLogo(m.away) : null;
-    const logoHtml = (url, nm) => url ? '<img src=' + url + ' style="width:16px;height:16px;object-fit:contain;vertical-align:middle">' : '';
     const live = liveData[parseInt(mid)];
     const storedFinalH = pronos[0]?.bet?.finalH;
     const storedFinalA = pronos[0]?.bet?.finalA;
@@ -2253,19 +2295,7 @@ function renderHistoryPanel() {
       ? storedFinalH + '-' + storedFinalA
       : live ? live.homeScore + '-' + live.awayScore : '?-?';
     const dayLabel = pronos[0]?.bet?.day || '';
-    const matchName = m
-      ? '<div style="display:flex;align-items:center;padding:4px 0;margin-bottom:2px;gap:4px">' +
-          '<div class="mtr-home" style="flex:0 1 auto">' +
-            (homeLogo ? '<img src=' + homeLogo + ' style="width:18px;height:18px;object-fit:contain;flex-shrink:0">' : '') +
-            '<span>' + m.home + '</span>' +
-          '</div>' +
-          '<div style="font-size:13px;font-weight:700;color:var(--acc);white-space:nowrap;padding:0 6px">' + scoreStr + '</div>' +
-          '<div style="display:flex;align-items:center;gap:5px;margin-left:auto;font-size:11px;font-weight:700">' +
-            '<span>' + m.away + '</span>' +
-            (awayLogo ? '<img src=' + awayLogo + ' style="width:18px;height:18px;object-fit:contain;flex-shrink:0">' : '') +
-          '</div>' +
-        '</div>'
-      : 'Match #' + mid;
+    const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
     const pronosHtml = pronos.map(({ name, bet }) => {
       const isMe = name === currentPlayer;
       const finalH = bet.finalH !== undefined ? bet.finalH : (live ? live.homeScore : null);
@@ -2296,15 +2326,15 @@ function renderHistoryPanel() {
           '<span style="background:' + totalBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
         '</span>';
       }
-      return '<div class="history-prono-row" style="align-items:center;flex-wrap:wrap;gap:4px">' +
+      return '<div class="history-prono-row">' +
         '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
-        '<span class="history-score">' + bet.h + '-' + bet.a + '</span>' +
-        ptsHtml + '</div>';
+        '<span class="history-score" style="text-align:center">' + bet.h + '-' + bet.a + '</span>' +
+        '<span style="display:flex;justify-content:flex-end">' + ptsHtml + '</span></div>';
     }).join('');
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
-        (dayLabel ? '<span style="font-size:9px;color:var(--txt2);font-weight:500;padding:0 4px">📅 ' + dayLabel + '</span>' : '') +
-        matchName +
+        '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
+        '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
       '</div>' + pronosHtml + '</div>';
   }).join('');
 }
