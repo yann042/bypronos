@@ -884,7 +884,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.silver .rank-pts{color:#808080;font-size:18px}
 .ranking-row.bronze .rank-pts{color:#a0622a;font-size:18px}
 .ranking-row.gold .rank-pos{font-size:26px}
-.ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
+.ranking-row.me{background:#f7f7f7;border:1px solid #e0e0e0}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
 
@@ -2237,12 +2237,13 @@ function renderRankingPanel() {
   const html = rows.map((r, i) => {
     const isMe = r.name === currentPlayer;
     const cls = (podiumCls[i] ? ' ' + podiumCls[i] : '') + (isMe ? ' me' : '');
+    const arrow = isMe ? '<span style="font-size:10px;color:var(--acc);font-weight:700;margin-right:2px">▶</span>' : '';
     const medalCell = i === 0
-      ? '<span style="display:flex;flex-direction:column;align-items:center;gap:1px;width:28px;flex-shrink:0"><span class="rank-pos">🥇</span><span style="font-size:7px;font-weight:800;letter-spacing:.8px;color:#c9960a;text-transform:uppercase;line-height:1">Vainqueur</span></span>'
-      : '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>';
+      ? arrow + '<span style="display:flex;flex-direction:column;align-items:center;gap:1px;width:28px;flex-shrink:0"><span class="rank-pos">🥇</span><span style="font-size:7px;font-weight:800;letter-spacing:.8px;color:#c9960a;text-transform:uppercase;line-height:1">Vainqueur</span></span>'
+      : arrow + '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>';
     return '<div class="ranking-row' + cls + '">' +
       medalCell +
-      '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
+      '<span class="rank-name">' + r.name + '</span>' +
       (i === 0 ? '<span style="font-size:16px;margin-right:4px">🏆</span>' : '') +
       '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
