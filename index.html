@@ -1240,34 +1240,7 @@ const liveData = {
   1: { homeScore: 1, awayScore: 1, minute: 54 }, // Lorient-Le Havre en live test
 };
 
-// ── TEST : données historique simulées ───────────────────────────────
-(function injectTestHistory() {
-  try {
-    const stored = localStorage.getItem('bypronos_players');
-    const players = stored ? JSON.parse(stored) : {};
-    // Injecter un joueur test si aucune donnée
-    if (!players['TestJoueur']) {
-      players['TestJoueur'] = {
-        validatedBets: {
-          // Match 1 : prono 1-1, score final 1-1 (score exact !)
-          1: { h:1, a:1, resultOdd:3.20, scoreOdd:1.50, resultCls:'draw',
-               resultLabel:'Nul', resultShort:'N', day:'J28',
-               finalH:1, finalA:1 },
-          // Match 2 : prono 2-0, score final 1-0 (bon résultat seulement)
-          2: { h:2, a:0, resultOdd:1.75, scoreOdd:0.80, resultCls:'win',
-               resultLabel:'Marseille', resultShort:'1', day:'J28',
-               finalH:1, finalA:0 },
-          // Match 3 : prono 1-0, score final 0-2 (mauvais résultat)
-          3: { h:1, a:0, resultOdd:3.20, scoreOdd:1.20, resultCls:'win',
-               resultLabel:'Strasbourg', resultShort:'1', day:'J28',
-               finalH:0, finalA:2 },
-        },
-        current: {}, pts: 0
-      };
-      localStorage.setItem('bypronos_players', JSON.stringify(players));
-    }
-  } catch(e) {}
-})();
+
 
 const SCORES = {
   win:  [{h:1,a:0},{h:2,a:0},{h:2,a:1},{h:3,a:0},{h:3,a:1},{h:3,a:2},{h:4,a:0},{h:4,a:1},{h:4,a:2},{h:4,a:3},{h:5,a:0},{h:5,a:1},{h:5,a:2},{h:5,a:3},{h:5,a:4}],
@@ -1711,42 +1684,145 @@ if (typeof testGoalTriggered === 'undefined') {
 }
 
 // ── Fetch scores live via Sofascore RapidAPI ──────────────────────
+// ── Résolution automatique des sofaId ────────────────────────────
+async function resolveSofaIds() {
+  if (TEST_MODE) return;
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm   = String(today.getMonth()+1).padStart(2,'0');
+  const dd   = String(today.getDate()).padStart(2,'0');
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+
+  // Récupérer tous les matchs du jour sur Sofascore
+  const tournaments = [679, 679]; // Ligue 1 sofaScore tournament id
+  const competitionIds = [679, 7, 8, 23]; // Ligue 1, Premier League, La Liga, Ligue 2
+
+  for (const compId of competitionIds) {
+    try {
+      const res = await fetch(`https://sofascore.p.rapidapi.com/tournaments/${compId}/events/last/0`, {
+        headers: { 'x-rapidapi-host': RAPIDAPI_HOST, 'x-rapidapi-key': RAPIDAPI_KEY }
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const events = data.events || [];
+      events.forEach(ev => {
+        const home = ev.homeTeam?.name || '';
+        const away = ev.awayTeam?.name || '';
+        const match = matches.find(m =>
+          !m.sofaId && (
+            (home.includes(m.home) || m.home.includes(home.split(' ')[0])) &&
+            (away.includes(m.away) || m.away.includes(away.split(' ')[0]))
+          )
+        );
+        if (match) {
+          match.sofaId = ev.id;
+          console.log(`✅ sofaId résolu : ${match.home} vs ${match.away} → ${ev.id}`);
+        }
+      });
+    } catch(e) { console.warn('resolveSofaIds error:', e); }
+  }
+
+  // Aussi chercher dans les matchs live du jour
+  try {
+    const res = await fetch(`https://sofascore.p.rapidapi.com/matches/live`, {
+      headers: { 'x-rapidapi-host': RAPIDAPI_HOST, 'x-rapidapi-key': RAPIDAPI_KEY }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      (data.events || []).forEach(ev => {
+        const home = ev.homeTeam?.name || '';
+        const away = ev.awayTeam?.name || '';
+        const match = matches.find(m =>
+          !m.sofaId && (
+            (home.includes(m.home) || m.home.includes(home.split(' ')[0])) &&
+            (away.includes(m.away) || m.away.includes(away.split(' ')[0]))
+          )
+        );
+        if (match) {
+          match.sofaId = ev.id;
+          console.log(`✅ sofaId live : ${match.home} vs ${match.away} → ${ev.id}`);
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+// ── Récupération scores live ──────────────────────────────────────
 async function fetchLiveScores() {
   const started = matches.filter(m => isMatchStarted(m.time) && !isMatchFinished(m.time));
   if (!started.length) return;
 
+  // Essayer d'abord l'endpoint live global (1 seul appel API)
+  try {
+    const res = await fetch(`https://sofascore.p.rapidapi.com/matches/live`, {
+      headers: { 'x-rapidapi-host': RAPIDAPI_HOST, 'x-rapidapi-key': RAPIDAPI_KEY }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      (data.events || []).forEach(ev => {
+        const match = matches.find(m =>
+          m.sofaId === ev.id ||
+          ((ev.homeTeam?.name||'').includes(m.home) || m.home.includes((ev.homeTeam?.name||'').split(' ')[0])) &&
+          ((ev.awayTeam?.name||'').includes(m.away) || m.away.includes((ev.awayTeam?.name||'').split(' ')[0]))
+        );
+        if (!match) return;
+        const hs = ev.homeScore?.current ?? ev.homeScore?.display ?? '?';
+        const as = ev.awayScore?.current ?? ev.awayScore?.display ?? '?';
+        const min = ev.time?.played ?? ev.time?.currentPeriodStartTimestamp ?? '?';
+        const finished = ev.status?.type === 'finished';
+        liveData[match.id] = { homeScore: hs, awayScore: as, minute: min, finished };
+        // Stocker score final dans validatedBets si match terminé
+        if (finished) saveFinalScore(match.id, hs, as);
+      });
+      renderMatches();
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback : appel individuel par sofaId
   for (const m of started) {
-    if (!m.sofaId) continue; // pas d'ID Sofascore défini
+    if (!m.sofaId) continue;
     try {
       const res = await fetch(`https://sofascore.p.rapidapi.com/matches/${m.sofaId}/score`, {
-        headers: {
-          'x-rapidapi-host': RAPIDAPI_HOST,
-          'x-rapidapi-key':  RAPIDAPI_KEY
-        }
+        headers: { 'x-rapidapi-host': RAPIDAPI_HOST, 'x-rapidapi-key': RAPIDAPI_KEY }
       });
       if (!res.ok) continue;
       const data = await res.json();
-      if (data && data.score) {
-        liveData[m.id] = {
-          homeScore: data.score.current?.home ?? '?',
-          awayScore: data.score.current?.away ?? '?',
-          minute: data.time?.played ?? '?',
-          status: data.status?.type ?? 'inprogress'
-        };
+      if (data?.score) {
+        const hs = data.score.current?.home ?? '?';
+        const as = data.score.current?.away ?? '?';
+        const finished = data.status?.type === 'finished';
+        liveData[m.id] = { homeScore: hs, awayScore: as, minute: data.time?.played ?? '?', finished };
+        if (finished) saveFinalScore(m.id, hs, as);
       }
     } catch(e) { console.warn('Live fetch error:', e); }
   }
   renderMatches();
 }
 
+// ── Sauvegarde score final dans validatedBets ─────────────────────
+function saveFinalScore(matchId, homeScore, awayScore) {
+  const players = loadPlayers();
+  let changed = false;
+  Object.values(players).forEach(p => {
+    const bet = p.validatedBets?.[parseInt(matchId)];
+    if (bet && bet.finalH === undefined) {
+      bet.finalH = homeScore;
+      bet.finalA = awayScore;
+      changed = true;
+    }
+  });
+  if (changed) { savePlayers(players); autosave(); }
+}
+
 // Polling toutes les 60 secondes
 setInterval(() => {
-  renderMatches(); // mise à jour heure locale
+  renderMatches();
   fetchLiveScores();
 }, 60000);
 
-// Premier appel immédiat
-fetchLiveScores();
+// Au démarrage : résoudre les sofaIds puis fetch
+resolveSofaIds().then(() => fetchLiveScores());
 
 // ══════════════════════════════════════════════
 // ── Interactions paris ────────────────────────
@@ -2214,7 +2290,16 @@ function renderRankingPanel() {
     .map(([name, data]) => {
       let pts = 0;
       if (rankTab === 'saison') {
-        pts = data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0;
+        // Calculer depuis tous les validatedBets avec score final connu
+        const vb = data.validatedBets || {};
+        Object.values(vb).forEach(bet => {
+          const fH = bet.finalH !== undefined ? bet.finalH : null;
+          const fA = bet.finalA !== undefined ? bet.finalA : null;
+          if (fH !== null && fA !== null) {
+            const p = calcLivePts(bet, fH, fA);
+            if (p) pts += p.pts;
+          }
+        });
       } else {
         // Calculer pts depuis validatedBets filtrés par journée
         const vb = data.validatedBets || {};
