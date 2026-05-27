@@ -23,7 +23,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .nav{display:flex;gap:4px;flex:1}
 .nav-btn{background:none;border:none;color:var(--txt2);padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;transition:all .15s}
 .nav-btn:hover{background:var(--bg3);color:var(--txt)}
-.nav-btn.active{background:var(--bg3);color:var(--acc)}
+.nav-btn.active{background:transparent;color:var(--acc);border-bottom:2px solid var(--acc)}
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
@@ -343,9 +343,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .betslip{border-left:none;border-top:1px solid var(--bord);height:auto;max-height:none}
   .betslip-body{max-height:400px}
 
-  /* App height auto sur mobile */
-  .app{grid-template-rows:56px auto;height:auto;min-height:100vh}
-  .view-panel{height:auto;min-height:calc(100vh - 56px);overflow:visible}
+  /* App height fixe sur mobile aussi */
+  .app{grid-template-rows:56px 1fr;height:100vh;overflow:hidden}
+  .view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden}
 
   /* Header compact */
   .header{padding:0 10px;gap:8px;flex-wrap:nowrap}
