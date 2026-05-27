@@ -14,10 +14,10 @@
   --txt:#1a1f1a;--txt2:#5a6a5a;--bord:#d0d5cc;
 }
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;font-size:14px}
-.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden}
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden;background:var(--bg2)}
 
 /* Header */
-.header{background:var(--bg2);border-bottom:1px solid var(--bord);padding:0 16px;display:flex;align-items:center;gap:16px}
+.header{background:var(--bg2);padding:0 16px;display:flex;align-items:center;gap:16px;height:56px}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:4px;flex:1}
@@ -27,7 +27,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
-.main{display:grid;grid-template-columns:1fr;height:calc(100vh - 56px);overflow:hidden}
+.main{display:grid;grid-template-columns:1fr}
 
 /* Sidebar */
 .sidebar{background:var(--bg2);border-right:1px solid var(--bord);padding:12px 8px;overflow-y:auto}
@@ -188,7 +188,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .place-btn{width:100%;background:var(--acc);color:#0d1117;border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .15s;margin-top:12px}
 .place-btn:hover{opacity:.9}
 
-.view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+.view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--bg2)}
 
 /* ── Login overlay ── */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
@@ -343,7 +343,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .betslip{border-left:none;border-top:1px solid var(--bord);height:auto;max-height:none}
   .betslip-body{max-height:400px}
 
-  /* App height fixe sur mobile */
+  /* App height fixe sur mobile aussi */
   .app{grid-template-rows:56px 1fr;height:100vh;overflow:hidden}
   .view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden}
 
@@ -868,7 +868,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;align-content:start}
 @media(max-width:768px){.results-view{grid-template-columns:1fr;padding:10px;gap:10px}}
 .results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
-.results-panel-body{overflow-y:auto;flex:1;padding:8px;max-height:60vh}
+.results-panel-body{overflow-y:auto;flex:1;padding:8px;max-height:60vh;background:#ffffff}
 @media(max-width:768px){.results-panel-body{max-height:none;overflow-y:visible}}
 .results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 
@@ -1832,7 +1832,7 @@ function placeBetForMatch(matchId) {
     p.validatedBets[parseInt(b.matchId)] = {
       h:b.h, a:b.a,
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
-      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd, day: day
+      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd
     };
     delete betslip[k];
   });
@@ -1887,8 +1887,7 @@ function placeBets() {
       resultCls:b.resultCls,
       resultShort:b.resultShort,
       scoreOdd:b.scoreOdd,
-      resultOdd:b.resultOdd,
-      day: day
+      resultOdd:b.resultOdd
     };
   });
   savePlayers(players);
@@ -2109,7 +2108,6 @@ function switchRankTab(tab, btn) {
 }
 
 let historyFilterPlayer = 'all';
-let historyFilterDay = 'all';
 let rankTab = 'saison';
 
 window.switchRankTab = function switchRankTab(tab) {
@@ -2159,56 +2157,45 @@ function renderRankingPanel() {
 function renderHistoryPanel() {
   const players = loadPlayers();
   const playerNames = Object.keys(players);
-  const allDays = new Set();
-  playerNames.forEach(name => {
-    const vb = players[name]?.validatedBets || {};
-    Object.values(vb).forEach(bet => { if (bet.day) allDays.add(bet.day); });
-  });
-  const daysArr = Array.from(allDays).sort();
+
+  // Filtres joueurs
   const filtersEl = document.getElementById('historyFilters');
   if (filtersEl) {
     var allActive = historyFilterPlayer === 'all' ? ' active' : '';
-    var btns = '<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">';
-    btns += '<button class="history-filter-btn' + allActive + '" onclick="setHistoryFilter(this,'all')">👥 Tous</button>';
+    var btns = '<button class="history-filter-btn' + allActive + '" onclick="setHistoryFilter(this,\'all\')">Tous</button>';
     playerNames.forEach(function(n) {
       var isActive = historyFilterPlayer === n ? ' active' : '';
-      btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,'' + n + '')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
+      btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,\'' + n + '\')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
     });
-    btns += '</div>';
-    if (daysArr.length >= 1) {
-      btns += '<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;border-top:1px solid var(--bord);padding-top:6px;margin-top:2px">';
-      var dayAllActive = historyFilterDay === 'all' ? ' active' : '';
-      btns += '<button class="history-filter-btn' + dayAllActive + '" onclick="setHistoryDayFilter(this,'all')">📅 Toutes</button>';
-      daysArr.forEach(function(d) {
-        var isActive = historyFilterDay === d ? ' active' : '';
-        btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryDayFilter(this,'' + d.replace(/'/g,"\'") + '')">' + d + '</button>';
-      });
-      btns += '</div>';
-    }
     filtersEl.innerHTML = btns;
   }
+
+  // Historique des paris
   const histEl = document.getElementById('historyList');
   if (!histEl) return;
+
   const filtered = historyFilterPlayer === 'all' ? playerNames : [historyFilterPlayer];
   const matchPronosMap = {};
+
   filtered.forEach(name => {
     const vb = players[name]?.validatedBets || {};
     Object.entries(vb).forEach(([mid, bet]) => {
-      if (historyFilterDay !== 'all' && bet.day !== historyFilterDay) return;
       if (!matchPronosMap[mid]) matchPronosMap[mid] = [];
       matchPronosMap[mid].push({ name, bet });
     });
   });
+
   if (Object.keys(matchPronosMap).length === 0) {
     histEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun pari trouvé</div>';
     return;
   }
+
   histEl.innerHTML = Object.entries(matchPronosMap).map(([mid, pronos]) => {
     const m = matches.find(x => String(x.id) === String(mid));
     const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
     const live = liveData[parseInt(mid)];
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
-    const dayLabel = pronos[0]?.bet?.day || '';
+
     const pronosHtml = pronos.map(({ name, bet }) => {
       const isMe = name === currentPlayer;
       const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
@@ -2218,13 +2205,17 @@ function renderHistoryPanel() {
       return '<div class="history-prono-row">' +
         '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
         '<span class="history-score">' + bet.h + '-' + bet.a + '</span>' +
-        ptsHtml + '</div>';
+        ptsHtml +
+      '</div>';
     }).join('');
+
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
-        '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
+        '<span>' + matchName + '</span>' +
         '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
-      '</div>' + pronosHtml + '</div>';
+      '</div>' +
+      pronosHtml +
+    '</div>';
   }).join('');
 }
 
@@ -2232,11 +2223,6 @@ function setHistoryFilter(btn, player) {
   historyFilterPlayer = player;
   document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderHistoryPanel();
-}
-
-function setHistoryDayFilter(btn, day) {
-  historyFilterDay = day;
   renderHistoryPanel();
 }
 
