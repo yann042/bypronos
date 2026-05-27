@@ -894,8 +894,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .history-filter-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s}
 .history-filter-btn.active{background:#056b52;color:#fff;border-color:#056b52}
 .history-match{border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden}
-.history-match-header{display:grid;grid-template-columns:1fr 60px 60px;align-items:center;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700;gap:6px}
-.history-prono-row{display:grid;grid-template-columns:1fr 60px 60px;align-items:center;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px;gap:6px}
+.history-match-header{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:6px 10px;background:var(--bg3);font-size:12px;font-weight:700;gap:6px}
+.history-prono-row{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:5px 10px;border-top:1px solid var(--bord);font-size:12px;gap:6px}
 .history-player{font-weight:700;color:var(--txt2)}
 .history-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700}
 .history-pts.pos{color:#056b52;font-weight:700}
@@ -2301,32 +2301,38 @@ function renderHistoryPanel() {
       const finalH = bet.finalH !== undefined ? bet.finalH : (live ? live.homeScore : null);
       const finalA = bet.finalA !== undefined ? bet.finalA : (live ? live.awayScore : null);
       const pts = (finalH !== null && finalA !== null) ? calcLivePts(bet, finalH, finalA) : null;
-      const ptsDisplay = '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">' +
+      const ptsDisplay = '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
         '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Pts</span>' +
         (pts
-          ? '<span style="font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:800;color:' + (pts.pts > 0 ? '#056b52' : '#cc2200') + '">' + fmtPts(pts.pts) + '</span>'
-          : '<span style="color:var(--txt2);font-size:10px">—</span>'
+          ? '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:800;color:' + (pts.pts > 0 ? '#056b52' : '#cc2200') + '">' + fmtPts(pts.pts) + '</span>'
+          : '<span style="color:var(--txt2);font-size:12px">—</span>'
         ) +
         '</span>';
       return '<div class="history-prono-row">' +
-        '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
+        '<span style="display:flex;flex-direction:column;gap:1px">' +
+          '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Joueur</span>' +
+          '<span class="history-player" style="font-size:12px">' + (isMe ? '👤 ' : '') + name + '</span>' +
+        '</span>' +
         '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
           '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Prono</span>' +
-          '<span class="history-score" style="color:var(--txt);font-weight:700">' + bet.h + '-' + bet.a + '</span>' +
+          '<span class="history-score" style="font-size:14px;font-family:Barlow Condensed,sans-serif;color:var(--txt);font-weight:700">' + bet.h + '-' + bet.a + '</span>' +
         '</span>' +
         ptsDisplay +
       '</div>';
         }).join('');
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
-        '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
+        '<span style="display:flex;flex-direction:column;gap:1px">' +
+          '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Match</span>' +
+          '<span style="font-size:12px;font-weight:700;color:var(--txt)">' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:400">· ' + dayLabel + '</span>' : '') + '</span>' +
+        '</span>' +
         '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
           '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Score final</span>' +
-          '<span style="color:#056b52;font-weight:800;font-family:Barlow Condensed,sans-serif;font-size:15px">' + scoreStr + '</span>' +
+          '<span style="color:#056b52;font-weight:800;font-family:Barlow Condensed,sans-serif;font-size:14px">' + scoreStr + '</span>' +
         '</span>' +
-        '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">' +
+        '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
           '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Pts max</span>' +
-          '<span style="font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:700;color:var(--txt2)">' + (pronos[0] ? fmtPts(pronos[0].bet.resultOdd + pronos[0].bet.scoreOdd) : '—') + '</span>' +
+          '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:var(--txt2)">' + (pronos[0] ? fmtPts(pronos[0].bet.resultOdd + pronos[0].bet.scoreOdd) : '—') + '</span>' +
         '</span>' +
       '</div>' + pronosHtml + '</div>';
   }).join('');
