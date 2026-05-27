@@ -23,7 +23,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .nav{display:flex;gap:4px;flex:1}
 .nav-btn{background:none;border:none;color:var(--txt2);padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;transition:all .15s}
 .nav-btn:hover{background:var(--bg3);color:var(--txt)}
-.nav-btn.active{background:var(--bg3);color:var(--acc)}
+.nav-btn.active{background:var(--bg3);color:var(--acc);border-radius:6px}
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
@@ -188,7 +188,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .place-btn{width:100%;background:var(--acc);color:#0d1117;border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .15s;margin-top:12px}
 .place-btn:hover{opacity:.9}
 
-.view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+.view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--bg2)}
 
 /* ── Login overlay ── */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
@@ -2328,7 +2328,7 @@ function renderHistoryPanel() {
         '</span>' +
         '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
           '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Score final</span>' +
-          '<span style="color:#056b52;font-weight:800;font-family:Barlow Condensed,sans-serif;font-size:14px">' + scoreStr + '</span>' +
+          '<span style="color:var(--txt2);font-weight:700;font-family:Barlow Condensed,sans-serif;font-size:14px">' + scoreStr + '</span>' +
         '</span>' +
         '<span style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
           '<span style="font-size:8px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.5px">Pts max</span>' +
