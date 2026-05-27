@@ -2278,6 +2278,10 @@ function renderHistoryPanel() {
     const vb = players[name]?.validatedBets || {};
     Object.entries(vb).forEach(([mid, bet]) => {
       if (historyFilterDay !== 'all' && bet.day !== historyFilterDay) return;
+      // Masquer les pronos des autres joueurs tant que le match n'a pas commencé
+      const matchObj = matches.find(x => String(x.id) === String(mid));
+      const hasStarted = bet.finalH !== undefined || liveData[parseInt(mid)] || (matchObj && isMatchStarted(matchObj.time, matchObj.id));
+      if (!hasStarted && name !== currentPlayer) return;
       if (!matchPronosMap[mid]) matchPronosMap[mid] = [];
       matchPronosMap[mid].push({ name, bet });
     });
