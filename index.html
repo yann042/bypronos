@@ -1003,11 +1003,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div><!-- /view-sports -->
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
-  <!-- Header fixe Live (hors view-panel) -->
-  <div id="liveFixedHeader" style="display:none;position:absolute;top:56px;left:0;right:0;z-index:20;background:var(--bg2);padding:8px 16px;border-bottom:1px solid var(--bord)">
-    <div class="live-title" id="livePanelTitle" style="font-size:14px">🔴 LIVE</div>
-  </div>
-  <div id="view-live" class="view-panel view-panel-live" style="display:none;top:96px !important">
+  <div id="view-live" class="view-panel" style="display:none">
     <div id="liveScoreList" style="padding:10px"></div>
   </div><!-- /view-live -->
 
@@ -1971,15 +1967,7 @@ window.selectComp = function selectComp(comp, btn) {
 
 window.showView = function showView(view, btn) {
   document.querySelectorAll('.view-panel').forEach(p=>p.style.display='none');
-  const panel = document.getElementById('view-'+view);
-  const liveHdr = document.getElementById('liveFixedHeader');
-  if (view === 'live') {
-    panel.style.display = 'block';
-    if (liveHdr) liveHdr.style.display = 'block';
-  } else {
-    panel.style.display = 'block';
-    if (liveHdr) liveHdr.style.display = 'none';
-  }
+  document.getElementById('view-'+view).style.display='block';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
@@ -2179,7 +2167,7 @@ var globalLiveLastFetch = 0;
 async function fetchGlobalLive() {
   // Afficher immédiatement les prochains matchs pendant le chargement
   renderLiveView();
-  if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length) {
+  if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
   }
   try {
@@ -2198,7 +2186,7 @@ async function fetchGlobalLive() {
 function renderLiveView() {
   const el = document.getElementById('liveScoreList');
   if (!el) return;
-  const titleEl = document.getElementById('livePanelTitle');
+  const titleEl = null; // titre supprimé
   if (globalLiveData.length > 0) {
     if (titleEl) titleEl.textContent = '🔴 ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
     const byLeague = {};
@@ -2244,8 +2232,12 @@ function renderLiveView() {
   const today = new Date().toISOString().slice(0, 10);
   let dm = matches.filter(function(m){ return m.date === today; });
   if (!dm.length) {
-    const fd = matches.map(function(m){ return m.date; }).filter(function(d){ return d >= today; }).sort();
-    if (fd.length) { const nd = fd[0]; dm = matches.filter(function(m){ return m.date === nd; }); }
+    // Chercher tous les matchs futurs ou passés récents
+    const allDates = matches.map(function(m){ return m.date; }).sort();
+    const futureDates = allDates.filter(function(d){ return d >= today; });
+    const pastDates = allDates.filter(function(d){ return d < today; }).reverse();
+    const nd = futureDates.length ? futureDates[0] : (pastDates.length ? pastDates[0] : null);
+    if (nd) dm = matches.filter(function(m){ return m.date === nd; });
   }
   if (!dm.length) {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt2)"><div style="font-size:48px">&#x26BD;</div><div style="font-size:16px;font-weight:700;margin-top:12px">Aucun match en direct</div></div>';
