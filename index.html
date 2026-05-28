@@ -1001,7 +1001,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <div class="live-header" style="position:sticky;top:0;z-index:10;background:var(--bg2);padding:8px 16px;border-bottom:1px solid var(--bord)">
+    <div style="position:sticky;top:0;z-index:10;background:var(--bg2);padding:8px 16px;border-bottom:1px solid var(--bord)">
       <div class="live-title" style="font-size:14px">🔴 LIVE — Coupe du Monde 2026</div>
     </div>
     <div id="liveScoreList" style="padding:10px"></div>
@@ -2156,10 +2156,10 @@ var globalLiveData = [];
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
-  const el = document.getElementById('liveScoreList');
-  if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement...</div>';
+  // Afficher immédiatement les prochains matchs pendant le chargement
+  renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length) {
-    renderLiveView(); return;
+    return;
   }
   try {
     const res = await fetch(APIFOOTBALL_HOST + '/fixtures?live=all', {
@@ -2203,7 +2203,7 @@ function renderLiveView() {
             '</div>' +
             '<div style="text-align:center;padding:0 6px;position:relative">' +
               '<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#e03030;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.5px;white-space:nowrap">' + min + '</div>' +
-              '<div style="font-size:11px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
+              '<div style="font-size:15px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
             '</div>' +
             '<div style="display:flex;align-items:center;gap:5px;min-width:0;justify-content:flex-end">' +
               '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
