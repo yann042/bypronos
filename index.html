@@ -1170,7 +1170,46 @@ function isMatchExpired(timeStr, matchId) {
   return true;
 }
 
-const LOGOS = {"Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
+const LOGOS = {
+  // ── Coupe du Monde 2026 ─────────────────────────────────────
+  "Mexique": "https://flagcdn.com/w40/mx.png",
+  "Afrique du Sud": "https://flagcdn.com/w40/za.png",
+  "Corée du Sud": "https://flagcdn.com/w40/kr.png",
+  "Rep. Tcheque": "https://flagcdn.com/w40/cz.png",
+  "Canada": "https://flagcdn.com/w40/ca.png",
+  "Bosnie-Herz.": "https://flagcdn.com/w40/ba.png",
+  "Etats-Unis": "https://flagcdn.com/w40/us.png",
+  "Paraguay": "https://flagcdn.com/w40/py.png",
+  "Qatar": "https://flagcdn.com/w40/qa.png",
+  "Suisse": "https://flagcdn.com/w40/ch.png",
+  "Bresil": "https://flagcdn.com/w40/br.png",
+  "Maroc": "https://flagcdn.com/w40/ma.png",
+  "Haiti": "https://flagcdn.com/w40/ht.png",
+  "Ecosse": "https://flagcdn.com/w40/gb-sct.png",
+  "Australie": "https://flagcdn.com/w40/au.png",
+  "Turquie": "https://flagcdn.com/w40/tr.png",
+  "Allemagne": "https://flagcdn.com/w40/de.png",
+  "Curacao": "https://flagcdn.com/w40/cw.png",
+  "Pays-Bas": "https://flagcdn.com/w40/nl.png",
+  "Japon": "https://flagcdn.com/w40/jp.png",
+  "France": "https://flagcdn.com/w40/fr.png",
+  "Senegal": "https://flagcdn.com/w40/sn.png",
+  "Argentine": "https://flagcdn.com/w40/ar.png",
+  "Espagne": "https://flagcdn.com/w40/es.png",
+  "Portugal": "https://flagcdn.com/w40/pt.png",
+  "Angleterre": "https://flagcdn.com/w40/gb-eng.png",
+  "Belgique": "https://flagcdn.com/w40/be.png",
+  "Croatie": "https://flagcdn.com/w40/hr.png",
+  "Uruguay": "https://flagcdn.com/w40/uy.png",
+  "Nigeria": "https://flagcdn.com/w40/ng.png",
+  "Pologne": "https://flagcdn.com/w40/pl.png",
+  "Danemark": "https://flagcdn.com/w40/dk.png",
+  "Serbie": "https://flagcdn.com/w40/rs.png",
+  "Norvege": "https://flagcdn.com/w40/no.png",
+  "Irak": "https://flagcdn.com/w40/iq.png",
+  "Algerie": "https://flagcdn.com/w40/dz.png",
+  // ── Clubs Ligue 1 ───────────────────────────────────────────
+  "Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg","Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
 
 function getLogo(name) {
   // Cherche une correspondance partielle
@@ -1194,7 +1233,7 @@ const WC2026_SEASON = 2026;
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
 const matches = [
   {id:1,  home:'Mexique',      away:'Afrique du Sud', date:'2026-06-11', time:'21:00', odds:[1.90,3.40,4.20], sofaId:null},
-  {id:2,  home:'Core du Sud', away:'Rep. Tcheque',   date:'2026-06-12', time:'04:00', odds:[2.60,3.10,2.80], sofaId:null},
+  {id:2,  home:'Corée du Sud', away:'Rep. Tcheque',   date:'2026-06-12', time:'04:00', odds:[2.60,3.10,2.80], sofaId:null},
   {id:3,  home:'Canada',       away:'Bosnie-Herz.',  date:'2026-06-12', time:'21:00', odds:[1.80,3.50,4.50], sofaId:null},
   {id:4,  home:'Etats-Unis',   away:'Paraguay',       date:'2026-06-13', time:'03:00', odds:[1.70,3.50,5.00], sofaId:null},
   {id:5,  home:'Qatar',        away:'Suisse',         date:'2026-06-13', time:'21:00', odds:[5.50,4.00,1.55], sofaId:null},
