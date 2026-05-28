@@ -241,8 +241,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-empty .ico{font-size:44px;margin-bottom:14px;opacity:.3}
 .ranking-empty p{font-size:13px;line-height:1.8}
 .journee-badge{display:inline-block;background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--txt2);margin-bottom:16px;max-width:680px}
-.live-view{height:100%;display:flex;flex-direction:column;background:var(--bg);padding:20px 28px;overflow-y:auto}
-.live-header{margin-bottom:20px}
+.live-view{display:flex;flex-direction:column;background:var(--bg2);padding:10px 16px}
+.live-header{margin-bottom:10px}
 .live-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;display:flex;align-items:center;gap:10px}
 .live-sub{font-size:12px;color:var(--txt2);margin-top:4px}
 .live-widget-wrap{position:relative;max-width:820px}
@@ -2210,22 +2210,22 @@ function renderLiveView() {
         const min = f.fixture.status.elapsed ? f.fixture.status.elapsed + "'" : f.fixture.status.short;
         const isPronos = matches.some(function(m){ return m.home === f.teams.home.name || m.away === f.teams.away.name; });
         const border = isPronos ? 'border:2px solid var(--acc)' : 'border:1px solid var(--bord)';
-        return '<div style="background:var(--bg2);' + border + ';border-radius:10px;margin-bottom:8px;padding:10px 12px">' +
-          '<div style="display:flex;align-items:center;gap:8px">' +
-            '<div style="flex:1;display:flex;align-items:center;gap:6px;min-width:0">' +
-              (f.teams.home.logo ? '<img src="' + f.teams.home.logo + '" style="width:20px;height:20px;object-fit:contain;flex-shrink:0">' : '') +
-              '<span style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
+        return '<div style="background:var(--bg2);' + border + ';border-radius:8px;margin-bottom:5px;padding:6px 10px">' +
+          '<div style="display:flex;align-items:center;gap:6px">' +
+            '<div style="flex:1;display:flex;align-items:center;gap:5px;min-width:0">' +
+              (f.teams.home.logo ? '<img src="' + f.teams.home.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
+              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
             '</div>' +
-            '<div style="flex-shrink:0;text-align:center;padding:0 8px">' +
-              '<div style="font-size:18px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
-              '<div style="font-size:9px;color:var(--acc3);font-weight:700">&#x1F534; ' + min + '</div>' +
+            '<div style="flex-shrink:0;text-align:center;padding:0 6px">' +
+              '<div style="background:#e03030;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:3px;margin-bottom:2px;letter-spacing:.5px">' + min + '</div>' +
+              '<div style="font-size:16px;font-weight:800;color:var(--acc);line-height:1">' + hs + '-' + as + '</div>' +
             '</div>' +
-            '<div style="flex:1;display:flex;align-items:center;gap:6px;min-width:0;justify-content:flex-end">' +
-              '<span style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
-              (f.teams.away.logo ? '<img src="' + f.teams.away.logo + '" style="width:20px;height:20px;object-fit:contain;flex-shrink:0">' : '') +
+            '<div style="flex:1;display:flex;align-items:center;gap:5px;min-width:0;justify-content:flex-end">' +
+              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
+              (f.teams.away.logo ? '<img src="' + f.teams.away.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
             '</div>' +
           '</div>' +
-          (isPronos ? '<div style="font-size:9px;color:var(--acc);font-weight:700;text-align:center;margin-top:4px">&#x2605; Dans vos pronos</div>' : '') +
+          (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:2px">&#x2605; Dans vos pronos</div>' : '') +
         '</div>';
       }).join('');
       return '<div style="margin-bottom:16px">' + hdr + cards + '</div>';
