@@ -242,6 +242,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-empty p{font-size:13px;line-height:1.8}
 .journee-badge{display:inline-block;background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--txt2);margin-bottom:16px;max-width:680px}
 .live-view{display:flex;flex-direction:column;background:var(--bg2);padding:10px 16px}
+.view-panel-live{display:flex !important;flex-direction:column;overflow:hidden !important}
+.live-fixed-header{flex-shrink:0;background:var(--bg2);padding:8px 16px;border-bottom:1px solid var(--bord)}
+.live-scroll-body{flex:1;overflow-y:auto;padding:10px}
 .live-header{margin-bottom:10px}
 .live-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;display:flex;align-items:center;gap:10px}
 .live-sub{font-size:12px;color:var(--txt2);margin-top:4px}
@@ -1000,11 +1003,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div><!-- /view-sports -->
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
-  <div id="view-live" class="view-panel" style="display:none">
-    <div style="position:sticky;top:0;z-index:10;background:var(--bg2);padding:8px 16px;border-bottom:1px solid var(--bord)">
-      <div class="live-title" style="font-size:14px">🔴 LIVE — Coupe du Monde 2026</div>
+  <div id="view-live" class="view-panel view-panel-live" style="display:none">
+    <div class="live-fixed-header">
+      <div class="live-title" id="livePanelTitle" style="font-size:14px">🔴 LIVE</div>
     </div>
-    <div id="liveScoreList" style="padding:10px"></div>
+    <div id="liveScoreList" class="live-scroll-body"></div>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
@@ -1738,6 +1741,14 @@ setInterval(() => {
   if (liveNow) fetchLiveScores();
 }, 180000);
 
+// Rafraîchissement automatique onglet Live toutes les 60s
+setInterval(() => {
+  const livePanel = document.getElementById('view-live');
+  if (livePanel && livePanel.style.display !== 'none') {
+    fetchGlobalLive();
+  }
+}, 60000);
+
 // Premier appel immédiat
 fetchLiveScores();
 
@@ -1958,7 +1969,7 @@ window.selectComp = function selectComp(comp, btn) {
 
 window.showView = function showView(view, btn) {
   document.querySelectorAll('.view-panel').forEach(p=>p.style.display='none');
-  document.getElementById('view-'+view).style.display='block';
+  document.getElementById('view-'+view).style.display = view === 'live' ? 'flex' : 'block';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
@@ -2177,7 +2188,9 @@ async function fetchGlobalLive() {
 function renderLiveView() {
   const el = document.getElementById('liveScoreList');
   if (!el) return;
+  const titleEl = document.getElementById('livePanelTitle');
   if (globalLiveData.length > 0) {
+    if (titleEl) titleEl.textContent = '🔴 ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
     const byLeague = {};
     globalLiveData.forEach(function(f) {
       const key = f.league.name + ' | ' + f.league.country;
@@ -2228,7 +2241,8 @@ function renderLiveView() {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt2)"><div style="font-size:48px">&#x26BD;</div><div style="font-size:16px;font-weight:700;margin-top:12px">Aucun match en direct</div></div>';
     return;
   }
-  const banner = dm[0].date > today ? '<div style="background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--txt2);text-align:center">&#128197; Prochains matchs &middot; ' + dm[0].date + '</div>' : '';
+  if (titleEl) titleEl.textContent = dm[0].date > today ? '📅 Prochains matchs · ' + dm[0].date : '🔴 Matchs du jour';
+  const banner = '';
   el.innerHTML = banner + dm.map(function(m) {
     const live = liveData[m.id];
     const started = isMatchStarted(m.time, m.id);
