@@ -14,10 +14,10 @@
   --txt:#1a1f1a;--txt2:#5a6a5a;--bord:#d0d5cc;
 }
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;font-size:14px}
-.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative}
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden}
 
 /* Header */
-.header{background:var(--bg2);padding:0 16px;display:flex;align-items:center;gap:16px}
+.header{background:var(--bg);padding:0 16px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:4px;flex:1}
@@ -192,7 +192,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .place-btn{width:100%;background:var(--acc);color:#0d1117;border:none;border-radius:8px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .15s;margin-top:12px}
 .place-btn:hover{opacity:.9}
 
-.view-panel{height:calc(100vh - 56px);overflow-y:auto;overflow-x:hidden;position:relative}
+.view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
 
 /* ── Login overlay ── */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
@@ -352,7 +352,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   /* App height auto sur mobile */
   .app{grid-template-rows:56px auto;height:auto;min-height:100vh}
-  .view-panel{height:auto;min-height:calc(100vh - 56px);overflow:visible}
+  .view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden}
 
   /* Header compact */
   .header{padding:0 10px;gap:8px;flex-wrap:nowrap}
@@ -1004,10 +1004,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <div id="livePanelHeader" style="padding:8px 16px;border-bottom:1px solid var(--bord);background:var(--bg2)">
-      <div class="live-title" id="livePanelTitle" style="font-size:14px">🔴 LIVE</div>
+    <div id="livePanelHeader" style="padding:6px 16px;border-bottom:1px solid var(--bord);background:var(--bg)">
+      <div class="live-title" id="livePanelTitle" style="font-size:13px">🔴 LIVE</div>
     </div>
-    <div id="liveScoreList" style="padding:10px"></div>
+    <div id="liveScoreList" style="padding:8px"></div>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
