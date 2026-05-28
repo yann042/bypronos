@@ -868,7 +868,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .sidebar-overlay { display: none !important; }
 }
 
-.comp-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
+.comp-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
 .comp-btn:hover{border-color:var(--acc);color:var(--acc)}
 .comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
 
@@ -880,7 +880,18 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .results-panel-body{overflow-y:auto;flex:1;padding:8px}
 
 /* Classement */
-.ranking-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--bg3)}
+.ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:#f7f7f7;border:1px solid #e0e0e0}
+.ranking-row.gold{background:#ffffff !important;border:3px solid #c9960a !important;padding:12px 14px}
+.ranking-row.silver{background:linear-gradient(135deg,#f4f4f4,#e8e8e8);border:1.5px solid #b0b0b0}
+.ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0);border:1.5px solid #c08040}
+.ranking-row.gold .rank-name{color:#c9960a;font-weight:800;font-size:15px}
+.ranking-row.silver .rank-name{color:#505050;font-weight:800}
+.ranking-row.bronze .rank-name{color:#7a4a10;font-weight:800}
+.ranking-row.gold .rank-pts{color:#c9960a;font-size:22px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+.ranking-row.silver .rank-pts{color:#808080;font-size:18px}
+.ranking-row.bronze .rank-pts{color:#a0622a;font-size:18px}
+.ranking-row.gold .rank-pos{font-size:26px}
+.ranking-row.me{background:#f7f7f7;border:1px solid #e0e0e0}
 .ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
@@ -964,9 +975,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
   <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
-  <button class="comp-btn" id="compBtn1" onclick="selectComp('worldcup',this)">🌍 Coupe du Monde</button>
-  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 Ligue 1</button>
-  <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+  <button class="comp-btn" id="compBtn1" onclick="selectComp('worldcup',this)">🌍 CdM 2026</button>
+  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 L1</button>
+  <button class="comp-btn" id="compBtn4" onclick="selectComp('ligue2',this)">🇫🇷 L2</button>
+  <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
 </div>
 <div class="section-title" id="sectionTitle">🌍 Coupe du Monde 2026</div>
       <div id="matchList"></div>
@@ -1126,7 +1138,7 @@ window.doJoinLeague = async function() {
 <script>
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
-const TEST_MODE = true;
+const TEST_MODE = false;
 function parseKickoff(dateStr, timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
   const d = dateStr ? new Date(dateStr) : new Date();
@@ -1215,6 +1227,8 @@ function getLogo(name) {
 const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
+const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
+const BSD_HOST = 'https://sports.bzzoiro.com';
 const APIFOOTBALL_HOST = 'https://v3.football.api-sports.io';
 const WC2026_LEAGUE_ID = 1;
 const WC2026_SEASON = 2026;
@@ -1222,16 +1236,16 @@ const WC2026_SEASON = 2026;
 // IDs Sofascore des matchs (à mettre à jour chaque journée)
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
 const matches = [
-  {id:1,  comp:'worldcup', home:'Mexique',      away:'Afrique du Sud', date:'2026-06-11', time:'21:00', odds:[1.90,3.40,4.20], sofaId:null},
-  {id:2,  comp:'worldcup', home:'Corée du Sud', away:'Rep. Tcheque',   date:'2026-06-12', time:'04:00', odds:[2.60,3.10,2.80], sofaId:null},
-  {id:3,  comp:'worldcup', home:'Canada',       away:'Bosnie-Herz.',  date:'2026-06-12', time:'21:00', odds:[1.80,3.50,4.50], sofaId:null},
-  {id:4,  comp:'worldcup', home:'Etats-Unis',   away:'Paraguay',       date:'2026-06-13', time:'03:00', odds:[1.70,3.50,5.00], sofaId:null},
-  {id:5,  comp:'worldcup', home:'Qatar',        away:'Suisse',         date:'2026-06-13', time:'21:00', odds:[5.50,4.00,1.55], sofaId:null},
-  {id:6,  comp:'worldcup', home:'Bresil',       away:'Maroc',          date:'2026-06-14', time:'00:00', odds:[1.75,3.60,4.80], sofaId:null},
-  {id:7,  comp:'worldcup', home:'Haiti',        away:'Ecosse',         date:'2026-06-14', time:'03:00', odds:[4.50,3.50,1.80], sofaId:null},
-  {id:8,  comp:'worldcup', home:'Australie',    away:'Turquie',        date:'2026-06-14', time:'06:00', odds:[2.80,3.20,2.60], sofaId:null},
-  {id:9,  comp:'worldcup', home:'Allemagne',    away:'Curacao',        date:'2026-06-14', time:'19:00', odds:[1.10,8.00,22.0], sofaId:null},
-  {id:10, home:'Pays-Bas',     away:'Japon',          date:'2026-06-14', time:'22:00', odds:[1.90,3.50,4.20], sofaId:null},
+  {id:1,  comp:'worldcup', home:'Mexique',      away:'Afrique du Sud', date:'2026-06-11', time:'21:00', odds:[1.45,4.05,6.25], sofaId:null},
+  {id:2,  comp:'worldcup', home:'Corée du Sud', away:'Rép. Tchèque',   date:'2026-06-12', time:'04:00', odds:[2.62,3.07,2.62], sofaId:null},
+  {id:3,  comp:'worldcup', home:'Canada',       away:'Bosnie-Herzég.', date:'2026-06-12', time:'21:00', odds:[1.95,3.40,4.10], sofaId:null},
+  {id:4,  comp:'worldcup', home:'États-Unis',   away:'Paraguay',       date:'2026-06-13', time:'03:00', odds:[1.57,3.90,5.50], sofaId:null},
+  {id:5,  comp:'worldcup', home:'Qatar',        away:'Suisse',         date:'2026-06-13', time:'21:00', odds:[5.25,3.80,1.62], sofaId:null},
+  {id:6,  comp:'worldcup', home:'Brésil',       away:'Maroc',          date:'2026-06-14', time:'00:00', odds:[1.57,3.90,5.50], sofaId:null},
+  {id:7,  comp:'worldcup', home:'Haïti',        away:'Écosse',         date:'2026-06-14', time:'03:00', odds:[7.10,4.55,1.39], sofaId:null},
+  {id:8,  comp:'worldcup', home:'Australie',    away:'Turquie',        date:'2026-06-14', time:'06:00', odds:[2.75,3.10,2.62], sofaId:null},
+  {id:9,  comp:'worldcup', home:'Allemagne',    away:'Curaçao',        date:'2026-06-14', time:'19:00', odds:[1.14,7.50,17.0], sofaId:null},
+  {id:10, comp:'worldcup', home:'Pays-Bas',     away:'Japon',          date:'2026-06-14', time:'22:00', odds:[1.95,3.40,4.00], sofaId:null},
 ];
 
 // ── Ligue courante ───────────────────────────────────────────────
@@ -1289,8 +1303,8 @@ function scoreOdd(m, h, a) {
   const lh=1.35*(p1/tot+0.5*pN/tot), la=1.35*(p2/tot+0.5*pN/tot);
   function pois(l,k){let e=Math.exp(-l),f=1;for(let i=1;i<=k;i++)f*=i;return e*Math.pow(l,k)/f;}
   const prob=pois(lh,h)*pois(la,a);
-  if(prob<0.00001) return 999.0;
-  return Math.round(1/prob*1.15*10)/10;
+  if(prob<0.00001) return 101.0;
+  return Math.min(101.0, Math.round(1/prob*1.15*10)/10);
 }
 function deduceResult(m, h, a) {
   const cls = h>a ? 'win' : h===a ? 'draw' : 'lose';
@@ -1735,6 +1749,101 @@ async function fetchLiveScores() {
   } catch(e) { console.warn('Live fetch error:', e); }
 }
 
+
+// ── Chargement automatique des matchs + cotes via API-Football ────
+async function fetchUpcomingMatches() {
+  console.log('🔄 Chargement matchs + cotes via API-Football...');
+  const headers = {'x-apisports-key': APIFOOTBALL_KEY};
+
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const next = new Date(Date.now() + 20*24*60*60*1000).toISOString().slice(0, 10);
+    const res = await fetch(APIFOOTBALL_HOST + '/fixtures?league=' + WC2026_LEAGUE_ID + '&season=' + WC2026_SEASON + '&from=' + today + '&to=' + next + '&status=NS', {headers});
+    if (!res.ok) return;
+    const data = await res.json();
+    const fixtures = (data.response || []).slice(0, 10);
+    if (!fixtures.length) return;
+
+    // Mapper les fixtures sur les matchs statiques par équipes
+    fixtures.forEach(function(f) {
+      const m = matches.find(function(x) {
+        return x.home.toLowerCase().includes(f.teams.home.name.split(' ')[0].toLowerCase()) ||
+               f.teams.home.name.toLowerCase().includes(x.home.split(' ')[0].toLowerCase());
+      });
+      if (m) m.fixtureId = f.fixture.id;
+    });
+
+    // Récupérer les cotes scores exacts pour chaque match
+    for (var i = 0; i < matches.length; i++) {
+      var m = matches[i];
+      if (!m.fixtureId) continue;
+      try {
+        var oddsRes = await fetch(APIFOOTBALL_HOST + '/odds?fixture=' + m.fixtureId, {headers});
+        if (!oddsRes.ok) continue;
+        var oddsData = await oddsRes.json();
+        var bookmakers = oddsData.response?.[0]?.bookmakers || [];
+        // Essayer plusieurs bookmakers
+        for (var b of bookmakers) {
+          var bets = b.bets || [];
+          // Score exact — noms possibles selon bookmaker
+          var exact = bets.find(function(bet) {
+            return bet.name === 'Exact Score' || bet.name === 'Score' || bet.name === 'Correct Score' || bet.name === 'Result/Both Teams Score';
+          });
+          if (exact) {
+            m.exactScoreOdds = {};
+            exact.values.forEach(function(v) {
+              m.exactScoreOdds[v.value] = parseFloat(v.odd);
+            });
+            console.log('✅ Cotes exactes pour ' + m.home + ' vs ' + m.away + ':', Object.keys(m.exactScoreOdds).length + ' scores');
+            break;
+          }
+        }
+      } catch(e) { console.warn('Odds error:', e); }
+    }
+    console.log('✅ fetchUpcomingMatches terminé');
+  } catch(e) { console.warn('fetchUpcomingMatches error:', e); }
+}
+
+
+// ── Récupération cotes 1X2 via BSD (illimité, gratuit) ───────────
+async function fetchBSDOdds() {
+  console.log('🔄 Chargement cotes 1X2 via BSD...');
+  try {
+    const res = await fetch(BSD_HOST + '/api/events/?status=upcoming', {
+      headers: {'Authorization': 'Token ' + BSD_KEY}
+    });
+    if (!res.ok) { console.warn('BSD error:', res.status); return; }
+    const data = await res.json();
+    const events = data.results || [];
+    let updated = 0;
+    matches.forEach(function(m) {
+      // Chercher le match correspondant dans BSD
+      const ev = events.find(function(e) {
+        const homeName = (e.home_team || '').toLowerCase();
+        const awayName = (e.away_team || '').toLowerCase();
+        const mHome = m.home.toLowerCase();
+        const mAway = m.away.toLowerCase();
+        return (homeName.includes(mHome.split(' ')[0]) || mHome.includes(homeName.split(' ')[0])) &&
+               (awayName.includes(mAway.split(' ')[0]) || mAway.includes(awayName.split(' ')[0]));
+      });
+      if (ev && ev.odds_home && ev.odds_draw && ev.odds_away) {
+        m.odds = [
+          Math.round(parseFloat(ev.odds_home) * 100) / 100,
+          Math.round(parseFloat(ev.odds_draw) * 100) / 100,
+          Math.round(parseFloat(ev.odds_away) * 100) / 100
+        ];
+        updated++;
+      }
+    });
+    if (updated > 0) {
+      console.log('✅ BSD : ' + updated + ' matchs mis à jour avec vraies cotes');
+      renderMatches();
+    } else {
+      console.warn('⚠️ BSD : aucun match trouvé dans les résultats');
+    }
+  } catch(e) { console.warn('BSD fetch error:', e); }
+}
+
 setInterval(() => {
   renderMatches();
   const liveNow = matches.some(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
@@ -1751,6 +1860,10 @@ setInterval(() => {
 
 // Premier appel immédiat
 fetchLiveScores();
+// Charger les cotes scores exacts
+fetchUpcomingMatches();
+// Charger les cotes 1X2 via BSD
+fetchBSDOdds();
 
 // ══════════════════════════════════════════════
 // ── Interactions paris ────────────────────────
