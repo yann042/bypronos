@@ -17,7 +17,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative}
 
 /* Header */
-.header{background:var(--bg2);border-bottom:1px solid var(--bord);padding:0 16px;display:flex;align-items:center;gap:16px}
+.header{background:var(--bg2);padding:0 16px;display:flex;align-items:center;gap:16px}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:4px;flex:1}
@@ -1004,6 +1004,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
+    <div id="livePanelHeader" style="padding:8px 16px;border-bottom:1px solid var(--bord);background:var(--bg2)">
+      <div class="live-title" id="livePanelTitle" style="font-size:14px">🔴 LIVE</div>
+    </div>
     <div id="liveScoreList" style="padding:10px"></div>
   </div><!-- /view-live -->
 
@@ -2186,7 +2189,7 @@ async function fetchGlobalLive() {
 function renderLiveView() {
   const el = document.getElementById('liveScoreList');
   if (!el) return;
-  const titleEl = null; // titre supprimé
+  const titleEl = document.getElementById('livePanelTitle');
   if (globalLiveData.length > 0) {
     if (titleEl) titleEl.textContent = '🔴 ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
     const byLeague = {};
