@@ -14,20 +14,20 @@
   --txt:#1a1f1a;--txt2:#5a6a5a;--bord:#d0d5cc;
 }
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;font-size:14px}
-.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden}
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh;position:relative;overflow:hidden;background:var(--bg3)}
 
 /* Header */
-.header{background:var(--bg2);border-bottom:1px solid var(--bord);padding:0 16px;display:flex;align-items:center;gap:16px}
+.header{background:var(--bg3);padding:0 16px;display:flex;align-items:center;gap:16px;height:56px}
 .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;color:var(--acc);letter-spacing:1px}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:4px;flex:1}
 .nav-btn{background:none;border:none;color:var(--txt2);padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;transition:all .15s}
 .nav-btn:hover{background:var(--bg3);color:var(--txt)}
-.nav-btn.active{background:var(--bg3);color:var(--acc);border-radius:6px}
+.nav-btn.active{background:var(--bg3);color:var(--acc)}
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
-.main{display:grid;grid-template-columns:1fr;height:calc(100vh - 56px);overflow:hidden}
+.main{display:grid;grid-template-columns:1fr}
 
 /* Sidebar */
 .sidebar{background:var(--bg2);border-right:1px solid var(--bord);padding:12px 8px;overflow-y:auto}
@@ -230,7 +230,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .rank-pos.bronze{color:#cd7f32}
 .rank-name{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
 .rank-name .you-badge{background:var(--acc);color:#0d1117;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;letter-spacing:.5px}
-.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
+.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--acc2)}
 .rank-detail{font-size:11px;color:var(--txt2)}
 .rank-bets{font-size:12px;color:var(--txt2)}
 .ranking-empty{text-align:center;padding:60px 20px;color:var(--txt2)}
@@ -343,7 +343,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .betslip{border-left:none;border-top:1px solid var(--bord);height:auto;max-height:none}
   .betslip-body{max-height:400px}
 
-  /* App height fixe sur mobile */
+  /* App height fixe sur mobile aussi */
   .app{grid-template-rows:56px 1fr;height:100vh;overflow:hidden}
   .view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden}
 
@@ -868,7 +868,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;align-content:start}
 @media(max-width:768px){.results-view{grid-template-columns:1fr;padding:10px;gap:10px}}
 .results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
-.results-panel-body{overflow-y:auto;flex:1;padding:8px;max-height:60vh}
+.results-panel-body{overflow-y:auto;flex:1;padding:8px;max-height:60vh;background:#ffffff}
 @media(max-width:768px){.results-panel-body{max-height:none;overflow-y:visible}}
 .results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 
@@ -881,21 +881,21 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.silver .rank-name{color:#505050;font-weight:800}
 .ranking-row.bronze .rank-name{color:#7a4a10;font-weight:800}
 .ranking-row.gold .rank-pts{color:#c9960a;font-size:22px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.15)}
-.ranking-row.silver .rank-pts{color:#808080;font-size:18px}
-.ranking-row.bronze .rank-pts{color:#a0622a;font-size:18px}
+.ranking-row.silver .rank-pts{color:#808080;font-size:20px}
+.ranking-row.bronze .rank-pts{color:#a0622a;font-size:20px}
 .ranking-row.gold .rank-pos{font-size:26px}
-.ranking-row.me{background:#f7f7f7;border:1px solid #e0e0e0}
+.ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
-
+.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#056b52}
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--bord);flex-shrink:0}
 .history-filter-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s}
 .history-filter-btn.active{background:#056b52;color:#fff;border-color:#056b52}
 .history-match{border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden}
-.history-match-header{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:6px 10px;background:var(--bg3);font-size:12px;font-weight:700;gap:6px}
-.history-prono-row{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:5px 10px;border-top:1px solid var(--bord);font-size:12px;gap:6px}
+.history-match-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700}
+.history-prono-row{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-top:1px solid var(--bord);font-size:11px}
 .history-player{font-weight:700;color:var(--txt2)}
 .history-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700}
 .history-pts.pos{color:#056b52;font-weight:700}
@@ -947,9 +947,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <div class="header">
     <div class="logo">BY<span> PRONOS</span> <span id="leagueBadge" style="font-size:11px;font-weight:600;opacity:.8"></span></div>
     <nav class="nav">
-      <button class="nav-btn active" onclick="window.showView('sports',this)" style="display:flex;align-items:center;justify-content:center"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;background:var(--acc);color:#fff;border-radius:4px;padding:2px 5px;letter-spacing:.5px;line-height:1">1X2</span></button>
+      <button class="nav-btn active" onclick="window.showView('sports',this)"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;background:var(--acc);color:#fff;border-radius:4px;padding:1px 4px;letter-spacing:.5px;margin-right:5px">1X2</span>Pronos</button>
       <button class="nav-btn" id="navLive" onclick="window.showView('live',this)"><span style="background:#e03030;color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:.5px">LIVE</span></button>
-      <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
+      <button class="nav-btn" onclick="window.showView('ranking',this)">📊 Résultats</button>
     </nav>
     <div class="header-right">
       <div class="player-badge" id="playerBadge" onclick="sessionReset()" title="Changer de joueur">
@@ -967,11 +967,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
   <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
-  <button class="comp-btn" id="compBtn1" onclick="selectComp('worldcup',this)">🌍 Coupe du Monde</button>
-  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 Ligue 1</button>
+  <button class="comp-btn" id="compBtn1" onclick="selectComp('ligue1',this)">🇫🇷 Ligue 1</button>
+  <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue2',this)">🇫🇷 Ligue 2</button>
   <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
 </div>
-<div class="section-title" id="sectionTitle">🌍 Coupe du Monde 2026</div>
+<div class="section-title" id="sectionTitle">🇫🇷 Ligue 1 — Journée du jour</div>
       <div id="matchList"></div>
     </div>
 
@@ -1009,10 +1009,22 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <div id="view-live" class="view-panel" style="display:none">
     <div class="live-view">
       <div class="live-header">
-        <div class="live-title">🔴 Live — Coupe du Monde 2026</div>
+        <div class="live-title">🔴 LIVE — Coupe du Monde 2026</div>
         <div class="live-sub">Scores en temps réel · actualisation toutes les 3 min</div>
       </div>
-      <div id="liveScoreList" style="padding:10px"></div>
+      <div id="liveScoreList" style="padding:10px">
+      <div class="live-widget-wrap" style="display:none">
+        <!-- Widget ScoreAxis Livescore Ligue 1 -->
+        <div class="scoreaxis-widget" style="width:100%;height:auto;font-size:14px;background-color:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:10px;overflow:auto">
+          <script src="https://widgets.scoreaxis.com/api/football/livescore/league/61?lang=fr&teamLogo=1&header=1&links=1&font=heebo&fontSize=14&rowDensity=110&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23161b22&textColor=%23e6edf3&linkColor=%2300d4aa&borderColor=%2330363d&tabColor=%2321262d" async></script>
+          <div style="padding:6px 12px;font-weight:500;font-size:11px;color:#8b949e">Données live par <a href="https://www.scoreaxis.com/" style="color:#00d4aa" target="_blank">ScoreAxis</a></div>
+        </div>
+        <div class="live-fallback" id="liveFallback">
+          <div class="live-fallback-ico">⚽</div>
+          <p>Chargement des scores en direct…</p>
+          <p class="live-fallback-sub">Si le widget ne s'affiche pas, <a href="https://www.flashscore.fr/football/france/ligue-1/" target="_blank" rel="noopener">ouvrir Flashscore Ligue 1 ↗</a></p>
+        </div>
+      </div>
     </div>
   </div><!-- /view-live -->
 
@@ -1024,11 +1036,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
           <div class="results-panel-header">
             🏆 Classement
             <div style="display:flex;gap:4px">
-              <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison')">Saison</button>
-              <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee')">Journée</button>
+              <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
+              <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee',this)">Journée</button>
             </div>
           </div>
-          <div id="rankDayFilters" style="display:none;padding:6px 8px;border-bottom:1px solid var(--bord);display:flex;gap:6px;flex-wrap:wrap"></div>
           <div class="results-panel-body" id="rankingList"></div>
         </div>
         <!-- Historique -->
@@ -1146,33 +1157,31 @@ function isMatchStarted(timeStr, matchId) {
   const kickoff = parseKickoff(match?.date, timeStr);
   return new Date() >= kickoff;
 }
-
 function isMatchFinished(timeStr, matchId) {
   if (TEST_MODE) return false;
   const match = matches.find(x => x.id === matchId);
   const end = parseKickoff(match?.date, timeStr);
-  end.setMinutes(end.getMinutes() + 135); // +2h15
+  end.setMinutes(end.getMinutes() + 135);
   return new Date() >= end;
 }
 
 function isMatchExpired(timeStr, matchId) {
   if (TEST_MODE) return false;
   const match = matches.find(x => x.id === (matchId || -1));
-  const kickoff = parseKickoff(match?.date, timeStr);
-  const expire = new Date(kickoff);
-  expire.setMinutes(expire.getMinutes() + 195); // +3h15 après le coup d'envoi
   const now = new Date();
-  // Si le match date d'un autre jour → on ne l'affiche pas non plus
+  const matchDate = match?.date || now.toISOString().slice(0, 10);
   const today = now.toISOString().slice(0, 10);
-  const matchDate = match?.date || today;
-  if (matchDate !== today) return true;
-  return now >= expire;
+  if (matchDate > today) return false;
+  if (matchDate === today) {
+    const expire = parseKickoff(match?.date, timeStr);
+    expire.setMinutes(expire.getMinutes() + 195);
+    return now >= expire;
+  }
+  return true;
 }
 
 const LOGOS = {"Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
 
-
-function fmtPts(n) { return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function getLogo(name) {
   // Cherche une correspondance partielle
   for (const [key, url] of Object.entries(LOGOS)) {
@@ -1184,27 +1193,26 @@ function getLogo(name) {
 // ── Données matchs ────────────────────────────
 // ══════════════════════════════════════════════
 // ── Clé API RapidAPI / Sofascore ─────────────────────────────────
-const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915'; // Sofascore (backup)
+const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
-const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1'; // API-Football (principal)
+const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const APIFOOTBALL_HOST = 'https://v3.football.api-sports.io';
-const WC2026_LEAGUE_ID = 1; // ID Coupe du Monde 2026 sur API-Football
+const WC2026_LEAGUE_ID = 1;
 const WC2026_SEASON = 2026;
 
 // IDs Sofascore des matchs (à mettre à jour chaque journée)
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
 const matches = [
-  // ── Coupe du Monde 2026 — Journée 1 (11-13 juin) ──────────────
-  {id:1,  home:'Mexique',          away:'Afrique du Sud',   date:'2026-06-11', time:'21:00', odds:[1.90,3.40,4.20], sofaId:null},
-  {id:2,  home:'Corée du Sud',     away:'Rép. Tchèque',    date:'2026-06-12', time:'04:00', odds:[2.60,3.10,2.80], sofaId:null},
-  {id:3,  home:'Canada',           away:'Bosnie-Herzég.',   date:'2026-06-12', time:'21:00', odds:[1.80,3.50,4.50], sofaId:null},
-  {id:4,  home:'États-Unis',       away:'Paraguay',         date:'2026-06-13', time:'03:00', odds:[1.70,3.50,5.00], sofaId:null},
-  {id:5,  home:'Qatar',            away:'Suisse',           date:'2026-06-13', time:'21:00', odds:[5.50,4.00,1.55], sofaId:null},
-  {id:6,  home:'Brésil',           away:'Maroc',            date:'2026-06-14', time:'00:00', odds:[1.75,3.60,4.80], sofaId:null},
-  {id:7,  home:'Haïti',            away:'Écosse',           date:'2026-06-14', time:'03:00', odds:[4.50,3.50,1.80], sofaId:null},
-  {id:8,  home:'Australie',        away:'Turquie',          date:'2026-06-14', time:'06:00', odds:[2.80,3.20,2.60], sofaId:null},
-  {id:9,  home:'Allemagne',        away:'Curaçao',          date:'2026-06-14', time:'19:00', odds:[1.10,8.00,22.0], sofaId:null},
-  {id:10, home:'Pays-Bas',         away:'Japon',            date:'2026-06-14', time:'22:00', odds:[1.90,3.50,4.20], sofaId:null},
+  {id:1,  home:'Lorient',       away:'Le Havre',   time:'13:00', odds:[2.80,3.10,2.55], sofaId:null},
+  {id:2,  home:'Marseille',     away:'Rennes',     time:'15:00', odds:[1.75,3.50,4.80], sofaId:null},
+  {id:3,  home:'Strasbourg',    away:'Monaco',     time:'15:00', odds:[3.20,3.30,2.15], sofaId:null},
+  {id:4,  home:'Brest',         away:'Angers',     time:'15:00', odds:[2.10,3.20,3.60], sofaId:null},
+  {id:5,  home:'Paris FC',      away:'Paris SG',   time:'17:05', odds:[8.50,5.00,1.18], sofaId:null},
+  {id:6,  home:'Lille',         away:'Auxerre',    time:'17:05', odds:[1.65,3.60,5.20], sofaId:null},
+  {id:7,  home:'Nice',          away:'Metz',       time:'19:05', odds:[1.55,3.80,6.00], sofaId:null},
+  {id:8,  home:'Nantes',        away:'Toulouse',   time:'19:05', odds:[2.40,3.20,3.00], sofaId:null},
+  {id:9,  home:'Lyon',          away:'Lens',       time:'20:45', odds:[2.05,3.30,3.80], sofaId:null},
+  {id:10, home:'Saint-Etienne', away:'Rodez',      time:'20:45', odds:[2.20,3.10,3.40], sofaId:null},
 ];
 
 // ── Ligue courante ───────────────────────────────────────────────
@@ -1240,11 +1248,9 @@ function loadPlayersFromLeague() {
 }
 
 // État live des matchs
-const liveData = {};
-
-// Pas de scores finaux pré-chargés pour la Coupe du Monde — récupérés via API live
-
-
+const liveData = {
+  1: { homeScore: 1, awayScore: 1, minute: 54 }, // Lorient-Le Havre en live test
+};
 
 const SCORES = {
   win:  [{h:1,a:0},{h:2,a:0},{h:2,a:1},{h:3,a:0},{h:3,a:1},{h:3,a:2},{h:4,a:0},{h:4,a:1},{h:4,a:2},{h:4,a:3},{h:5,a:0},{h:5,a:1},{h:5,a:2},{h:5,a:3},{h:5,a:4}],
@@ -1259,14 +1265,6 @@ const SCORES = {
 // ── Calculs cotes & résultat ──────────────────
 // ══════════════════════════════════════════════
 function scoreOdd(m, h, a) {
-  // Utiliser les vraies cotes bookmaker si disponibles (API-Football)
-  const key = h + '-' + a;
-  const altKey = h + ':' + a;
-  if (m.exactScoreOdds) {
-    const realOdd = m.exactScoreOdds[key] || m.exactScoreOdds[altKey];
-    if (realOdd) return Math.round(realOdd * 10) / 10;
-  }
-  // Sinon calcul probabiliste
   const [o1,oN,o2] = m.odds;
   const p1=1/o1, pN=1/oN, p2=1/o2, tot=p1+pN+p2;
   const lh=1.35*(p1/tot+0.5*pN/tot), la=1.35*(p2/tot+0.5*pN/tot);
@@ -1295,17 +1293,13 @@ function getAllPronosHtml(matchId, hs, as) {
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
       if (name === currentPlayer) return; // exclure mon prono
-      // Masquer les pronos des autres avant le début du match
-      const matchObj = matches.find(x => x.id === mid);
-      const started = matchObj && isMatchStarted(matchObj.time, matchObj.id);
-      if (!started) return;
       const isMe = false;
       const pts = calcLivePts(vb, hs, as);
       let ptsHtml = '';
       if (pts) {
-        const sign = '';
+        const sign = pts.pts > 0 ? '+' : '';
         const cls  = pts.pts > 0 ? 'pos' : 'neg';
-        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + fmtPts(pts.pts) + '</span>';
+        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + pts.pts.toFixed(1) + '</span>';
       }
       const meStyle = isMe ? 'border-color:#056b52;background:rgba(5,107,82,.08)' : '';
       chips.push('<div class="prono-chip" style="' + meStyle + '">' +
@@ -1327,9 +1321,9 @@ function ptsChip(vb, matchId) {
   if (!live) return '';
   const pts = calcLivePts(vb, live.homeScore, live.awayScore);
   if (!pts) return '';
-  const sign = '';
+  const sign = pts.pts > 0 ? '+' : '';
   const bg   = pts.pts > 0 ? '#057a3a' : '#cc2200';
-  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + fmtPts(pts.pts) + '</span>';
+  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + pts.pts.toFixed(1) + '</span>';
 }
 
 function renderPronoBelow(matchId) {
@@ -1389,10 +1383,10 @@ function getPronoHeader(matchId) {
     if (live) {
       const pts = calcLivePts(vb, live.homeScore, live.awayScore);
       if (pts) {
-        const sign = '';
+        const sign = pts.pts > 0 ? '+' : '';
         const isPos = pts.pts > 0;
         const bg  = isPos ? '#057a3a' : '#cc2200';
-        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + fmtPts(pts.pts) + 'pts</span>';
+        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + pts.pts.toFixed(1) + 'pts</span>';
       }
     }
     let out = '<span class="header-prono-badge">🎯 Mon prono : ' + vb.h + '-' + vb.a + '</span>';
@@ -1416,7 +1410,7 @@ function renderLiveProno(matchId, hs, as) {
   const livePts = (hs !== '?' && as !== '?') ? calcLivePts(b, hs, as) : null;
   const ptsCol = livePts ? (livePts.pts > 0 ? '#057a3a' : '#cc2200') : '#057a3a';
   const ptsTxt = livePts
-    ? fmtPts(livePts.pts) + ' pts · ' + livePts.label
+    ? (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2) + ' pts · ' + livePts.label
     : '';
   // Calcul détaillé des pts selon le score live ou potentiel
   let ptsResult, ptsScore, ptsTotal, resultBg, resultColor, scoreBg, scoreColor, totalBg;
@@ -1428,9 +1422,9 @@ function renderLiveProno(matchId, hs, as) {
     const hasBonus   = livePts.type === 'bonus';
     const isBad      = livePts.type === 'zero';
 
-    ptsResult = isBad ? '-1' : fmtPts(b.resultOdd);
-    ptsScore  = exactScore ? fmtPts(b.scoreOdd) : (hasBonus ? '0.5' : '0');
-    ptsTotal  = fmtPts(livePts.pts);
+    ptsResult = isBad ? '-1' : ('+' + b.resultOdd.toFixed(2));
+    ptsScore  = exactScore ? ('+' + b.scoreOdd.toFixed(2)) : (hasBonus ? '+0.5' : '0');
+    ptsTotal  = (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2);
 
     resultBg    = isBad ? '#fff0ee' : '#eef7f2';
     resultColor = isBad ? '#cc2200' : '#056b52';
@@ -1439,9 +1433,9 @@ function renderLiveProno(matchId, hs, as) {
     totalBg     = isBad ? '#cc2200' : '#056b52';
   } else {
     // Pré-match : pts potentiels max
-    ptsResult   = fmtPts(b.resultOdd);
-    ptsScore    = fmtPts(b.scoreOdd);
-    ptsTotal    = fmtPts(b.resultOdd + b.scoreOdd);
+    ptsResult   = '+' + b.resultOdd.toFixed(2);
+    ptsScore    = '+' + b.scoreOdd.toFixed(2);
+    ptsTotal    = '+' + (b.resultOdd + b.scoreOdd).toFixed(2);
     resultBg    = '#eef7f2'; resultColor = '#056b52';
     scoreBg     = '#fff8ee'; scoreColor  = '#8b6000';
     totalBg     = '#056b52';
@@ -1593,9 +1587,9 @@ function buildCard(m) {
     let footerHtml = '';
     if (betKey) {
       const b = betslip[betKey];
-      const ptsR = fmtPts(b.resultOdd);
-      const ptsS = fmtPts(b.scoreOdd);
-      const ptsMax = fmtPts(b.resultOdd + b.scoreOdd);
+      const ptsR = b.resultOdd.toFixed(2);
+      const ptsS = b.scoreOdd.toFixed(2);
+      const ptsMax = (b.resultOdd + b.scoreOdd).toFixed(2);
       footerHtml = `<div class="score-step-footer">
         <div class="score-step-recap">
           <span class="recap-score">🎯 ${b.h}-${b.a} · ${b.resultLabel}</span>
@@ -1623,7 +1617,6 @@ function buildCard(m) {
 
   const started  = isMatchStarted(m.time, m.id);
   const finished = isMatchFinished(m.time, m.id);
-  if (isMatchExpired(m.time, m.id)) return '';
   const live     = liveData[m.id];
   const cardCls  = finished ? 'is-finished' : started ? 'is-live' : '';
 
@@ -1651,9 +1644,9 @@ function buildCard(m) {
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <div class="match-header">
-      <div class="league"><span>🌍</span> Coupe du Monde</div>
+      <div class="league"><span>🇫🇷</span> Ligue 1</div>
 
-      <span class="match-time">${finished ? '✅ Terminé' : started ? '<span style="font-size:10px;color:var(--acc3);font-weight:700;margin-right:4px">En direct</span><span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>' : '🕐 À venir · ' + m.time}</span>
+      <span class="match-time">${started ? (finished ? '✅ FIN' : '<span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>') : '🕐 ' + m.time}</span>
     </div>
     ${!started ? `<div class="match-teams-row">
       <div class="mtr-home">
@@ -1696,101 +1689,1144 @@ if (typeof testGoalTriggered === 'undefined') {
 }
 
 // ── Fetch scores live via Sofascore RapidAPI ──────────────────────
-// ── Chargement automatique des matchs via API-Football ───────────
-async function fetchUpcomingMatches() {
-  console.log('🔄 Chargement des matchs via API-Football...');
-  const headers = { 'x-apisports-key': APIFOOTBALL_KEY };
+async function fetchLiveScores() {
+  const started = matches.filter(m => isMatchStarted(m.time) && !isMatchFinished(m.time));
+  if (!started.length) return;
 
-  // 1. Matchs à venir dans les 10 prochains jours
-  let apiMatches = [];
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const next = new Date(Date.now() + 10*24*60*60*1000).toISOString().slice(0, 10);
-    const res = await fetch(
-      `${APIFOOTBALL_HOST}/fixtures?league=${WC2026_LEAGUE_ID}&season=${WC2026_SEASON}&from=${today}&to=${next}&status=NS`,
-      { headers }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      apiMatches = (data.response || []).slice(0, 10).map((f, i) => {
-        const kickoff = new Date(f.fixture.date);
-        return {
-          id: i + 1,
-          fixtureId: f.fixture.id,
-          home: f.teams.home.name,
-          away: f.teams.away.name,
-          date: kickoff.toISOString().slice(0, 10),
-          time: kickoff.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/Paris' }),
-          sofaId: null,
-          odds: [2.00, 3.20, 3.50]
-        };
+  for (const m of started) {
+    if (!m.sofaId) continue; // pas d'ID Sofascore défini
+    try {
+      const res = await fetch(`https://sofascore.p.rapidapi.com/matches/${m.sofaId}/score`, {
+        headers: {
+          'x-rapidapi-host': RAPIDAPI_HOST,
+          'x-rapidapi-key':  RAPIDAPI_KEY
+        }
       });
-      console.log(`✅ ${apiMatches.length} matchs chargés`);
-    }
-  } catch(e) { console.warn('API-Football fixtures error:', e); }
-
-  if (!apiMatches.length) { console.warn('⚠️ Aucun match récupéré'); return; }
-
-  // 2. Cotes 1X2 + scores exacts par fixture
-  try {
-    for (const m of apiMatches) {
-      if (!m.fixtureId) continue;
-      const oddsRes = await fetch(
-        `${APIFOOTBALL_HOST}/odds?fixture=${m.fixtureId}&bookmaker=8`,
-        { headers }
-      );
-      if (!oddsRes.ok) continue;
-      const bets = oddsRes.ok ? ((await oddsRes.json()).response?.[0]?.bookmakers?.[0]?.bets || []) : [];
-      const h2h = bets.find(b => b.name === 'Match Winner');
-      if (h2h) {
-        m.odds = [
-          Math.round(parseFloat(h2h.values.find(v => v.value === 'Home')?.odd || 2) * 100) / 100,
-          Math.round(parseFloat(h2h.values.find(v => v.value === 'Draw')?.odd || 3.2) * 100) / 100,
-          Math.round(parseFloat(h2h.values.find(v => v.value === 'Away')?.odd || 3.5) * 100) / 100
-        ];
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.score) {
+        liveData[m.id] = {
+          homeScore: data.score.current?.home ?? '?',
+          awayScore: data.score.current?.away ?? '?',
+          minute: data.time?.played ?? '?',
+          status: data.status?.type ?? 'inprogress'
+        };
       }
-      const exact = bets.find(b => b.name === 'Exact Score');
-      if (exact) {
-        m.exactScoreOdds = {};
-        exact.values.forEach(v => { m.exactScoreOdds[v.value] = parseFloat(v.odd); });
-      }
-    }
-    console.log('✅ Cotes 1X2 + scores exacts récupérées');
-  } catch(e) { console.warn('API-Football odds error:', e); }
-
-  matches.length = 0;
-  apiMatches.forEach(m => matches.push(m));
-
-  try {
-    const leagueCode = localStorage.getItem('bypronos_league');
-    if (leagueCode && typeof db !== 'undefined') {
-      db.ref(`leagues/${leagueCode}/matches`).set(matches);
-    }
-  } catch(e) {}
-
+    } catch(e) { console.warn('Live fetch error:', e); }
+  }
   renderMatches();
-  console.log('✅ Matchs mis à jour :', matches.map(m => m.home + ' vs ' + m.away).join(', '));
 }
 
+function startSmartPolling() {
+  setInterval(() => {
+    renderMatches();
+    const liveNow = matches.some(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
+    if (liveNow) fetchLiveScores();
+  }, 180000);
+}
+startSmartPolling();
 
-// ── Chargement des matchs depuis Firebase (si déjà sauvegardés) ───
-async function loadMatchesFromFirebase() {
+// Premier appel immédiat
+fetchLiveScores();
+
+// ══════════════════════════════════════════════
+// ── Interactions paris ────────────────────────
+// ══════════════════════════════════════════════
+function selectResult(matchId, cls) {
+  if(!currentPlayer){ openLogin(); return; }
+  if(cls.startsWith('other')) return; // géré par openOtherModal
+  if(matchState[matchId] && matchState[matchId].resultCls===cls) {
+    delete matchState[matchId];
+    Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+  } else {
+    Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+    matchState[matchId]={resultCls:cls};
+  }
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function toggleScore(matchId, h, a) {
+  if(!currentPlayer){ openLogin(); return; }
+  const key=`${matchId}_${h}_${a}`;
+  const m=matches.find(x=>x.id===matchId);
+  if(!m) return;
+  if(betslip[key]) {
+    delete betslip[key];
+  } else {
+    Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+    const odd=scoreOdd(m,h,a);
+    const res=deduceResult(m,h,a);
+    const rMap={win:m.odds[0],draw:m.odds[1],lose:m.odds[2]};
+    betslip[key]={matchId,h,a,matchName:m.home+' - '+m.away,home:m.home,away:m.away,scoreOdd:odd,resultLabel:res.label,resultCls:res.cls,resultShort:res.short,resultOdd:rMap[res.cls],stake:1};
+  }
+  renderMatches();
+  renderBetslip();
+  autosave();
+  // Ouvrir le tiroir mobile automatiquement si un score est sélectionné
+  if (Object.keys(betslip).length > 0 && window.innerWidth <= 768) {
+    openMobileSlip();
+  }
+}
+
+// ══════════════════════════════════════════════
+// ── Bulletin ─────────────────────────────────
+// ══════════════════════════════════════════════
+function renderBetslip() {
+  const keys=Object.keys(betslip);
+  const countEl=document.getElementById('betCount');
+  if(countEl) countEl.textContent=keys.length;
+  const body=document.getElementById('betslipBody');
+  const footer=document.getElementById('betslipFooter');
+  if(!keys.length){
+    if(body) body.innerHTML=`<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>`;
+    if(footer) footer.style.display='none';
+    syncMobileSlip();
+    return;
+  }
+  if(footer) footer.style.display='block';
+  if(body) body.innerHTML=keys.map(k=>{
+    const b=betslip[k];
+    const ptsR=b.resultOdd.toFixed(2);
+    const ptsS=b.scoreOdd.toFixed(2);
+    const ptsMax=(b.resultOdd+b.scoreOdd).toFixed(2);
+    return `<div class="bet-item">
+      <button class="remove-bet" onclick="removeBet('${k}')" title="Supprimer">×</button>
+      <div class="bet-match">${b.matchName}</div>
+      <div class="bet-score-big ${b.resultCls}">${b.h} — ${b.a}</div>
+      <div class="bet-result-deduced ${b.resultCls}"><span class="arrow">↳</span><span class="label ${b.resultCls}">${b.resultLabel} (${b.resultShort})</span></div>
+      <div class="bet-pts-badges">
+        <div class="pts-badge result"><span class="pts-badge-label">✅ Bon résultat</span><span class="pts-badge-val">${ptsR} pts</span><span class="pts-badge-sub">si résultat correct</span></div>
+        <div class="pts-badge score"><span class="pts-badge-label">🎯 Score exact</span><span class="pts-badge-val">${ptsS} pts</span><span class="pts-badge-sub">gain exceptionnel</span></div>
+      </div>
+      <div class="pts-bonus-row"><span class="pts-bonus-label">🎯 Bon résultat + bon écart</span><span class="pts-bonus-val">+0.5 pt</span></div>
+      <div class="pts-loss-row"><span class="pts-loss-label">❌ Pronostic faux</span><span class="pts-loss-val">−1 pt</span></div>
+      <div class="pts-max-row">Max si tout juste : <strong>${ptsMax} pts</strong></div>
+    </div>`;
+  }).join('');
+  updateTotals();
+}
+
+function updateTotals() {
+  const keys=Object.keys(betslip);
+  const ptsR=keys.reduce((s,k)=>s+betslip[k].resultOdd,0);
+  const ptsS=keys.reduce((s,k)=>s+betslip[k].scoreOdd,0);
+  const pen=keys.length;
+  document.getElementById('totalBets').textContent=keys.length+' pari(s)';
+  document.getElementById('ptsResult').textContent='+'+ptsR.toFixed(2)+' pts';
+  document.getElementById('ptsScore').textContent='+'+ptsS.toFixed(2)+' pts'; document.getElementById('ptsScore').style.color='var(--acc-score)';
+  document.getElementById('ptsPenalty').textContent='-'+pen+' pt'+(pen>1?'s':'');
+  document.getElementById('ptsTotal').textContent=(ptsR+ptsS).toFixed(2)+' pts';
+}
+
+function removeBet(key) {
+  delete betslip[key];
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function clearAll() {
+  betslip={};
+  matchState={};
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+// Valider uniquement le pari d'un match spécifique
+function placeBetForMatch(matchId) {
+  if (!currentPlayer) { showNotif('⚠️ Connectez-vous dabord !'); openLogin(); return; }
+  const keys = Object.keys(betslip).filter(k => k.startsWith(matchId + '_'));
+  if (!keys.length) return;
+
+  const players = loadPlayers();
+  if (!players[currentPlayer]) players[currentPlayer] = {season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
+  const p = players[currentPlayer];
+  const day = 'Journée en cours';
+  if (!p.season.days[day]) p.season.days[day] = {ptsResult:0,ptsScore:0,bets:0};
+  if (!p.validatedBets) p.validatedBets = {};
+
+  keys.forEach(k => {
+    const b = betslip[k];
+    const pts = calcPoints(b);
+    p.season.ptsResult += pts.result;
+    p.season.ptsScore  += pts.score;
+    p.season.bets      += 1;
+    p.season.days[day].ptsResult += pts.result;
+    p.season.days[day].ptsScore  += pts.score;
+    p.season.days[day].bets      += 1;
+    p.validatedBets[parseInt(b.matchId)] = {
+      h:b.h, a:b.a,
+      resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
+      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
+      day: day
+    };
+    delete betslip[k];
+  });
+  p.current = {};
+  // Sauvegarder le resultCls dans validatedBets pour la couleur du bouton
+  const savedCls = matchState[matchId] ? matchState[matchId].resultCls : null;
+  if (savedCls && p.validatedBets[parseInt(matchId)]) {
+    p.validatedBets[parseInt(matchId)].resultCls = savedCls;
+  }
+  // Vider matchState pour replier le scoreBlock
+  delete matchState[matchId];
+  savePlayers(players);
+
+  const m = matches.find(x => x.id === matchId);
+  showNotif('✅ Pari validé sur ' + (m ? m.home + ' - ' + m.away : 'le match'));
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function placeBets() {
+  const keys=Object.keys(betslip);
+  if(!keys.length) return;
+  if(!currentPlayer){
+    showNotif('⚠️ Connectez-vous dabord !');
+    openLogin();
+    return;
+  }
+  const players=loadPlayers();
+  if(!players[currentPlayer]) players[currentPlayer]={season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
+  const p=players[currentPlayer];
+  const day='Journée en cours';
+  if(!p.season.days[day]) p.season.days[day]={ptsResult:0,ptsScore:0,bets:0};
+  keys.forEach(k=>{
+    const b=betslip[k];
+    const pts=calcPoints(b);
+    p.season.ptsResult+=pts.result;
+    p.season.ptsScore+=pts.score;
+    p.season.bets+=1;
+    p.season.days[day].ptsResult+=pts.result;
+    p.season.days[day].ptsScore+=pts.score;
+    p.season.days[day].bets+=1;
+  });
+  p.current={};
+  // Sauvegarder les paris validés pour le live
+  if(!p.validatedBets) p.validatedBets={};
+  keys.forEach(k=>{
+    const b=betslip[k];
+    p.validatedBets[parseInt(b.matchId)]={
+      h:b.h, a:b.a,
+      resultLabel:b.resultLabel,
+      resultCls:b.resultCls,
+      resultShort:b.resultShort,
+      scoreOdd:b.scoreOdd,
+      resultOdd:b.resultOdd,
+      day: day
+    };
+  });
+  savePlayers(players);
+  const totalPts=keys.reduce((s,k)=>s+calcPoints(betslip[k]).total,0);
+  showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' — max '+totalPts.toFixed(2)+' pts potentiels');
+  betslip={};
+  matchState={};
+  renderMatches();
+  renderBetslip();
+}
+
+// ══════════════════════════════════════════════
+// ── Navigation vues ──────────────────────────
+// ══════════════════════════════════════════════
+window.selectComp = function selectComp(comp, btn) {
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const titles = {
+    all:    '⚽ Tous les matchs — Journée du jour',
+    ligue1: '🇫🇷 Ligue 1 — Journée du jour',
+    ligue2: '🇫🇷 Ligue 2 — Journée du jour',
+    premier: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League — Journée du jour'
+  };
+  const titleEl = document.getElementById('sectionTitle');
+  if (titleEl) titleEl.textContent = titles[comp] || '';
+  // À terme : charger les matchs de la compétition sélectionnée
+}
+
+window.showView = function showView(view, btn) {
+  document.querySelectorAll('.view-panel').forEach(p=>p.style.display='none');
+  document.getElementById('view-'+view).style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(view==='ranking') renderResultsView();
+  if(view==='live') renderLiveView();
+}
+
+function scrollToMatch(id, el) {
+  document.querySelectorAll('.sport-item[onclick]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  const card=document.querySelector(`.match-card[data-id="${id}"]`);
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+  // Fermer la sidebar sur mobile après sélection
+  if (window.innerWidth <= 768) toggleSidebar();
+}
+
+// ══════════════════════════════════════════════
+// ── Système joueurs ───────────────────────────
+// ══════════════════════════════════════════════
+const STORAGE_KEY='bypronos_players';
+
+function loadPlayers() {
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}; }
+  catch(e){ return {}; }
+}
+function savePlayers(data) {
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  savePlayers_league(data);
+}
+function autosave() {
+  if(!currentPlayer) return;
+  const players=loadPlayers();
+  if(!players[currentPlayer]) return;
+  players[currentPlayer].current={betslip:JSON.parse(JSON.stringify(betslip)),matchState:JSON.parse(JSON.stringify(matchState))};
+  savePlayers(players);
+}
+
+function openOtherModal(matchId) {
+  if(!currentPlayer){ openLogin(); return; }
+  const m = matches.find(x => x.id === matchId);
+  if(!m) return;
+  // Modale simple : choisir 1 / N / 2 pour les scores 6+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `<div style="background:#161b22;border:1px solid #30363d;border-radius:14px;padding:28px 24px;width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+    <div style="font-size:22px;margin-bottom:6px">🔥</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">${m.home} - ${m.away}</div>
+    <div style="font-size:12px;color:#8b949e;margin-bottom:18px">Score avec 6 buts ou plus — qui gagne ?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="selectOtherResult(${matchId},'other_win',this.closest('[style*=fixed]'))"
+        style="background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.4);color:#16a34a;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
+        ✦ ${m.home} gagne (6-0, 7-1…)
+      </button>
+      <button onclick="selectOtherResult(${matchId},'other_draw',this.closest('[style*=fixed]'))"
+        style="background:rgba(247,201,72,.1);border:1px solid rgba(247,201,72,.3);color:#f7c948;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
+        ◆ Match nul (6-6, 7-7…)
+      </button>
+      <button onclick="selectOtherResult(${matchId},'other_lose',this.closest('[style*=fixed]'))"
+        style="background:rgba(232,93,74,.12);border:1px solid rgba(232,93,74,.3);color:#e85d4a;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
+        ✦ ${m.away} gagne (0-6, 1-7…)
+      </button>
+      <button onclick="this.closest('[style*=fixed]').remove()"
+        style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:13px;margin-top:4px">Annuler</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+}
+
+function selectOtherResult(matchId, cls, overlay) {
+  if(overlay) overlay.remove();
+  Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+  matchState[matchId] = { resultCls: cls };
+  renderMatches();
+  renderBetslip();
+  autosave();
+}
+
+function openLogin() {
+  const players=loadPlayers();
+  const names=Object.keys(players);
+  const list=document.getElementById('loginPlayersList');
+  const wrap=document.getElementById('loginPlayers');
+  if(names.length){
+    list.innerHTML=names.map(n=>`<span class="login-player-chip" onclick="doLoginName('${n}')">👤 ${n}</span>`).join('');
+    wrap.style.display='block';
+  } else {
+    wrap.style.display='none';
+  }
+  document.getElementById('loginInput').value='';
+  document.getElementById('loginOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('loginInput').focus(),150);
+}
+
+function doLogin() {
+  const val=document.getElementById('loginInput').value.trim();
+  if(!val) return;
+  doLoginName(val);
+}
+
+// switchLeagueTab défini dans script séparé
+
+function generateCode(name) {
+  const clean = name.toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,6);
+  const rand = Math.random().toString(36).substring(2,6).toUpperCase();
+  return clean + rand;
+}
+
+window.doCreateLeague = async function() {
+  const name = document.getElementById('leagueNameInput').value.trim();
+  const admin = document.getElementById('loginInputCreate').value.trim();
+  if (!name || !admin) { showNotif('⚠️ Remplis tous les champs !'); return; }
+
+  const code = generateCode(name);
+  const config = { name, admin, createdAt: Date.now(), code };
+
+  // Sauver la config dans Firebase
+  await fetch(FB_URL + '/ligues/' + code + '/config.json', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(config)
+  });
+
+  currentLeague = { code, name, isAdmin: true };
+  localStorage.setItem('bypronos_league', JSON.stringify(currentLeague));
+
+  document.getElementById('loginOverlay').style.display = 'none';
+  showNotif('✅ Ligue créée ! Code : ' + code);
+
+  // Afficher le code à l'admin
+  setTimeout(() => {
+    alert('Code de votre ligue : ' + code + ' - Partagez ce code a vos amis !');
+  }, 500);
+
+  doLoginName(admin);
+}
+
+window.doJoinLeague = async function() {
+  const code = document.getElementById('leagueCodeInput').value.trim().toUpperCase();
+  const name = document.getElementById('loginInput').value.trim();
+  if (!code || !name) { showNotif('⚠️ Remplis tous les champs !'); return; }
+
+  // Vérifier que la ligue existe
+  const res = await fetch(FB_URL + '/ligues/' + code + '/config.json').then(r => r.json());
+  if (!res || !res.name) {
+    showNotif('❌ Code de ligue invalide !');
+    return;
+  }
+
+  currentLeague = { code, name: res.name, isAdmin: res.admin === name };
+  localStorage.setItem('bypronos_league', JSON.stringify(currentLeague));
+
+  document.getElementById('loginOverlay').style.display = 'none';
+  showNotif('✅ Bienvenue dans "' + res.name + '" !');
+  doLoginName(name);
+}
+
+window.doLoginName = function doLoginName(name) {
+  currentPlayer=name;
+  document.getElementById('loginOverlay').style.display='none';
+  document.getElementById('playerName').textContent=name;
+  // Afficher le nom de la ligue
+  const lb = document.getElementById('leagueBadge');
+  if (lb && currentLeague) lb.textContent = '· ' + currentLeague.name;
+  document.getElementById('playerAvatar').textContent=name.charAt(0).toUpperCase();
+  const players=loadPlayers();
+  if(!players[name]) players[name]={season:{ptsResult:0,ptsScore:0,bets:0,days:{}},current:{}};
+  savePlayers(players);
+  // Restaurer paris en cours
+  betslip={};
+  matchState={};
   try {
-    const leagueCode = localStorage.getItem('bypronos_league');
-    if (!leagueCode || typeof db === 'undefined') return false;
-    const snap = await db.ref(`leagues/${leagueCode}/matches`).once('value');
-    const saved = snap.val();
-    if (saved && Array.isArray(saved) && saved.length) {
-      matches.length = 0;
-      saved.forEach(m => matches.push(m));
-      console.log('✅ Matchs chargés depuis Firebase');
-      renderMatches();
-      return true;
-    }
-  } catch(e) {}
-  return false;
+    const saved=players[name].current||{};
+    if(saved.betslip && typeof saved.betslip==='object') Object.assign(betslip, JSON.parse(JSON.stringify(saved.betslip)));
+    if(saved.matchState && typeof saved.matchState==='object') Object.assign(matchState, JSON.parse(JSON.stringify(saved.matchState)));
+  } catch(e){ betslip={}; matchState={}; }
+  renderMatches();
+  renderBetslip();
 }
 
-// ── resolveSofaIds désactivé (remplacé par API-Football) ─────────
-async function resolveSofaIds() { return; }
->
+// ══════════════════════════════════════════════
+// ── Classement ───────────────────────────────
+// ══════════════════════════════════════════════
+function switchRankTab(tab, btn) {
+  rankTab=tab;
+  document.querySelectorAll('.ranking-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRanking();
+}
+
+let historyFilterPlayer = 'all';
+let historyFilterDay = 'all';
+let rankTab = 'saison';
+
+function renderLiveView() {
+  var el = document.getElementById('liveScoreList');
+  if (!el) return;
+  var today = new Date().toISOString().slice(0, 10);
+  var displayMatches = matches.filter(function(m){ return m.date === today; });
+  var isToday = displayMatches.length > 0;
+  if (!isToday) {
+    var futureDates = matches.map(function(m){ return m.date; }).filter(function(d){ return d >= today; }).sort();
+    if (futureDates.length) { var nextDate = futureDates[0]; displayMatches = matches.filter(function(m){ return m.date === nextDate; }); }
+  }
+  if (!displayMatches.length) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt2)"><div style="font-size:48px">&#x26BD;</div><div style="font-size:16px;font-weight:700;margin-top:12px">Aucun match programm&#233;</div></div>';
+    return;
+  }
+  var banner = !isToday ? '<div style="background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--txt2);text-align:center">&#128197; Prochains matchs &middot; ' + displayMatches[0].date + '</div>' : '';
+  el.innerHTML = banner + displayMatches.map(function(m) {
+    var live = liveData[m.id];
+    var started = isMatchStarted(m.time, m.id);
+    var finished = isMatchFinished(m.time, m.id);
+    var logoImg = function(url) { return url ? '<img src="' + url + '" style="width:32px;height:32px;object-fit:contain">' : '<span style="width:32px;display:inline-block"></span>'; };
+    var scoreBlock, statusBlock;
+    if (!started) {
+      scoreBlock = '<span style="font-size:20px;font-weight:700;color:var(--txt2);padding:0 12px">' + m.time + '</span>';
+      statusBlock = '<span style="font-size:10px;color:var(--txt2)">&#128336; &#192; venir</span>';
+    } else if (finished) {
+      var sc = live ? live.homeScore + ' - ' + live.awayScore : '? - ?';
+      scoreBlock = '<span style="font-size:28px;font-weight:800;color:var(--txt);padding:0 12px">' + sc + '</span>';
+      statusBlock = '<span style="font-size:10px;color:var(--txt2)">&#x2705; Termin&#233;</span>';
+    } else {
+      var sc2 = live ? live.homeScore + ' - ' + live.awayScore : '? - ?';
+      var min = live && live.minute ? live.minute + "'" : '...';
+      scoreBlock = '<span style="font-size:28px;font-weight:800;color:var(--acc);padding:0 12px">' + sc2 + '</span>';
+      statusBlock = '<span style="font-size:10px;font-weight:700;color:var(--acc3)">&#x1F534; En direct ' + min + '</span>';
+    }
+    return '<div style="background:var(--bg2);border:1px solid var(--bord);border-radius:12px;margin-bottom:10px;padding:16px 12px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1">' + logoImg(getLogo(m.home)) + '<span style="font-size:12px;font-weight:700;text-align:center">' + m.home + '</span></div>' +
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">' + scoreBlock + statusBlock + '</div>' +
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1">' + logoImg(getLogo(m.away)) + '<span style="font-size:12px;font-weight:700;text-align:center">' + m.away + '</span></div>' +
+      '</div></div>';
+  }).join('');
+}
+
+window.switchRankTab = function switchRankTab(tab) {
+  rankTab = tab;
+  document.getElementById('rankTabSaison').classList.toggle('active', tab === 'saison');
+  document.getElementById('rankTabJournee').classList.toggle('active', tab === 'journee');
+  renderResultsView();
+}
+
+function renderResultsView() {
+  renderRankingPanel();
+  renderHistoryPanel();
+}
+
+function renderRankingPanel() {
+  const players = loadPlayers();
+  const day = 'Journée en cours';
+  const rows = Object.entries(players)
+    .map(([name, data]) => {
+      const pts = rankTab === 'saison'
+        ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
+        : (data.season?.days?.[day] ? (data.season.days[day].ptsResult || 0) + (data.season.days[day].ptsScore || 0) : 0);
+      return { name, pts };
+    })
+    .sort((a, b) => b.pts - a.pts);
+
+  const medals = ['🥇','🥈','🥉'];
+  const podiumCls = ['gold','silver','bronze'];
+  const html = rows.map((r, i) => {
+    const isMe = r.name === currentPlayer;
+    const cls = (podiumCls[i] ? ' ' + podiumCls[i] : '') + (isMe ? ' me' : '');
+    const medalCell = i === 0
+      ? '<span style="display:flex;flex-direction:column;align-items:center;gap:1px;width:28px;flex-shrink:0"><span class="rank-pos">🥇</span><span style="font-size:7px;font-weight:800;letter-spacing:.8px;color:#c9960a;text-transform:uppercase;line-height:1">Vainqueur</span></span>'
+      : '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>';
+    return '<div class="ranking-row' + cls + '">' +
+      medalCell +
+      '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
+      (i === 0 ? '<span style="font-size:16px;margin-right:4px">🏆</span>' : '') +
+      '<span class="rank-pts">+' + r.pts.toFixed(2) + ' pts</span>' +
+    '</div>';
+  }).join('');
+
+  const el = document.getElementById('rankingList');
+  if (el) el.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun joueur</div>';
+}
+
+function renderHistoryPanel() {
+  const players = loadPlayers();
+  const playerNames = Object.keys(players);
+
+  // Collecter toutes les journées disponibles
+  const allDays = new Set();
+  playerNames.forEach(name => {
+    const vb = players[name]?.validatedBets || {};
+    Object.values(vb).forEach(bet => { if (bet.day) allDays.add(bet.day); });
+  });
+  const daysArr = Array.from(allDays).sort();
+
+  // Filtres
+  const filtersEl = document.getElementById('historyFilters');
+  if (filtersEl) {
+    var allActive = historyFilterPlayer === 'all' ? ' active' : '';
+    var btns = '<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:4px">';
+    btns += '<button class="history-filter-btn' + allActive + '" onclick="setHistoryFilter(this,'all')">👥 Tous</button>';
+    playerNames.forEach(function(n) {
+      var isActive = historyFilterPlayer === n ? ' active' : '';
+      btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,'' + n + '')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
+    });
+    btns += '</div>';
+    if (daysArr.length >= 1) {
+      btns += '<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;border-top:1px solid var(--bord);padding-top:6px;margin-top:2px">';
+      var dayAllActive = historyFilterDay === 'all' ? ' active' : '';
+      btns += '<button class="history-filter-btn' + dayAllActive + '" onclick="setHistoryDayFilter(this,'all')">📅 Toutes</button>';
+      daysArr.forEach(function(d) {
+        var isActive = historyFilterDay === d ? ' active' : '';
+        btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryDayFilter(this,'' + d.replace(/'/g,"\'") + '')">' + d + '</button>';
+      });
+      btns += '</div>';
+    }
+    filtersEl.innerHTML = btns;
+  }
+
+  const histEl = document.getElementById('historyList');
+  if (!histEl) return;
+
+  const filtered = historyFilterPlayer === 'all' ? playerNames : [historyFilterPlayer];
+  const matchPronosMap = {};
+
+  filtered.forEach(name => {
+    const vb = players[name]?.validatedBets || {};
+    Object.entries(vb).forEach(([mid, bet]) => {
+      if (historyFilterDay !== 'all' && bet.day !== historyFilterDay) return;
+      if (!matchPronosMap[mid]) matchPronosMap[mid] = [];
+      matchPronosMap[mid].push({ name, bet });
+    });
+  });
+
+  if (Object.keys(matchPronosMap).length === 0) {
+    histEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun pari trouvé</div>';
+    return;
+  }
+
+  histEl.innerHTML = Object.entries(matchPronosMap).map(([mid, pronos]) => {
+    const m = matches.find(x => String(x.id) === String(mid));
+    const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
+    const live = liveData[parseInt(mid)];
+    const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
+    const dayLabel = pronos[0]?.bet?.day || '';
+    const pronosHtml = pronos.map(({ name, bet }) => {
+      const isMe = name === currentPlayer;
+      const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
+      const ptsHtml = pts
+        ? '<span class="history-pts ' + (pts.pts > 0 ? 'pos' : 'neg') + '">' + (pts.pts > 0 ? '+' : '') + pts.pts.toFixed(2) + ' pts</span>'
+        : '<span style="color:var(--txt2);font-size:10px">en attente</span>';
+      return '<div class="history-prono-row">' +
+        '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
+        '<span class="history-score">' + bet.h + '-' + bet.a + '</span>' +
+        ptsHtml +
+      '</div>';
+    }).join('');
+    return '<div class="history-match">' +
+      '<div class="history-match-header">' +
+        '<span>' + matchName + (dayLabel ? ' <span style="font-size:9px;color:var(--txt2);font-weight:500">· ' + dayLabel + '</span>' : '') + '</span>' +
+        '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
+      '</div>' +
+      pronosHtml +
+    '</div>';
+  }).join('');
+}
+
+function setHistoryFilter(btn, player) {
+  historyFilterPlayer = player;
+  document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderHistoryPanel();
+}
+
+function setHistoryDayFilter(btn, day) {
+  historyFilterDay = day;
+  renderHistoryPanel();
+}
+
+function renderRanking() {
+  const players=loadPlayers();
+  const day='Journée en cours';
+  document.getElementById('rankDayLabel').textContent=day;
+  let rows=[];
+  Object.entries(players).forEach(([name,data])=>{
+    if(rankTab==='season'){
+      rows.push({name,bets:data.season.bets,ptsResult:data.season.ptsResult,ptsScore:data.season.ptsScore,total:data.season.ptsResult+data.season.ptsScore});
+    } else {
+      const d=data.season.days[day]||{ptsResult:0,ptsScore:0,bets:0};
+      rows.push({name,bets:d.bets,ptsResult:d.ptsResult,ptsScore:d.ptsScore,total:d.ptsResult+d.ptsScore});
+    }
+  });
+  rows.sort((a,b)=>b.total-a.total);
+  const tbody=document.getElementById('rankingBody');
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="6"><div class="ranking-empty"><div class="ico">🏆</div><p>Aucun joueur enregistré.<br>Connectez-vous et validez vos paris pour apparaître.</p></div></td></tr>';
+    return;
+  }
+  const medals=['🥇','🥈','🥉'];
+  tbody.innerHTML=rows.map((r,i)=>{
+    const isYou=r.name===currentPlayer;
+    return `<tr>
+      <td class="rank-pos ${i<3?['gold','silver','bronze'][i]:''}">${i<3?medals[i]:i+1}</td>
+      <td class="rank-name">${r.name}${isYou?' <span class="you-badge">VOUS</span>':''}</td>
+      <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
+      <td style="color:var(--acc);font-size:13px">+${r.ptsResult.toFixed(2)}</td>
+      <td style="color:var(--acc2);font-size:13px">+${r.ptsScore.toFixed(2)}</td>
+      <td class="rank-pts">${r.total.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// ── Notif & Init ─────────────────────────────
+// ══════════════════════════════════════════════
+function testFirebase() {
+  console.log('fbSavePlayers:', typeof window.fbSavePlayers);
+  console.log('firebaseReady:', window.firebaseReady);
+  const testData = { test: { name: 'test', ts: Date.now() } };
+  if (window.fbSavePlayers) {
+    window.fbSavePlayers(testData);
+    console.log('✅ Test envoyé à Firebase !');
+    alert('Test envoyé ! Vérifie Firebase dans 5 secondes.');
+  } else {
+    console.error('❌ fbSavePlayers non défini !');
+    alert('❌ fbSavePlayers non défini - Firebase pas chargé');
+  }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (!sidebar) return;
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+function sessionReset() {
+  currentPlayer = null;
+  betslip = {};
+  matchState = {};
+  const pn = document.getElementById('playerName');
+  const pa = document.getElementById('playerAvatar');
+  if (pn) pn.textContent = 'Connexion';
+  if (pa) pa.textContent = '?';
+  renderMatches();
+  renderBetslip();
+  openLogin();
+}
+
+// Stocke les derniers scores connus pour détecter les buts
+const lastScores = {};
+
+function triggerGoalAnimation(homeName, awayName, newH, newA, oldH, oldA, matchId) {
+  const scoringTeam = newH > oldH ? homeName : awayName;
+
+  // Animation cadran pour le chiffre qui change
+  animateScoreDigit('sn-h-' + matchId, oldH, newH);
+  animateScoreDigit('sn-a-' + matchId, oldA, newA);
+
+  // Overlay but
+  const overlay = document.getElementById('goalOverlay');
+  const titleEl = document.getElementById('goalTitle');
+  const teamEl  = document.getElementById('goalTeam');
+  const scoreEl = document.getElementById('goalScore');
+
+  titleEl.textContent = '⚽ BUUUT !';
+  teamEl.textContent  = scoringTeam.toUpperCase();
+  scoreEl.textContent = newH + ' - ' + newA;
+
+  launchConfetti();
+  overlay.classList.remove('show');
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 2600);
+}
+
+function animateScoreDigit(elemId, oldVal, newVal) {
+  if (oldVal === newVal) return;
+  // Convertir l'ID sd- en sn-
+  const wrapper = document.getElementById(elemId);
+  if (!wrapper) return;
+  const inner = wrapper.querySelector('.score-num-inner');
+  if (!inner) return;
+
+  let current = parseInt(oldVal) || 0;
+  const target = parseInt(newVal) || 0;
+
+  const step = () => {
+    if (current >= target) return;
+    current++;
+    // Ajouter le nouveau chiffre en bas
+    const newSpan = document.createElement('span');
+    newSpan.textContent = current;
+    inner.appendChild(newSpan);
+    // Slide vers le haut
+    inner.style.transition = 'transform 0.45s cubic-bezier(.25,.8,.25,1)';
+    const h = 36;
+    const count = inner.children.length;
+    inner.style.transform = 'translateY(-' + ((count-1)*h) + 'px)';
+    setTimeout(() => {
+      if (current < target) step();
+    }, 500);
+  };
+  step();
+}
+
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  const colors = ['#057a3a','#f7c948','#e85d4a','#00d4aa','#fff','#a855f7'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.cssText = [
+      'left:' + Math.random()*100 + '%',
+      'background:' + colors[Math.floor(Math.random()*colors.length)],
+      'width:' + (6+Math.random()*8) + 'px',
+      'height:' + (6+Math.random()*8) + 'px',
+      'animation-duration:' + (1.5+Math.random()*2) + 's',
+      'animation-delay:' + (Math.random()*0.5) + 's',
+      'border-radius:' + (Math.random()>0.5?'50%':'2px')
+    ].join(';');
+    container.appendChild(c);
+  }
+  setTimeout(() => container.innerHTML = '', 3500);
+}
+
+function checkGoals(matchId, newH, newA, homeName, awayName) {
+  const key = 'match_' + matchId;
+  if (lastScores[key] !== undefined) {
+    const old = lastScores[key];
+    if (newH > old.h || newA > old.a) {
+      triggerGoalAnimation(homeName, awayName, newH, newA, old.h, old.a, matchId);
+    }
+  }
+  lastScores[key] = { h: newH, a: newA };
+}
+
+function showNotif(msg) {
+  const n=document.getElementById('notif');
+  n.textContent=msg;
+  n.style.display='block';
+  setTimeout(()=>n.style.display='none',3500);
+}
+
+
+// ══════════════════════════════════════════════
+// ── Tchat local ──────────────────────────────
+// ══════════════════════════════════════════════
+const CHAT_KEY = 'bypronos_chat';
+let chatOpen = false;
+let unreadCount = 0;
+let lastMsgCount = 0;
+
+function loadMessages() {
+  try { return JSON.parse(localStorage.getItem(CHAT_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveMessages(msgs) {
+  // Garder les 200 derniers messages max
+  if (msgs.length > 200) msgs = msgs.slice(-200);
+  localStorage.setItem(CHAT_KEY, JSON.stringify(msgs));
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chatWindow');
+  win.classList.toggle('open', chatOpen);
+  if (chatOpen) {
+    unreadCount = 0;
+    updateUnread();
+    renderChat();
+    setTimeout(() => {
+      const input = document.getElementById('chatInput');
+      if (input) input.focus();
+      scrollChatBottom();
+    }, 50);
+  }
+}
+
+function sendChat() {
+  if (!currentPlayer) { showNotif('⚠️ Connectez-vous dabord !'); openLogin(); return; }
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = loadMessages();
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  msgs.push({ author: currentPlayer, text, time, id: Date.now() });
+  saveMessages(msgs);
+  input.value = '';
+  renderChat();
+  scrollChatBottom();
+}
+
+function renderChat() {
+  const msgs = loadMessages();
+  const container = document.getElementById('chatMessages');
+  const empty = document.getElementById('chatEmpty');
+  if (!msgs.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  // Grouper messages consécutifs du même auteur
+  let html = '';
+  msgs.forEach((m, i) => {
+    const isMe = m.author === currentPlayer;
+    const cls = isMe ? 'me' : 'other';
+    const showAuthor = i === 0 || msgs[i-1].author !== m.author;
+    html += `<div class="chat-msg ${cls}">
+      ${showAuthor ? `<div class="chat-msg-author">${m.author}</div>` : ''}
+      <div class="chat-msg-bubble">${escapeHtml(m.text)}</div>
+      <div class="chat-msg-time">${m.time}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function scrollChatBottom() {
+  const c = document.getElementById('chatMessages');
+  if (c) c.scrollTop = c.scrollHeight;
+}
+
+function updateUnread() {
+  const badge = document.getElementById('chatUnread');
+  if (!badge) return;
+  if (unreadCount > 0 && !chatOpen) {
+    badge.style.display = 'flex';
+    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Polling : vérifie les nouveaux messages toutes les 3s
+setInterval(() => {
+  const msgs = loadMessages();
+  if (msgs.length > lastMsgCount) {
+    const newCount = msgs.length - lastMsgCount;
+    lastMsgCount = msgs.length;
+    if (!chatOpen) {
+      unreadCount += newCount;
+      updateUnread();
+    } else {
+      renderChat();
+      scrollChatBottom();
+    }
+  }
+}, 3000);
+
+// Init chat count
+window.addEventListener('load', () => {
+  lastMsgCount = loadMessages().length;
+});
+
+
+// ── Bulletin mobile ───────────────────────────────────────────────
+function openMobileSlip() {
+  document.getElementById('mobileSlipDrawer').classList.add('open');
+  document.getElementById('mobileSlipOverlay').classList.add('open');
+  syncMobileSlip();
+}
+function closeMobileSlip() {
+  document.getElementById('mobileSlipDrawer').classList.remove('open');
+  document.getElementById('mobileSlipOverlay').classList.remove('open');
+}
+
+function syncMobileSlip() {
+  const keys = Object.keys(betslip);
+
+  // Badge bouton flottant
+  const btn = document.getElementById('mobileSlipBtn');
+  const badge = document.getElementById('betCountMobileBtn');
+  if (badge) badge.textContent = keys.length;
+  if (btn) {
+    btn.className = keys.length > 0
+      ? 'mobile-slip-btn has-bets'
+      : 'mobile-slip-btn empty';
+    btn.innerHTML = keys.length > 0
+      ? '🎯 Coupon de pari <span class="slip-badge">' + keys.length + '</span>'
+      : '🎯 Coupon de pari <span class="slip-badge">0</span>';
+    btn.onclick = openMobileSlip;
+  }
+
+  const countEl = document.getElementById('betCountMobile');
+  if (countEl) countEl.textContent = keys.length;
+
+  const body = document.getElementById('betslipBodyMobile');
+  const footer = document.getElementById('betslipFooterMobile');
+  if (!body) return;
+
+  if (!keys.length) {
+    body.innerHTML = '<div class="empty-slip"><div class="ico">🎯</div><p>Étape 1 : choisissez un résultat (1/N/2).<br>Étape 2 : sélectionnez le score exact.</p></div>';
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+  if (footer) footer.style.display = 'block';
+
+  body.innerHTML = keys.map(k => {
+    const b = betslip[k];
+    const ptsR = b.resultOdd.toFixed(2);
+    const ptsS = b.scoreOdd.toFixed(2);
+    const ptsMax = (b.resultOdd + b.scoreOdd).toFixed(2);
+    return '<div class="bet-item">' +
+      '<button class="remove-bet" onclick="removeBet(\'' + k + '\')" title="Supprimer">×</button>' +
+      '<div class="bet-match">' + b.matchName + '</div>' +
+      '<div class="bet-score-big ' + b.resultCls + '">' + b.h + ' — ' + b.a + '</div>' +
+      '<div class="bet-result-deduced ' + b.resultCls + '"><span class="arrow">↳</span><span class="label ' + b.resultCls + '">' + b.resultLabel + ' (' + b.resultShort + ')</span></div>' +
+      '<div class="bet-pts-badges">' +
+        '<div class="pts-badge result"><span class="pts-badge-label">✅ Bon résultat</span><span class="pts-badge-val">' + ptsR + ' pts</span><span class="pts-badge-sub">si résultat correct</span></div>' +
+        '<div class="pts-badge score"><span class="pts-badge-label">🎯 Score exact</span><span class="pts-badge-val">' + ptsS + ' pts</span><span class="pts-badge-sub">gain exceptionnel</span></div>' +
+      '</div>' +
+      '<div class="pts-bonus-row"><span class="pts-bonus-label">🎯 Bon résultat + bon écart</span><span class="pts-bonus-val">+0.5 pt</span></div>' +
+      '<div class="pts-loss-row"><span class="pts-loss-label">❌ Pronostic faux</span><span class="pts-loss-val">−1 pt</span></div>' +
+      '<div class="pts-max-row">Max si tout juste : <strong>' + ptsMax + ' pts</strong></div>' +
+    '</div>';
+  }).join('');
+
+  // Totaux
+  const ptsR = keys.reduce((s,k) => s + betslip[k].resultOdd, 0);
+  const ptsS = keys.reduce((s,k) => s + betslip[k].scoreOdd, 0);
+  const pen  = keys.length;
+  const el = (id) => document.getElementById(id);
+  if (el('totalBetsMobile'))    el('totalBetsMobile').textContent   = pen + ' pari(s)';
+  if (el('ptsResultMobile'))    el('ptsResultMobile').textContent   = '+' + ptsR.toFixed(2) + ' pts';
+  if (el('ptsScoreMobile'))     el('ptsScoreMobile').textContent    = '+' + ptsS.toFixed(2) + ' pts';
+  if (el('ptsPenaltyMobile'))   el('ptsPenaltyMobile').textContent  = '-' + pen + ' pt' + (pen>1?'s':'');
+  if (el('ptsTotalMobile'))     el('ptsTotalMobile').textContent    = (ptsR+ptsS).toFixed(2) + ' pts';
+}
+
+// sync mobile appelé dans renderBetslip directement
+
+renderMatches();
+
+// ── Fonctions Firebase sync ──────────────────────────────────────
+const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
+
+function loadPlayersFromFirebase() {
+  return fetch(FB_URL + '/players.json')
+    .then(r => r.json())
+    .then(d => d || {})
+    .catch(e => { console.warn('Firebase load error:', e); return {}; });
+}
+
+async function syncFromFirebase() {
+  try {
+    const fbPlayers = currentLeague ? await loadPlayersFromLeague() : await loadPlayersFromFirebase();
+    if (fbPlayers && Object.keys(fbPlayers).length > 0) {
+      const localPlayers = loadPlayers();
+      const merged = Object.assign({}, localPlayers, fbPlayers);
+      localStorage.setItem('apexbet_players', JSON.stringify(merged));
+      renderMatches();
+      renderBetslip();
+      console.log('✅ Sync Firebase OK - ' + Object.keys(fbPlayers).length + ' joueur(s)');
+    }
+  } catch(e) { console.warn('Sync error:', e); }
+}
+
+function watchFirebase() {
+  // Polling toutes les 10s via REST
+  setInterval(async () => {
+    try {
+      const fbPlayers = await loadPlayersFromFirebase();
+      if (fbPlayers && Object.keys(fbPlayers).length > 0) {
+        const localPlayers = loadPlayers();
+        const merged = Object.assign({}, localPlayers, fbPlayers);
+        const current = JSON.stringify(localPlayers);
+        const next = JSON.stringify(merged);
+        if (current !== next) {
+          localStorage.setItem('apexbet_players', next);
+          renderMatches();
+          renderBetslip();
+          console.log('🔄 Mise à jour Firebase détectée');
+        }
+      }
+    } catch(e) {}
+  }, 10000);
+}
+
+// Démarrer Firebase sync
+window.addEventListener('firebaseReady', () => {
+  syncFromFirebase();
+  watchFirebase();
+});
+if (window.firebaseReady) {
+  syncFromFirebase();
+  watchFirebase();
+}
+
+window.addEventListener('load', ()=>{ openLogin(); });
+</script>
+
+<!-- ── Login overlay ─────────────────────────── -->
+<div class="login-overlay" id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center">
+  <div class="login-box">
+    <div class="login-logo">BY <span>PRONOS</span></div>
+    <p class="login-sub">Entrez votre pseudo pour jouer</p>
+    <div class="league-tabs">
+      <div class="league-tab active" id="tabJoin" onclick="window.switchLeagueTab('join')">REJOINDRE</div>
+      <div class="league-tab" id="tabCreate" onclick="window.switchLeagueTab('create')">CRÉER</div>
+    </div>
+    <div id="panelJoin">
+      <label class="login-label">CODE DE LIGUE</label>
+      <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: AMIS2024" maxlength="12" style="text-transform:uppercase;margin-bottom:10px" oninput="this.value=this.value.toUpperCase()">
+      <label class="login-label">VOTRE PSEUDO</label>
+      <input class="login-input" id="loginInput" type="text" placeholder="Ex: Torpedo42" maxlength="20" onkeydown="if(event.key==='Enter')window.doJoinLeague()">
+      <button class="login-btn" onclick="window.doJoinLeague()">REJOINDRE →</button>
+    </div>
+    <div id="panelCreate" style="display:none">
+      <label class="login-label">NOM DE VOTRE LIGUE</label>
+      <input class="login-input" id="leagueNameInput" type="text" placeholder="Ex: Les Potes du Lundi" maxlength="30" style="margin-bottom:10px">
+      <label class="login-label">VOTRE PSEUDO (admin)</label>
+      <input class="login-input" id="loginInputCreate" type="text" placeholder="Ex: LeChef" maxlength="20">
+      <button class="login-btn" style="background:#c45a00" onclick="window.doCreateLeague()">CRÉER MA LIGUE →</button>
+    </div>
+    <div class="login-players" id="loginPlayers" style="display:none">
+      <div class="login-players-label">Joueurs enregistrés</div>
+      <div id="loginPlayersList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tchat flottant ── -->
+<div class="chat-bubble" id="chatBubble">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <div class="chat-online"></div>
+        💬 Tchat By Pronos
+      </div>
+      <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">Aucun message pour l'instant.<br>Soyez le premier à écrire !</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" type="text" placeholder="Écrivez un message…" maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <button class="chat-toggle" onclick="toggleChat()" title="Ouvrir le tchat">💬</button>
+    <div class="chat-unread" id="chatUnread">0</div>
+  </div>
+</div>
+
+<!-- ── Bulletin mobile flottant ── -->
+<div class="mobile-slip-overlay" id="mobileSlipOverlay" onclick="closeMobileSlip()"></div>
+
+<div class="mobile-slip-drawer" id="mobileSlipDrawer">
+  <div class="mobile-slip-drawer-handle"></div>
+  <div class="mobile-slip-drawer-header">
+    <div class="mobile-slip-drawer-title">Coupon de pari <div class="bet-count" id="betCountMobile">0</div></div>
+    <button class="mobile-slip-close" onclick="closeMobileSlip()">×</button>
+  </div>
+  <div class="mobile-slip-drawer-body" id="betslipBodyMobile"></div>
+  <div class="mobile-slip-drawer-footer" id="betslipFooterMobile" style="display:none">
+    <div class="total-row"><span>Paris validés</span><span id="totalBetsMobile">0 pari(s)</span></div>
+    <div class="total-row"><span>✅ Bon résultat</span><span id="ptsResultMobile" style="color:var(--acc);font-weight:700">0 pts</span></div>
+    <div class="total-row">
+      <span style="display:flex;flex-direction:column;gap:1px">
+        <span style="color:#8b6000;font-weight:700">Score exact 🎯</span>
+        <span style="font-size:10px;color:var(--txt2)">+0.5 pt bonus si bon écart (hors nul)</span>
+      </span>
+      <span id="ptsScoreMobile" style="background:linear-gradient(135deg,#c9922a,#f5c842,#ffe599);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700">0 pts</span>
+    </div>
+    <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenaltyMobile" style="color:var(--acc3);font-weight:700">0 pts</span></div>
+    <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotalMobile" style="color:var(--acc)">0 pts</span></div>
+    <button class="place-btn" style="margin-top:10px" onclick="placeBets()">VALIDER MES PARIS →</button>
+  </div>
+</div>
+
+<button class="mobile-slip-btn empty" id="mobileSlipBtn" onclick="openMobileSlip()">
+  🎯 Coupon de pari <span class="slip-badge" id="betCountMobileBtn">0</span>
+</button>
+</body>
+</html>
