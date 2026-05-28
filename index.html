@@ -26,6 +26,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .nav-btn.active{background:var(--bg3);color:var(--acc)}
 .nav-btn .live-badge{background:transparent;color:#e03030;border:1.5px solid #e03030;font-size:11px;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:.5px;transition:all .15s}
 .nav-btn.active .live-badge{background:#e03030;color:#fff;border-color:#e03030}
+.nav-btn .prono-badge{background:transparent;color:var(--acc);border:1.5px solid var(--acc);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.5px;transition:all .15s}
+.nav-btn.active .prono-badge{background:var(--acc);color:#fff;border-color:var(--acc)}
 .header-right{display:flex;align-items:center;gap:10px}
 
 /* Layout */
@@ -939,7 +941,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <div class="header">
     <div class="logo">BY<span> PRONOS</span> <span id="leagueBadge" style="font-size:11px;font-weight:600;opacity:.8"></span></div>
     <nav class="nav">
-      <button class="nav-btn active" onclick="window.showView('sports',this)"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;background:var(--acc);color:#fff;border-radius:4px;padding:2px 6px;letter-spacing:.5px">1X2</span></button>
+      <button class="nav-btn active" onclick="window.showView('sports',this)"><span class="prono-badge">1X2</span></button>
       <button class="nav-btn" id="navLive" onclick="window.showView('live',this)"><span class="live-badge">LIVE</span></button>
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
     </nav>
@@ -1675,7 +1677,7 @@ function buildCard(m) {
     <div class="match-header">
       <div class="league"><span>🇫🇷</span> Ligue 1</div>
 
-      <span class="match-time">${started ? (finished ? '✅ FIN' : '<span class="live-minute">' + (live ? live.minute + "'" : 'LIVE') + '</span>') : '🕐 ' + m.time}</span>
+      <span class="match-time">${started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:700;color:var(--acc3);margin-right:3px">Live</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(5).replace('-','/') + '</span>' : '') + '🕐 ' + m.time}</span>
     </div>
     ${!started ? `<div class="match-teams-row">
       <div class="mtr-home">
