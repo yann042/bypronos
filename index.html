@@ -2405,6 +2405,7 @@ function renderLiveView() {
       '</div>';
     }).join('');
     return;
+  } // fin if globalLiveData
   // Pas de live — afficher prochains matchs
   const today = new Date().toISOString().slice(0, 10);
   let dm = matches.filter(function(m){ return m.date === today; });
