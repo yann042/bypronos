@@ -2341,21 +2341,19 @@ window.setLiveFilter = function(filter, btn) {
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
+  if (Date.now() - globalLiveLastFetch < 60000 && globalLiveData.length > 0) {
+    renderLiveView(); return;
+  }
   const el = document.getElementById('liveScoreList');
   if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement...</div>';
   try {
-    console.log('🔄 Appel SportDB...');
-    const res = await fetch(SPORTDB_HOST + '/api/flashscore/football', {
-      headers: {'X-API-Key': SPORTDB_KEY}
-    });
-    console.log('SportDB status:', res.status, res.ok);
-    if (!res.ok) { console.warn('SportDB error:', res.status, res.statusText); renderLiveView(); return; }
+    const res = await fetch('https://sportsrc.org/api/matches/football');
+    if (!res.ok) { console.warn('SportSRC error:', res.status); renderLiveView(); return; }
     const data = await res.json();
-    console.log('SportDB raw data:', JSON.stringify(data).slice(0, 300));
-    globalLiveData = data.matches || data.events || data.data || data || [];
+    globalLiveData = data.matches || data.data || data || [];
     globalLiveLastFetch = Date.now();
-    console.log('✅ SportDB live:', globalLiveData.length, 'matchs');
-  } catch(e) { console.warn('SportDB live error:', e.message, e); }
+    console.log('✅ SportSRC live:', globalLiveData.length, 'matchs');
+  } catch(e) { console.warn('SportSRC live error:', e.message); }
   renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
