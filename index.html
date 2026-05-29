@@ -1152,6 +1152,11 @@ window.doJoinLeague = async function() {
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
 const TEST_MODE = false;
+function fmtPts(val) {
+  if (val === undefined || val === null) return '0';
+  return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
 function parseKickoff(dateStr, timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
   const d = dateStr ? new Date(dateStr) : new Date();
@@ -2494,16 +2499,20 @@ function renderHistoryPanel() {
     const live = liveData[parseInt(mid)];
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
 
-    const pronosHtml = pronos.map(({ name, bet }) => {
+    // En-tête colonnes
+    const colHeader = '<div style="display:grid;grid-template-columns:1fr 60px 80px;gap:4px;padding:4px 8px;font-size:9px;font-weight:700;color:var(--txt2);text-transform:uppercase;border-bottom:1px solid var(--bord)">' +
+      '<span>Joueur</span><span style="text-align:center">Prono</span><span style="text-align:right">Score · Pts</span></div>';
+
+    const pronosHtml = colHeader + pronos.map(({ name, bet }) => {
       const isMe = name === currentPlayer;
       const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
-      const ptsHtml = pts
-        ? '<span class="history-pts ' + (pts.pts > 0 ? 'pos' : 'neg') + '">' + (pts.pts > 0 ? '+' : '') + pts.pts.toFixed(2) + ' pts</span>'
-        : '<span style="color:var(--txt2);font-size:10px">en attente</span>';
-      return '<div class="history-prono-row">' +
-        '<span class="history-player">' + (isMe ? '👤 ' : '') + name + '</span>' +
-        '<span class="history-score">' + bet.h + '-' + bet.a + '</span>' +
-        ptsHtml +
+      const ptsVal = pts ? fmtPts(pts.pts) : '—';
+      const ptsCls = pts ? (pts.pts > 0 ? 'pos' : 'neg') : '';
+      const scoreFinal = live ? '<span style="font-weight:700">' + scoreStr + '</span>' : '<span style="color:var(--txt2)">?</span>';
+      return '<div style="display:grid;grid-template-columns:1fr 60px 80px;gap:4px;padding:5px 8px;align-items:center;border-bottom:1px solid var(--bg3)">' +
+        '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + '">' + (isMe ? '▶ ' : '') + name + '</span>' +
+        '<span style="font-size:12px;font-weight:700;text-align:center;color:var(--acc2)">' + bet.h + '-' + bet.a + '</span>' +
+        '<span style="text-align:right;font-size:11px">' + scoreFinal + ' <span class="history-pts ' + ptsCls + '">' + ptsVal + '</span></span>' +
       '</div>';
     }).join('');
 
@@ -2551,9 +2560,9 @@ function renderRanking() {
       <td class="rank-pos">${i<3?medals[i]:i+1}</td>
       <td class="rank-name">${r.name}${isYou?' <span class="you-badge">▶</span>':''}</td>
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
-      <td style="color:var(--acc);font-size:13px">+${r.ptsResult.toFixed(2)}</td>
-      <td style="color:var(--acc2);font-size:13px">+${r.ptsScore.toFixed(2)}</td>
-      <td class="rank-pts">${r.total.toFixed(2)}</td>
+      <td style="color:var(--acc);font-size:13px">+${fmtPts(r.ptsResult)}</td>
+      <td style="color:var(--acc2);font-size:13px">+${fmtPts(r.ptsScore)}</td>
+      <td class="rank-pts">${fmtPts(r.total)}</td>
     </tr>`;
   }).join('');
 }
