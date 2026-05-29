@@ -1021,11 +1021,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <div style="padding:8px">
-      <div class="scoreaxis-widget" style="width:100%;border-radius:8px;overflow:hidden">
-        <script src="https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0" async></script>
-      </div>
-    </div>
+    <iframe 
+      src="https://widgets.scoreaxis.com/widget?sport=football&type=livescore&lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0"
+      style="width:100%;height:calc(100vh - 56px);border:none;border-radius:8px"
+      loading="lazy"
+      title="Scores en direct">
+    </iframe>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
