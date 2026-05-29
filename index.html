@@ -2499,19 +2499,31 @@ function renderHistoryPanel() {
     const live = liveData[parseInt(mid)];
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
 
-    const pronosHtml = pronos.map(({ name, bet }) => {
-      const isMe = name === currentPlayer;
+    // Trier les pronos par points décroissants
+    const pronosWithPts = pronos.map(({ name, bet }) => {
       const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
+      return { name, bet, pts };
+    }).sort((a, b) => {
+      if (!a.pts && !b.pts) return 0;
+      if (!a.pts) return 1;
+      if (!b.pts) return -1;
+      return b.pts.pts - a.pts.pts;
+    });
+
+    const pronosHtml = pronosWithPts.map(({ name, bet, pts }, idx) => {
+      const isMe = name === currentPlayer;
       const ptsVal = pts ? fmtPts(pts.pts) : null;
       const ptsBubble = ptsVal
         ? '<span style="background:' + (pts.pts > 0 ? '#056b52' : '#cc2200') + ';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap">' + ptsVal + '</span>'
         : '<span style="font-size:10px;color:var(--txt2)">—</span>';
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-bottom:1px solid var(--bg3);gap:8px">' +
-        '<div style="display:flex;align-items:center;gap:6px;min-width:0">' +
+      const rankNum = live ? '<span style="font-size:9px;color:var(--txt2);width:14px;text-align:center;flex-shrink:0">' + (idx+1) + '</span>' : '';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-bottom:1px solid var(--bg3);gap:6px' + (isMe ? ';background:var(--bg3)' : '') + '">' +
+        '<div style="display:flex;align-items:center;gap:5px;min-width:0">' +
+          rankNum +
           ptsBubble +
           '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (isMe ? '▶ ' : '') + name + '</span>' +
         '</div>' +
-        '<span style="font-size:13px;font-weight:800;color:#111;flex-shrink:0">' + bet.h + '-' + bet.a + '</span>' +
+        '<span style="font-size:11px;font-weight:700;color:#111;flex-shrink:0">' + bet.h + '-' + bet.a + '</span>' +
       '</div>';
     }).join('');
 
