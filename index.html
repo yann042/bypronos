@@ -2449,7 +2449,7 @@ function renderRankingPanel() {
     return '<div class="ranking-row ' + cls + '">' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
       '<span class="rank-name">' + (isMe ? '▶ ' : '') + r.name + '</span>' +
-      '<span class="rank-pts">' + r.pts.toFixed(2) + ' pts</span>' +
+      '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
 
@@ -2518,7 +2518,7 @@ function renderHistoryPanel() {
     return '<div class="history-match">' +
       '<div class="history-match-header">' +
         '<span>' + matchName + '</span>' +
-        '<span style="color:#056b52;font-weight:700">' + scoreStr + '</span>' +
+        '<span style="color:#111;font-weight:700">' + scoreStr + '</span>' +
       '</div>' +
       pronosHtml +
     '</div>';
