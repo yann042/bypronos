@@ -894,7 +894,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.me{background:var(--bg2);border:1px solid var(--bord)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
-.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#111}
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--bord);flex-shrink:0}
@@ -1022,8 +1021,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <div id="livePanelHeader" style="padding:6px 16px;border-bottom:1px solid var(--bord);background:var(--bg)">
-      <div class="live-title" id="livePanelTitle" style="font-size:13px">🔴 LIVE</div>
+    <div id="livePanelHeader" style="padding:6px 16px 0;border-bottom:1px solid var(--bord);background:var(--bg)">
+      <div class="live-title" id="livePanelTitle" style="font-size:13px;margin-bottom:6px">🔴 LIVE</div>
+      <div style="display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px">
+        <button class="comp-btn active" id="liveFilter-all" onclick="setLiveFilter('all',this)">Tous</button>
+        <button class="comp-btn" id="liveFilter-worldcup" onclick="setLiveFilter('worldcup',this)">🌍 CdM 2026</button>
+        <button class="comp-btn" id="liveFilter-ligue1" onclick="setLiveFilter('ligue1',this)">🇫🇷 L1</button>
+        <button class="comp-btn" id="liveFilter-ligue2" onclick="setLiveFilter('ligue2',this)">🇫🇷 L2</button>
+        <button class="comp-btn" id="liveFilter-premier" onclick="setLiveFilter('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
+      </div>
     </div>
     <div id="liveScoreList" style="padding:8px"></div>
     <!-- Widget ScoreAxis tous championnats -->
@@ -2331,6 +2337,14 @@ let historyFilterDay = 'all';
 let rankTab = 'saison';
 
 var globalLiveData = [];
+var currentLiveFilter = 'all';
+
+window.setLiveFilter = function(filter, btn) {
+  currentLiveFilter = filter;
+  document.querySelectorAll('[id^="liveFilter-"]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderLiveView();
+}
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
@@ -2357,9 +2371,24 @@ function renderLiveView() {
   if (!el) return;
   const titleEl = document.getElementById('livePanelTitle');
   if (globalLiveData.length > 0) {
-    if (titleEl) titleEl.textContent = '🔴 ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
+    const filterMap = {
+      'worldcup': ['world cup','coupe du monde','fifa world'],
+      'ligue1':   ['ligue 1','ligue1'],
+      'ligue2':   ['ligue 2','ligue2'],
+      'premier':  ['premier league']
+    };
+    const keywords = filterMap[currentLiveFilter] || [];
+    const filteredLive = currentLiveFilter === 'all' ? globalLiveData : globalLiveData.filter(function(f) {
+      const name = (f.league.name + ' ' + f.league.country).toLowerCase();
+      return keywords.some(function(k){ return name.includes(k); });
+    });
+    if (titleEl) titleEl.textContent = '🔴 ' + filteredLive.length + ' match' + (filteredLive.length > 1 ? 's' : '') + ' en direct';
+    if (!filteredLive.length) {
+      el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--txt2)"><div style="font-size:40px">&#x26BD;</div><div style="font-size:14px;font-weight:700;margin-top:8px">Aucun match en direct' + (currentLiveFilter !== 'all' ? ' pour cette comp.' : '') + '</div></div>';
+      return;
+    }
     const byLeague = {};
-    globalLiveData.forEach(function(f) {
+    filteredLive.forEach(function(f) {
       const key = f.league.name + ' | ' + f.league.country;
       if (!byLeague[key]) byLeague[key] = {logo: f.league.logo, matches: []};
       byLeague[key].matches.push(f);
@@ -2467,9 +2496,9 @@ function renderRankingPanel() {
       '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '▶' : '') + '</span>' +
       '<span class="rank-pos" style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
         (medals[i] || (i+1)) +
-        (i===0 ? '<span style="font-size:8px;font-weight:700;color:#c9960a;letter-spacing:.3px">Vainqueur</span>' : '') +
+        (i===0 ? '<span style="font-size:9px;font-weight:800;color:#c9960a;letter-spacing:.5px;text-transform:uppercase">VAINQUEUR</span>' : '') +
       '</span>' +
-      '<span class="rank-name">' + r.name + (i===0 ? ' 🏆' : '') + '</span>' +
+      '<span class="rank-name">' + r.name + (i===0 ? ' <span style="font-size:18px">🏆</span>' : '') + '</span>' +
       '<span class="rank-pts" style="color:' + (i<3?'':'#111') + '">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
@@ -2593,9 +2622,9 @@ function renderRanking() {
       <td style="width:14px;padding:0 2px;text-align:center">${isYou?'<span style="color:var(--acc);font-weight:900;font-size:12px">▶</span>':''}</td>
       <td class="rank-pos" style="text-align:center">
         <div>${i<3?medals[i]:i+1}</div>
-        ${i===0?'<div style="font-size:7px;font-weight:700;color:#c9960a;letter-spacing:.3px">Vainqueur</div>':''}
+        ${i===0?'<div style="font-size:8px;font-weight:800;color:#c9960a;letter-spacing:.5px;text-transform:uppercase">VAINQUEUR</div>':''}
       </td>
-      <td class="rank-name">${r.name}${i===0?' 🏆':''}</td>
+      <td class="rank-name">${r.name}${i===0?' <span style="font-size:18px">🏆</span>':''}</td>
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
       <td style="color:${i<3?'var(--acc)':'#111'};font-size:13px">${fmtPts(r.ptsResult)}</td>
       <td style="color:${i<3?'var(--acc2)':'#111'};font-size:13px">${fmtPts(r.ptsScore)}</td>
