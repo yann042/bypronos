@@ -1269,8 +1269,10 @@ let currentLeague = null; // { code, name, isAdmin }
 // /ligues/{code}/config → { name, admin, matches, createdAt }
 
 function getLeagueUrl() {
-  if (!currentLeague) return FB_URL + '/players';
-  return FB_URL + '/ligues/' + currentLeague.code + '/players';
+  const lc = localStorage.getItem('bypronos_league') || 'global';
+  let leagueCode = lc;
+  try { const p = JSON.parse(lc); if (p && p.code) leagueCode = p.code; } catch(e) {}
+  return FB_URL + '/leagues/' + leagueCode;
 }
 
 function savePlayers_league(data) {
@@ -2976,7 +2978,8 @@ renderMatches();
 const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
 
 function loadPlayersFromFirebase() {
-  const league = localStorage.getItem('bypronos_league') || 'global';
+  let league = localStorage.getItem('bypronos_league') || 'global';
+  try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
   return fetch(FB_URL + '/leagues/' + league + '/players.json')
     .then(r => r.json())
     .then(d => d || {})
@@ -3115,7 +3118,7 @@ function switchLeagueModalTab(tab) {
 window.doJoinLeagueAuth = function() {
   const code = document.getElementById('leagueCodeInput')?.value.trim().toUpperCase();
   if (!code) return alert('Entrez un code de ligue');
-  localStorage.setItem('bypronos_league', code);
+  localStorage.setItem('bypronos_league', code.trim().toUpperCase());
   document.getElementById('leagueModal').style.display = 'none';
   syncFromFirebase();
   watchFirebase();
