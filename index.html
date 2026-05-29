@@ -1021,12 +1021,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <iframe 
-      src="https://www.aiscore.com/livescorewidget/iframe?lang=fr&theme=light&featured=1,2,3,4,5,6"
-      style="width:100%;height:calc(100vh - 56px);border:none"
-      title="Scores en direct - AiScore"
-      allow="autoplay">
-    </iframe>
+    <div id="liveScoreList" style="padding:8px"></div>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
@@ -1244,6 +1239,8 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
+const SPORTDB_KEY = 'WnSpv63Ra6DLCOYWjn5s3YgnB7HuMqjrls6KlXJR';
+const SPORTDB_HOST = 'https://api.sportdb.dev';
 const BSD_HOST = 'https://sports.bzzoiro.com';
 const APIFOOTBALL_HOST = 'https://v3.football.api-sports.io';
 const WC2026_LEAGUE_ID = 1;
@@ -2348,16 +2345,18 @@ window.setLiveFilter = function(filter, btn) {
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
-  // Gérer l'affichage ScoreAxis vs liste filtrée
-  const scoreaxis = document.getElementById('scoreaxisWidget');
-  const scoreList = document.getElementById('liveScoreList');
-  if (currentLiveFilter === 'all') {
-    if (scoreaxis) scoreaxis.style.display = 'block';
-    if (scoreList) scoreList.style.display = 'none';
-    return; // ScoreAxis gère tout, pas besoin d'API
-  }
-  if (scoreaxis) scoreaxis.style.display = 'none';
-  if (scoreList) scoreList.style.display = 'block';
+  const el = document.getElementById('liveScoreList');
+  if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement...</div>';
+  try {
+    const res = await fetch(SPORTDB_HOST + '/api/flashscore/football', {
+      headers: {'X-API-Key': SPORTDB_KEY}
+    });
+    if (!res.ok) { console.warn('SportDB error:', res.status); renderLiveView(); return; }
+    const data = await res.json();
+    globalLiveData = data.matches || data.events || data.data || data || [];
+    globalLiveLastFetch = Date.now();
+    console.log('✅ SportDB live:', globalLiveData.length, 'matchs');
+  } catch(e) { console.warn('SportDB live error:', e); }
   renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
