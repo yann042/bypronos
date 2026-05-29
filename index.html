@@ -2499,19 +2499,19 @@ function renderHistoryPanel() {
     const live = liveData[parseInt(mid)];
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
 
-    // En-tête colonnes
-    const colHeader = '<div style="display:grid;grid-template-columns:1fr 60px 70px;gap:4px;padding:4px 8px;font-size:9px;font-weight:700;color:var(--txt2);text-transform:uppercase;border-bottom:1px solid var(--bord)">' +
-      '<span>Joueur</span><span style="text-align:center">Prono</span><span style="text-align:right">Pts</span></div>';
-
-    const pronosHtml = colHeader + pronos.map(({ name, bet }) => {
+    const pronosHtml = pronos.map(({ name, bet }) => {
       const isMe = name === currentPlayer;
       const pts = live ? calcLivePts(bet, live.homeScore, live.awayScore) : null;
-      const ptsVal = pts ? fmtPts(pts.pts) : '—';
-      const ptsColor = pts ? (pts.pts > 0 ? '#056b52' : '#cc2200') : 'var(--txt2)';
-      return '<div style="display:grid;grid-template-columns:1fr 60px 70px;gap:4px;padding:5px 8px;align-items:center;border-bottom:1px solid var(--bg3)">' +
-        '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + '">' + (isMe ? '▶ ' : '') + name + '</span>' +
-        '<span style="font-size:12px;font-weight:700;text-align:center;color:#111">' + bet.h + '-' + bet.a + '</span>' +
-        '<span style="text-align:right;font-size:11px;font-weight:700;color:' + ptsColor + '">' + ptsVal + '</span>' +
+      const ptsVal = pts ? fmtPts(pts.pts) : null;
+      const ptsBubble = ptsVal
+        ? '<span style="background:' + (pts.pts > 0 ? '#056b52' : '#cc2200') + ';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap">' + ptsVal + '</span>'
+        : '<span style="font-size:10px;color:var(--txt2)">—</span>';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-bottom:1px solid var(--bg3);gap:8px">' +
+        '<div style="display:flex;align-items:center;gap:6px;min-width:0">' +
+          ptsBubble +
+          '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (isMe ? '▶ ' : '') + name + '</span>' +
+        '</div>' +
+        '<span style="font-size:13px;font-weight:800;color:#111;flex-shrink:0">' + bet.h + '-' + bet.a + '</span>' +
       '</div>';
     }).join('');
 
