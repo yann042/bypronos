@@ -2470,7 +2470,7 @@ function renderRankingPanel() {
         (i===0 ? '<span style="font-size:8px;font-weight:700;color:#c9960a;letter-spacing:.3px">Vainqueur</span>' : '') +
       '</span>' +
       '<span class="rank-name">' + r.name + (i===0 ? ' 🏆' : '') + '</span>' +
-      '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
+      '<span class="rank-pts" style="color:' + (i<3?'':'#111') + '">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
 
@@ -2597,9 +2597,9 @@ function renderRanking() {
       </td>
       <td class="rank-name">${r.name}${i===0?' 🏆':''}</td>
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
-      <td style="color:var(--acc);font-size:13px">+${fmtPts(r.ptsResult)}</td>
-      <td style="color:var(--acc2);font-size:13px">+${fmtPts(r.ptsScore)}</td>
-      <td class="rank-pts" style="color:#111">${fmtPts(r.total)}</td>
+      <td style="color:${i<3?'var(--acc)':'#111'};font-size:13px">${fmtPts(r.ptsResult)}</td>
+      <td style="color:${i<3?'var(--acc2)':'#111'};font-size:13px">${fmtPts(r.ptsScore)}</td>
+      <td class="rank-pts" style="color:${i<3?'':'#111'}">${fmtPts(r.total)}</td>
     </tr>`;
   }).join('');
 }
