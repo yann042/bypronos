@@ -2347,13 +2347,13 @@ async function fetchGlobalLive() {
   const el = document.getElementById('liveScoreList');
   if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement...</div>';
   try {
-    const res = await fetch('https://sportsrc.org/api/matches/football');
-    if (!res.ok) { console.warn('SportSRC error:', res.status); renderLiveView(); return; }
+    const res = await fetch('https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/scores/?apiKey=' + ODDS_API_KEY + '&daysFrom=1');
+    if (!res.ok) { console.warn('OddsAPI scores error:', res.status); renderLiveView(); return; }
     const data = await res.json();
-    globalLiveData = data.matches || data.data || data || [];
+    globalLiveData = data || [];
     globalLiveLastFetch = Date.now();
-    console.log('✅ SportSRC live:', globalLiveData.length, 'matchs');
-  } catch(e) { console.warn('SportSRC live error:', e.message); }
+    console.log('✅ OddsAPI scores:', globalLiveData.length, 'matchs', JSON.stringify(data).slice(0,200));
+  } catch(e) { console.warn('OddsAPI scores error:', e.message); }
   renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
@@ -2376,71 +2376,35 @@ function renderLiveView() {
   if (!el) return;
   const titleEl = document.getElementById('livePanelTitle');
   if (globalLiveData.length > 0) {
-    // Filtrage par pays + nom exact de ligue
-    const filteredLive = (function() {
-      if (currentLiveFilter === 'all') return globalLiveData;
-      return globalLiveData.filter(function(f) {
-        const country = (f.league.country || '').toLowerCase();
-        const league = (f.league.name || '').toLowerCase();
-        if (currentLiveFilter === 'worldcup') {
-          return league.includes('world cup') || league.includes('fifa world') || country === 'world';
-        }
-        if (currentLiveFilter === 'ligue1') {
-          return country === 'france' && (league.includes('ligue 1') || league === 'ligue 1');
-        }
-        if (currentLiveFilter === 'ligue2') {
-          return country === 'france' && (league.includes('ligue 2') || league === 'ligue 2');
-        }
-        if (currentLiveFilter === 'premier') {
-          return country === 'england' && league.includes('premier league');
-        }
-        return true;
-      });
-    })();
-    if (titleEl) titleEl.textContent = '🔴 ' + filteredLive.length + ' match' + (filteredLive.length > 1 ? 's' : '') + ' en direct';
-    if (!filteredLive.length) {
-      el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--txt2)"><div style="font-size:40px">&#x26BD;</div><div style="font-size:14px;font-weight:700;margin-top:8px">Aucun match en direct' + (currentLiveFilter !== 'all' ? ' pour cette comp.' : '') + '</div></div>';
+    // Format The Odds API scores
+    const liveNow = globalLiveData.filter(function(m) { return m.scores && !m.completed; });
+    const finished = globalLiveData.filter(function(m) { return m.completed; });
+    const all = liveNow.concat(finished);
+    if (titleEl) titleEl.textContent = liveNow.length > 0 ? '🔴 ' + liveNow.length + ' match' + (liveNow.length > 1 ? 's' : '') + ' en direct' : '📅 Résultats récents';
+    if (!all.length) {
+      el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--txt2)"><div style="font-size:40px">&#x26BD;</div><div style="font-size:14px;font-weight:700;margin-top:8px">Aucun match en direct</div></div>';
       return;
     }
-    const byLeague = {};
-    filteredLive.forEach(function(f) {
-      const key = f.league.name + ' | ' + f.league.country;
-      if (!byLeague[key]) byLeague[key] = {logo: f.league.logo, matches: []};
-      byLeague[key].matches.push(f);
-    });
-    el.innerHTML = Object.entries(byLeague).map(function(e) {
-      const lName = e[0], league = e[1];
-      const hdr = '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;margin-bottom:6px;border-bottom:1px solid var(--bord)">' +
-        (league.logo ? '<img src="' + league.logo + '" style="width:18px;height:18px;object-fit:contain">' : '') +
-        '<span style="font-size:11px;font-weight:700;color:var(--txt2)">' + lName + '</span></div>';
-      const cards = league.matches.map(function(f) {
-        const hs = f.goals.home !== null ? f.goals.home : '?';
-        const as = f.goals.away !== null ? f.goals.away : '?';
-        const min = f.fixture.status.elapsed ? f.fixture.status.elapsed + "'" : f.fixture.status.short;
-        const isPronos = matches.some(function(m){ return m.home === f.teams.home.name || m.away === f.teams.away.name; });
-        const border = isPronos ? 'border:2px solid var(--acc)' : 'border:1px solid var(--bord)';
-        return '<div style="background:var(--bg2);' + border + ';border-radius:6px;margin-bottom:3px;padding:10px 8px 4px">' +
-          '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px">' +
-            '<div style="display:flex;align-items:center;gap:5px;min-width:0">' +
-              (f.teams.home.logo ? '<img src="' + f.teams.home.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
-              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
-            '</div>' +
-            '<div style="text-align:center;padding:0 6px;position:relative">' +
-              '<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#e03030;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.5px;white-space:nowrap">' + min + '</div>' +
-              '<div style="font-size:15px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
-            '</div>' +
-            '<div style="display:flex;align-items:center;gap:5px;min-width:0;justify-content:flex-end">' +
-              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
-              (f.teams.away.logo ? '<img src="' + f.teams.away.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
-            '</div>' +
+    el.innerHTML = all.map(function(m) {
+      const getScore = function(team) { return m.scores ? ((m.scores.find(function(s){ return s.name === team; }) || {}).score || '?') : '?'; };
+      const hs = getScore(m.home_team);
+      const as = getScore(m.away_team);
+      const status = m.completed ? '<span style="color:var(--txt2)">&#x2705; FIN</span>' : '<span style="color:#e03030;font-weight:800">&#x1F534; LIVE</span>';
+      const isPronos = matches.some(function(p){ return p.home === m.home_team || p.away === m.away_team; });
+      const border = isPronos ? 'border:2px solid var(--acc)' : 'border:1px solid var(--bord)';
+      return '<div style="background:var(--bg2);' + border + ';border-radius:8px;margin-bottom:5px;padding:8px 10px">' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:11px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + m.home_team + '</span>' +
+          '<div style="flex-shrink:0;text-align:center">' +
+            '<div style="font-size:15px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
+            '<div style="font-size:9px">' + status + '</div>' +
           '</div>' +
-          (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:2px">&#x2605; Dans vos pronos</div>' : '') +
-        '</div>';
-      }).join('');
-      return '<div style="margin-bottom:16px">' + hdr + cards + '</div>';
+          '<span style="font-size:11px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + m.away_team + '</span>' +
+        '</div>' +
+        (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:2px">&#x2605; Dans vos pronos</div>' : '') +
+      '</div>';
     }).join('');
     return;
-  }
   // Pas de live — afficher prochains matchs
   const today = new Date().toISOString().slice(0, 10);
   let dm = matches.filter(function(m){ return m.date === today; });
