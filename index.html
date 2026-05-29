@@ -961,9 +961,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
     </nav>
     <div class="header-right">
-      <div class="player-badge" id="playerBadge" onclick="sessionReset()" title="Changer de joueur">
+      <div class="player-badge" id="playerBadge" onclick="currentPlayer ? showPlayerMenu() : openLogin()" title="Mon profil">
         <div class="avatar" id="playerAvatar">?</div>
         <span id="playerName">Connexion</span>
+      </div>
+      <!-- Menu profil -->
+      <div id="playerMenu" style="display:none;position:absolute;top:52px;right:12px;background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:8px;z-index:200;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,.15)">
+        <div style="padding:8px 12px;font-size:12px;font-weight:700;color:var(--txt2);border-bottom:1px solid var(--bord);margin-bottom:4px" id="playerMenuName"></div>
+        <div onclick="showLeagueModal()" style="padding:8px 12px;font-size:12px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🏆 Changer de ligue</div>
+        <div onclick="doLogout()" style="padding:8px 12px;font-size:12px;cursor:pointer;border-radius:6px;color:#e03030;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🚪 Se déconnecter</div>
       </div>
     </div>
   </div>
@@ -2431,12 +2437,14 @@ function renderRankingPanel() {
     .sort((a, b) => b.pts - a.pts);
 
   const medals = ['🥇','🥈','🥉'];
+  const podium = ['gold','silver','bronze'];
   const html = rows.map((r, i) => {
     const isMe = r.name === currentPlayer;
-    return '<div class="ranking-row' + (isMe ? ' me' : '') + '">' +
+    const cls = (podium[i] || '') + (isMe ? ' me' : '');
+    return '<div class="ranking-row ' + cls + '">' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + (isMe ? '👤 ' : '') + r.name + '</span>' +
-      '<span class="rank-pts">+' + r.pts.toFixed(2) + ' pts</span>' +
+      '<span class="rank-name">' + (isMe ? '▶ ' : '') + r.name + '</span>' +
+      '<span class="rank-pts">' + r.pts.toFixed(2) + ' pts</span>' +
     '</div>';
   }).join('');
 
@@ -3043,6 +3051,33 @@ window.doCreateLeagueAuth = async function() {
 
 function showLeagueModal() {
   document.getElementById('leagueModal').style.display = 'flex';
+  document.getElementById('playerMenu').style.display = 'none';
+}
+
+function showPlayerMenu() {
+  const menu = document.getElementById('playerMenu');
+  const nameEl = document.getElementById('playerMenuName');
+  if (nameEl) nameEl.textContent = '👤 ' + currentPlayer;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Fermer le menu si clic ailleurs
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#playerBadge') && !e.target.closest('#playerMenu')) {
+    const menu = document.getElementById('playerMenu');
+    if (menu) menu.style.display = 'none';
+  }
+});
+
+function doLogout() {
+  if (window._firebaseAuth) window._firebaseAuth.signOut();
+  currentPlayer = null;
+  localStorage.removeItem('bypronos_player');
+  localStorage.removeItem('bypronos_league');
+  document.getElementById('playerAvatar').textContent = '?';
+  document.getElementById('playerName').textContent = 'Connexion';
+  document.getElementById('playerMenu').style.display = 'none';
+  openLogin();
 }
 
 window.addEventListener('load', ()=>{ openLogin(); });
