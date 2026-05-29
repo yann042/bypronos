@@ -1780,6 +1780,19 @@ async function fetchLiveScores() {
 
 // ── Chargement automatique des matchs + cotes via API-Football ────
 async function fetchUpcomingMatches() {
+  // Verrou Firebase : 1 seule requête API par heure maximum
+  try {
+    const leagueCode = localStorage.getItem('bypronos_league') || 'global';
+    const lockRef = db.ref('leagues/' + leagueCode + '/matchesLock');
+    const snap = await lockRef.once('value');
+    const lock = snap.val();
+    const now = Date.now();
+    if (lock && lock.ts && (now - lock.ts) < 3600000) {
+      console.log('⏱ fetchUpcomingMatches ignoré (verrou actif, prochaine MAJ dans ' + Math.round((3600000-(now-lock.ts))/60000) + ' min)');
+      return;
+    }
+    await lockRef.set({ts: now, by: currentPlayer || 'system'});
+  } catch(e) {}
   console.log('🔄 Chargement matchs + cotes via API-Football...');
   const headers = {'x-apisports-key': APIFOOTBALL_KEY};
 
