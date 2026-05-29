@@ -1020,10 +1020,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div><!-- /view-sports -->
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
-  <div id="view-live" class="view-panel" style="visibility:hidden;pointer-events:none;z-index:-1">
-    <div class="scoreaxis-widget" style="width:100%;height:auto;font-size:13px;background-color:#ffffff;color:#222222;border-radius:8px;overflow:auto">
-      <script src="https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0" async></script>
-    </div>
+  <div id="view-live" class="view-panel" style="display:none">
+    <div id="scoreaxisContainer" style="padding:8px"></div>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
@@ -2131,22 +2129,20 @@ window.selectComp = function selectComp(comp, btn) {
 }
 
 window.showView = function showView(view, btn) {
-  document.querySelectorAll('.view-panel').forEach(p => {
-    if (p.id === 'view-live') {
-      p.style.visibility = 'hidden';
-      p.style.pointerEvents = 'none';
-      p.style.zIndex = '-1';
-    } else {
-      p.style.display = 'none';
-    }
-  });
-  const activePanel = document.getElementById('view-'+view);
+  document.querySelectorAll('.view-panel').forEach(p => p.style.display='none');
+  document.getElementById('view-'+view).style.display='block';
   if (view === 'live') {
-    activePanel.style.visibility = 'visible';
-    activePanel.style.pointerEvents = 'auto';
-    activePanel.style.zIndex = '1';
-  } else {
-    activePanel.style.display = 'block';
+    const c = document.getElementById('scoreaxisContainer');
+    if (c) {
+      c.innerHTML = '';
+      const wrap = document.createElement('div');
+      wrap.className = 'scoreaxis-widget';
+      wrap.style.cssText = 'width:100%;font-size:13px;background:#fff;border-radius:8px;overflow:auto';
+      c.appendChild(wrap);
+      const s = document.createElement('script');
+      s.src = 'https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0&_=' + Date.now();
+      wrap.appendChild(s);
+    }
   }
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
