@@ -1159,7 +1159,11 @@ function fmtPts(val) {
 
 function parseKickoff(dateStr, timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
-  const d = dateStr ? new Date(dateStr) : new Date();
+  if (dateStr) {
+    const [y, mo, day] = dateStr.split('-').map(Number);
+    return new Date(y, mo - 1, day, h, m, 0, 0);
+  }
+  const d = new Date();
   d.setHours(h, m, 0, 0);
   return d;
 }
@@ -1350,7 +1354,7 @@ function getAllPronosHtml(matchId, hs, as) {
       if (pts) {
         const sign = pts.pts > 0 ? '+' : '';
         const cls  = pts.pts > 0 ? 'pos' : 'neg';
-        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + pts.pts.toFixed(1) + '</span>';
+        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + fmtPts(pts.pts) + '</span>';
       }
       const meStyle = isMe ? 'border-color:#056b52;background:rgba(5,107,82,.08)' : '';
       chips.push('<div class="prono-chip" style="' + meStyle + '">' +
@@ -1374,7 +1378,7 @@ function ptsChip(vb, matchId) {
   if (!pts) return '';
   const sign = pts.pts > 0 ? '+' : '';
   const bg   = pts.pts > 0 ? '#057a3a' : '#cc2200';
-  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + pts.pts.toFixed(1) + '</span>';
+  return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + fmtPts(pts.pts) + '</span>';
 }
 
 function renderPronoBelow(matchId) {
@@ -1437,7 +1441,7 @@ function getPronoHeader(matchId) {
         const sign = pts.pts > 0 ? '+' : '';
         const isPos = pts.pts > 0;
         const bg  = isPos ? '#057a3a' : '#cc2200';
-        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + pts.pts.toFixed(1) + 'pts</span>';
+        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + fmtPts(pts.pts) + ' pts</span>';
       }
     }
     let out = '<span class="header-prono-badge">🎯 Mon prono : ' + vb.h + '-' + vb.a + '</span>';
@@ -1461,7 +1465,7 @@ function renderLiveProno(matchId, hs, as) {
   const livePts = (hs !== '?' && as !== '?') ? calcLivePts(b, hs, as) : null;
   const ptsCol = livePts ? (livePts.pts > 0 ? '#057a3a' : '#cc2200') : '#057a3a';
   const ptsTxt = livePts
-    ? (livePts.pts > 0 ? '+' : '') + livePts.pts.toFixed(2) + ' pts · ' + livePts.label
+    ? (livePts.pts > 0 ? '+' : '') + fmtPts(livePts.pts) + ' pts · ' + livePts.label
     : '';
   // Calcul détaillé des pts selon le score live ou potentiel
   let ptsResult, ptsScore, ptsTotal, resultBg, resultColor, scoreBg, scoreColor, totalBg;
@@ -1473,9 +1477,9 @@ function renderLiveProno(matchId, hs, as) {
     const hasBonus   = livePts.type === 'bonus';
     const isBad      = livePts.type === 'zero';
 
-    ptsResult = isBad ? '-1' : b.resultOdd.toFixed(2);
-    ptsScore  = exactScore ? b.scoreOdd.toFixed(2) : (hasBonus ? '0.5' : '0');
-    ptsTotal  = livePts.pts.toFixed(2);
+    ptsResult = isBad ? '-1' : fmtPts(b.resultOdd);
+    ptsScore  = exactScore ? fmtPts(b.scoreOdd) : (hasBonus ? '0.5' : '0');
+    ptsTotal  = fmtPts(livePts.pts);
 
     resultBg    = isBad ? '#fff0ee' : '#eef7f2';
     resultColor = isBad ? '#cc2200' : '#056b52';
@@ -1484,9 +1488,9 @@ function renderLiveProno(matchId, hs, as) {
     totalBg     = isBad ? '#cc2200' : '#056b52';
   } else {
     // Pré-match : pts potentiels max
-    ptsResult   = b.resultOdd.toFixed(2);
-    ptsScore    = b.scoreOdd.toFixed(2);
-    ptsTotal    = (b.resultOdd + b.scoreOdd).toFixed(2);
+    ptsResult   = fmtPts(b.resultOdd);
+    ptsScore    = fmtPts(b.scoreOdd);
+    ptsTotal    = fmtPts(b.resultOdd + b.scoreOdd);
     resultBg    = '#eef7f2'; resultColor = '#056b52';
     scoreBg     = '#fff8ee'; scoreColor  = '#8b6000';
     totalBg     = '#056b52';
