@@ -1110,7 +1110,7 @@ window.doCreateLeague = async function() {
   var rand = Math.random().toString(36).substring(2,6).toUpperCase();
   var code = clean + rand;
   var config = { name: name, admin: admin, createdAt: Date.now(), code: code };
-  await fetch(FB_URL + '/ligues/' + code + '/config.json', {
+  await fetch(FB_URL + '/leagues/' + code + '/config.json', {
     method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(config)
   });
   localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: name, isAdmin: true }));
@@ -1128,7 +1128,7 @@ window.doJoinLeague = async function() {
   var code = (document.getElementById('leagueCodeInput').value || '').trim().toUpperCase();
   var name = (document.getElementById('loginInput').value || '').trim();
   if (!code || !name) { alert('⚠️ Remplis tous les champs !'); return; }
-  var res = await fetch(FB_URL + '/ligues/' + code + '/config.json').then(function(r){ return r.json(); });
+  var res = await fetch(FB_URL + '/leagues/' + code + '/config.json').then(function(r){ return r.json(); });
   if (!res || !res.name) { alert('❌ Code de ligue invalide !'); return; }
   localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: res.name, isAdmin: res.admin === name }));
   document.getElementById('loginOverlay').style.display = 'none';
@@ -2247,7 +2247,7 @@ window.doCreateLeague = async function() {
   const config = { name, admin, createdAt: Date.now(), code };
 
   // Sauver la config dans Firebase
-  await fetch(FB_URL + '/ligues/' + code + '/config.json', {
+  await fetch(FB_URL + '/leagues/' + code + '/config.json', {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(config)
@@ -2273,7 +2273,7 @@ window.doJoinLeague = async function() {
   if (!code || !name) { showNotif('⚠️ Remplis tous les champs !'); return; }
 
   // Vérifier que la ligue existe
-  const res = await fetch(FB_URL + '/ligues/' + code + '/config.json').then(r => r.json());
+  const res = await fetch(FB_URL + '/leagues/' + code + '/config.json').then(r => r.json());
   if (!res || !res.name) {
     showNotif('❌ Code de ligue invalide !');
     return;
