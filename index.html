@@ -2134,18 +2134,7 @@ window.showView = function showView(view, btn) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
-  if(view==='live') {
-    const container = document.getElementById('liveWidgetContainer');
-    if (container && !container.dataset.loaded) {
-      container.dataset.loaded = '1';
-      container.innerHTML = '<div class="scoreaxis-widget" style="width:100%;border-radius:8px;overflow:hidden"></div>';
-      setTimeout(function() {
-        const script = document.createElement('script');
-        script.src = 'https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0';
-        document.getElementById('liveWidgetContainer').querySelector('.scoreaxis-widget').appendChild(script);
-      }, 100);
-    }
-  }
+  if(view==='live') fetchGlobalLive();
 }
 
 function scrollToMatch(id, el) {
@@ -2982,10 +2971,9 @@ const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app'
 function loadPlayersFromFirebase() {
   let league = localStorage.getItem('bypronos_league') || 'global';
   try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
-  return fetch(FB_URL + '/leagues/' + league + '/players.json')
-    .then(r => r.json())
-    .then(d => d || {})
-    .catch(e => { console.warn('Firebase load error:', e); return {}; });
+  return db.ref('leagues/' + league + '/players').once('value')
+    .then(function(snap) { return snap.val() || {}; })
+    .catch(function(e) { console.warn('Firebase load error:', e); return {}; });
 }
 
 async function syncFromFirebase() {
