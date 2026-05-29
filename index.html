@@ -1021,19 +1021,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <div id="livePanelHeader" style="padding:6px 16px 0;border-bottom:1px solid var(--bord);background:var(--bg)">
-      <div class="live-title" id="livePanelTitle" style="font-size:13px;margin-bottom:6px">🔴 LIVE</div>
-      <div style="display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px">
-        <button class="comp-btn active" id="liveFilter-all" onclick="setLiveFilter('all',this)">Tous</button>
-        <button class="comp-btn" id="liveFilter-worldcup" onclick="setLiveFilter('worldcup',this)">🌍 CdM 2026</button>
-        <button class="comp-btn" id="liveFilter-ligue1" onclick="setLiveFilter('ligue1',this)">🇫🇷 L1</button>
-        <button class="comp-btn" id="liveFilter-ligue2" onclick="setLiveFilter('ligue2',this)">🇫🇷 L2</button>
-        <button class="comp-btn" id="liveFilter-premier" onclick="setLiveFilter('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
-      </div>
-    </div>
-    <div id="liveScoreList" style="padding:8px"></div>
-    <!-- Widget ScoreAxis tous championnats -->
-    <div id="scoreaxisWidget" style="padding:0 8px 8px">
+    <div style="padding:8px">
       <div class="scoreaxis-widget" style="width:100%;border-radius:8px;overflow:hidden">
         <script src="https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0" async></script>
       </div>
@@ -2343,12 +2331,30 @@ window.setLiveFilter = function(filter, btn) {
   currentLiveFilter = filter;
   document.querySelectorAll('[id^="liveFilter-"]').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderLiveView();
+  const scoreaxis = document.getElementById('scoreaxisWidget');
+  const scoreList = document.getElementById('liveScoreList');
+  if (filter === 'all') {
+    if (scoreaxis) scoreaxis.style.display = 'block';
+    if (scoreList) scoreList.style.display = 'none';
+  } else {
+    if (scoreaxis) scoreaxis.style.display = 'none';
+    if (scoreList) scoreList.style.display = 'block';
+    renderLiveView();
+  }
 }
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
-  // Afficher immédiatement les prochains matchs pendant le chargement
+  // Gérer l'affichage ScoreAxis vs liste filtrée
+  const scoreaxis = document.getElementById('scoreaxisWidget');
+  const scoreList = document.getElementById('liveScoreList');
+  if (currentLiveFilter === 'all') {
+    if (scoreaxis) scoreaxis.style.display = 'block';
+    if (scoreList) scoreList.style.display = 'none';
+    return; // ScoreAxis gère tout, pas besoin d'API
+  }
+  if (scoreaxis) scoreaxis.style.display = 'none';
+  if (scoreList) scoreList.style.display = 'block';
   renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
