@@ -891,8 +891,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.silver .rank-pts{color:#808080;font-size:18px}
 .ranking-row.bronze .rank-pts{color:#a0622a;font-size:18px}
 .ranking-row.gold .rank-pos{font-size:26px}
-.ranking-row.me{background:#f7f7f7;border:1px solid #e0e0e0}
-.ranking-row.me{background:rgba(5,107,82,.1);border:1px solid rgba(5,107,82,.2)}
+.ranking-row.me{background:var(--bg2);border:1px solid var(--bord)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
 .rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#056b52}
@@ -2586,9 +2585,9 @@ function renderRanking() {
     const isYou=r.name===currentPlayer;
     const cls=['gold','silver','bronze'][i]||'';
     return `<tr class="ranking-row ${cls} ${isYou?'me':''}">
-      <td class="rank-pos">${isYou?'<span class="you-badge">▶</span>':''}</td>
+      <td style="width:14px;padding:0 2px;text-align:center">${isYou?'<span style="color:var(--acc);font-weight:900;font-size:12px">▶</span>':''}</td>
       <td class="rank-pos">${i<3?medals[i]:i+1}</td>
-      <td class="rank-name">${r.name}</td>
+      <td class="rank-name">${r.name}${i===0?' <span style="background:#c9960a;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">🏆 VAINQUEUR</span>':''}</td>
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
       <td style="color:var(--acc);font-size:13px">+${fmtPts(r.ptsResult)}</td>
       <td style="color:var(--acc2);font-size:13px">+${fmtPts(r.ptsScore)}</td>
