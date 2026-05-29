@@ -2465,8 +2465,11 @@ function renderRankingPanel() {
     const cls = (podium[i] || '') + (isMe ? ' me' : '');
     return '<div class="ranking-row ' + cls + '">' +
       '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '▶' : '') + '</span>' +
-      '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + r.name + (i===0 ? ' <span style="background:#c9960a;color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:3px;white-space:nowrap">🏆 Vainqueur</span>' : '') + '</span>' +
+      '<span class="rank-pos" style="display:flex;flex-direction:column;align-items:center;gap:1px">' +
+        (medals[i] || (i+1)) +
+        (i===0 ? '<span style="font-size:8px;font-weight:700;color:#c9960a;letter-spacing:.3px">Vainqueur</span>' : '') +
+      '</span>' +
+      '<span class="rank-name">' + r.name + (i===0 ? ' 🏆' : '') + '</span>' +
       '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
@@ -2588,8 +2591,11 @@ function renderRanking() {
     const cls=['gold','silver','bronze'][i]||'';
     return `<tr class="ranking-row ${cls} ${isYou?'me':''}">
       <td style="width:14px;padding:0 2px;text-align:center">${isYou?'<span style="color:var(--acc);font-weight:900;font-size:12px">▶</span>':''}</td>
-      <td class="rank-pos">${i<3?medals[i]:i+1}</td>
-      <td class="rank-name">${r.name}${i===0?' <span style="background:#c9960a;color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:3px;white-space:nowrap">🏆 Vainqueur</span>':''}</td>
+      <td class="rank-pos" style="text-align:center">
+        <div>${i<3?medals[i]:i+1}</div>
+        ${i===0?'<div style="font-size:7px;font-weight:700;color:#c9960a;letter-spacing:.3px">Vainqueur</div>':''}
+      </td>
+      <td class="rank-name">${r.name}${i===0?' 🏆':''}</td>
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
       <td style="color:var(--acc);font-size:13px">+${fmtPts(r.ptsResult)}</td>
       <td style="color:var(--acc2);font-size:13px">+${fmtPts(r.ptsScore)}</td>
