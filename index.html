@@ -1021,12 +1021,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <iframe 
-      src="https://widgets.scoreaxis.com/widget?sport=football&type=livescore&lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0"
-      style="width:100%;height:calc(100vh - 56px);border:none;border-radius:8px"
-      loading="lazy"
-      title="Scores en direct">
-    </iframe>
+    <div id="liveWidgetContainer" style="padding:8px">
+      <!-- Widget chargé dynamiquement au clic sur l'onglet LIVE -->
+    </div>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
@@ -2135,7 +2132,20 @@ window.showView = function showView(view, btn) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
-  if(view==='live') fetchGlobalLive();
+  if(view==='live') {
+    const container = document.getElementById('liveWidgetContainer');
+    if (container && !container.dataset.loaded) {
+      container.dataset.loaded = '1';
+      const div = document.createElement('div');
+      div.className = 'scoreaxis-widget';
+      div.style.cssText = 'width:100%;border-radius:8px;overflow:hidden';
+      const script = document.createElement('script');
+      script.src = 'https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0';
+      script.async = true;
+      div.appendChild(script);
+      container.appendChild(div);
+    }
+  }
 }
 
 function scrollToMatch(id, el) {
