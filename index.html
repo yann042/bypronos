@@ -1389,7 +1389,8 @@ function renderPronoBelow(matchId) {
       players[currentPlayer].validatedBets &&
       (players[currentPlayer].validatedBets[mid] || players[currentPlayer].validatedBets[String(mid)]);
 
-    const matchStarted = isMatchStarted(matches.find(m => parseInt(m.id) === mid)?.time, mid);
+    const matchObj = matches.find(m => parseInt(m.id) === mid);
+    const matchStarted = matchObj ? isMatchStarted(matchObj.time, mid) : false;
     const others = [];
     Object.entries(players).forEach(([name, data]) => {
       if (name === currentPlayer) return;
@@ -2369,7 +2370,7 @@ function renderLiveView() {
               '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
             '</div>' +
             '<div style="text-align:center;padding:0 6px;position:relative">' +
-              '<div style="background:#e03030;color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:4px;letter-spacing:.5px;min-width:42px;text-align:center;margin-bottom:4px">' + min + '</div>' +
+              '<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#e03030;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.5px;white-space:nowrap">' + min + '</div>' +
               '<div style="font-size:15px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
             '</div>' +
             '<div style="display:flex;align-items:center;gap:5px;min-width:0;justify-content:flex-end">' +
@@ -2572,8 +2573,9 @@ function renderRanking() {
     const isYou=r.name===currentPlayer;
     const cls=['gold','silver','bronze'][i]||'';
     return `<tr class="ranking-row ${cls} ${isYou?'me':''}">
+      <td class="rank-pos">${isYou?'<span class="you-badge">▶</span>':''}</td>
       <td class="rank-pos">${i<3?medals[i]:i+1}</td>
-      <td class="rank-name">${r.name}${isYou?' <span class="you-badge">▶</span>':''}</td>
+      <td class="rank-name">${r.name}</td>
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
       <td style="color:var(--acc);font-size:13px">+${fmtPts(r.ptsResult)}</td>
       <td style="color:var(--acc2);font-size:13px">+${fmtPts(r.ptsScore)}</td>
