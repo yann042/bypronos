@@ -913,6 +913,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <!-- Firebase SDK compat -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCKGmv4pnhQpRPkGxgsLz0OF4QyN1DrzJY",
@@ -2925,12 +2926,123 @@ function watchFirebase() {
 
 // Démarrer Firebase sync
 window.addEventListener('firebaseReady', () => {
+  // Init Firebase Auth
+  const auth = firebase.auth();
+  auth.onAuthStateChanged(function(user) {
+    if (user && !currentPlayer) {
+      // Auto-login via Firebase Auth
+      const displayName = user.displayName || user.email.split('@')[0];
+      doLoginName(displayName);
+    }
+  });
+  window._firebaseAuth = auth;
   syncFromFirebase();
   watchFirebase();
 });
 if (window.firebaseReady) {
   syncFromFirebase();
   watchFirebase();
+}
+
+// Connexion Google
+window.loginWithGoogle = async function() {
+  try {
+    const auth = window._firebaseAuth || firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    const name = result.user.displayName || result.user.email.split('@')[0];
+    currentPlayer = name;
+    localStorage.setItem('bypronos_player', name);
+    document.getElementById('loginOverlay').style.display = 'none';
+    const league = localStorage.getItem('bypronos_league');
+    if (!league) {
+      showLeagueModal();
+    } else {
+      await db.ref('leagues/' + league + '/players/' + result.user.uid).update({name, email: result.user.email, uid: result.user.uid});
+      syncFromFirebase();
+      watchFirebase();
+      renderMatches();
+    }
+  } catch(e) { alert('Erreur Google : ' + (e.message || e)); }
+}
+
+// Connexion Email
+window.loginWithEmail = async function() {
+  const email = document.getElementById('authEmail')?.value.trim();
+  const pass = document.getElementById('authPass')?.value;
+  const pseudo = document.getElementById('authPseudo')?.value.trim();
+  if (!email || !pass) return alert('Email et mot de passe requis');
+  try {
+    const auth = window._firebaseAuth || firebase.auth();
+    let user;
+    try {
+      const r = await auth.createUserWithEmailAndPassword(email, pass);
+      user = r.user;
+      if (pseudo) await user.updateProfile({displayName: pseudo});
+    } catch(e2) {
+      if (e2.code === 'auth/email-already-in-use') {
+        const r2 = await auth.signInWithEmailAndPassword(email, pass);
+        user = r2.user;
+      } else throw e2;
+    }
+    const name = pseudo || user.displayName || email.split('@')[0];
+    currentPlayer = name;
+    localStorage.setItem('bypronos_player', name);
+    document.getElementById('loginOverlay').style.display = 'none';
+    const league = localStorage.getItem('bypronos_league');
+    if (!league) {
+      showLeagueModal();
+    } else {
+      await db.ref('leagues/' + league + '/players/' + user.uid).update({name, email: user.email, uid: user.uid});
+      syncFromFirebase();
+      watchFirebase();
+      renderMatches();
+    }
+  } catch(e) {
+    const msgs = {'auth/wrong-password':'Mot de passe incorrect','auth/user-not-found':'Compte introuvable','auth/weak-password':'Mot de passe trop faible (6 car. min)','auth/invalid-email':'Email invalide','auth/invalid-credential':'Email ou mot de passe incorrect'};
+    alert(msgs[e.code] || e.message);
+  }
+}
+
+window.applyLeagueCode = function() {
+  const code = document.getElementById('leagueCodeInput')?.value.trim().toUpperCase();
+  if (!code) return alert('Entrez un code de ligue');
+  localStorage.setItem('bypronos_league', code);
+  alert('Ligue "' + code + '" sélectionnée ! Connectez-vous maintenant.');
+}
+
+function switchLeagueModalTab(tab) {
+  document.getElementById('leaguePanelJoin').style.display = tab === 'join' ? 'block' : 'none';
+  document.getElementById('leaguePanelCreate').style.display = tab === 'create' ? 'block' : 'none';
+  document.getElementById('tabJoin').classList.toggle('active', tab === 'join');
+  document.getElementById('tabCreate').classList.toggle('active', tab === 'create');
+}
+
+window.doJoinLeagueAuth = function() {
+  const code = document.getElementById('leagueCodeInput')?.value.trim().toUpperCase();
+  if (!code) return alert('Entrez un code de ligue');
+  localStorage.setItem('bypronos_league', code);
+  document.getElementById('leagueModal').style.display = 'none';
+  syncFromFirebase();
+  watchFirebase();
+  renderMatches();
+}
+
+window.doCreateLeagueAuth = async function() {
+  const name = document.getElementById('leagueNameInput')?.value.trim();
+  if (!name) return alert('Entrez un nom de ligue');
+  const code = name.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10) + Math.floor(Math.random()*100);
+  localStorage.setItem('bypronos_league', code);
+  await db.ref('leagues/' + code + '/info').set({name, code, createdBy: currentPlayer, createdAt: Date.now()});
+  document.getElementById('leagueModal').style.display = 'none';
+  alert('Ligue créée ! Code : ' + code + '\nPartagez ce code à vos amis !');
+  syncFromFirebase();
+  watchFirebase();
+  renderMatches();
+}
+
+function showLeagueModal() {
+  document.getElementById('leagueModal').style.display = 'flex';
 }
 
 window.addEventListener('load', ()=>{ openLogin(); });
@@ -2940,28 +3052,47 @@ window.addEventListener('load', ()=>{ openLogin(); });
 <div class="login-overlay" id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center">
   <div class="login-box">
     <div class="login-logo">BY <span>PRONOS</span></div>
-    <p class="login-sub">Entrez votre pseudo pour jouer</p>
+    <p class="login-sub" style="margin-bottom:20px">Connectez-vous pour jouer</p>
+
+    <!-- Bouton Google -->
+    <button onclick="loginWithGoogle()" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:700;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px"> Connexion avec Google
+    </button>
+
+    <!-- Séparateur -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="flex:1;height:1px;background:var(--bord)"></div>
+      <span style="font-size:10px;color:var(--txt2);font-weight:600">OU</span>
+      <div style="flex:1;height:1px;background:var(--bord)"></div>
+    </div>
+
+    <!-- Formulaire Email -->
+    <input class="login-input" id="authPseudo" type="text" placeholder="Votre pseudo (ex: Torpedo42)" maxlength="20" style="margin-bottom:8px">
+    <input class="login-input" id="authEmail" type="email" placeholder="Email" style="margin-bottom:8px">
+    <input class="login-input" id="authPass" type="password" placeholder="Mot de passe (6 car. min)" style="margin-bottom:8px">
+    <button class="login-btn" onclick="loginWithEmail()">CONNEXION / INSCRIPTION →</button>
+
+  </div>
+</div>
+
+<!-- Modal ligue (après connexion) -->
+<div id="leagueModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.85);align-items:center;justify-content:center">
+  <div class="login-box">
+    <div class="login-logo">BY <span>PRONOS</span></div>
+    <p class="login-sub" style="margin-bottom:20px">Rejoindre ou créer une ligue</p>
     <div class="league-tabs">
-      <div class="league-tab active" id="tabJoin" onclick="window.switchLeagueTab('join')">REJOINDRE</div>
-      <div class="league-tab" id="tabCreate" onclick="window.switchLeagueTab('create')">CRÉER</div>
+      <div class="league-tab active" id="tabJoin" onclick="switchLeagueModalTab('join')">REJOINDRE</div>
+      <div class="league-tab" id="tabCreate" onclick="switchLeagueModalTab('create')">CRÉER</div>
     </div>
-    <div id="panelJoin">
-      <label class="login-label">CODE DE LIGUE</label>
-      <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: AMIS2024" maxlength="12" style="text-transform:uppercase;margin-bottom:10px" oninput="this.value=this.value.toUpperCase()">
-      <label class="login-label">VOTRE PSEUDO</label>
-      <input class="login-input" id="loginInput" type="text" placeholder="Ex: Torpedo42" maxlength="20" onkeydown="if(event.key==='Enter')window.doJoinLeague()">
-      <button class="login-btn" onclick="window.doJoinLeague()">REJOINDRE →</button>
+    <div id="leaguePanelJoin">
+      <label class="login-label" style="margin-top:12px">CODE DE LIGUE</label>
+      <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: AMIS2024" maxlength="12" style="text-transform:uppercase;margin-bottom:8px" oninput="this.value=this.value.toUpperCase()">
+      <button class="login-btn" onclick="window.doJoinLeagueAuth()">REJOINDRE →</button>
     </div>
-    <div id="panelCreate" style="display:none">
-      <label class="login-label">NOM DE VOTRE LIGUE</label>
-      <input class="login-input" id="leagueNameInput" type="text" placeholder="Ex: Les Potes du Lundi" maxlength="30" style="margin-bottom:10px">
-      <label class="login-label">VOTRE PSEUDO (admin)</label>
-      <input class="login-input" id="loginInputCreate" type="text" placeholder="Ex: LeChef" maxlength="20">
-      <button class="login-btn" style="background:#c45a00" onclick="window.doCreateLeague()">CRÉER MA LIGUE →</button>
-    </div>
-    <div class="login-players" id="loginPlayers" style="display:none">
-      <div class="login-players-label">Joueurs enregistrés</div>
-      <div id="loginPlayersList"></div>
+    <div id="leaguePanelCreate" style="display:none">
+      <label class="login-label" style="margin-top:12px">NOM DE LA LIGUE</label>
+      <input class="login-input" id="leagueNameInput" type="text" placeholder="Ex: Les Potes du Lundi" maxlength="30" style="margin-bottom:8px">
+      <button class="login-btn" style="background:#c45a00" onclick="window.doCreateLeagueAuth()">CRÉER MA LIGUE →</button>
     </div>
   </div>
 </div>
