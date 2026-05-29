@@ -3006,8 +3006,14 @@ if (window.firebaseReady) {
 // Connexion Google
 window.loginWithGoogle = async function() {
   try {
+    if (!window.firebaseReady && !window._firebaseAuth) {
+      alert('Firebase pas encore prêt, réessaie dans 2 secondes');
+      return;
+    }
     const auth = window._firebaseAuth || firebase.auth();
+    window._firebaseAuth = auth;
     const provider = new firebase.auth.GoogleAuthProvider();
+    console.log('🔄 Google login...');
     const result = await auth.signInWithPopup(provider);
     const name = result.user.displayName || result.user.email.split('@')[0];
     currentPlayer = name;
