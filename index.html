@@ -883,7 +883,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:var(--bg2);border:1px solid var(--bord)}
 .ranking-row.gold{background:#ffffff !important;border:3px solid #c9960a !important;padding:12px 14px}
 .ranking-row.silver{background:linear-gradient(135deg,#f4f4f4,#e8e8e8);border:1.5px solid #b0b0b0}
-.ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0);border:1.5px solid #c08040}
+.ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0) !important;border:2px solid #c08040 !important}
 .ranking-row.gold .rank-name{color:#c9960a;font-weight:800;font-size:15px}
 .ranking-row.silver .rank-name{color:#505050;font-weight:800}
 .ranking-row.bronze .rank-name{color:#7a4a10;font-weight:800}
@@ -2371,17 +2371,27 @@ function renderLiveView() {
   if (!el) return;
   const titleEl = document.getElementById('livePanelTitle');
   if (globalLiveData.length > 0) {
-    const filterMap = {
-      'worldcup': ['world cup','coupe du monde','fifa world'],
-      'ligue1':   ['ligue 1','ligue1'],
-      'ligue2':   ['ligue 2','ligue2'],
-      'premier':  ['premier league']
-    };
-    const keywords = filterMap[currentLiveFilter] || [];
-    const filteredLive = currentLiveFilter === 'all' ? globalLiveData : globalLiveData.filter(function(f) {
-      const name = (f.league.name + ' ' + f.league.country).toLowerCase();
-      return keywords.some(function(k){ return name.includes(k); });
-    });
+    // Filtrage par pays + nom exact de ligue
+    const filteredLive = (function() {
+      if (currentLiveFilter === 'all') return globalLiveData;
+      return globalLiveData.filter(function(f) {
+        const country = (f.league.country || '').toLowerCase();
+        const league = (f.league.name || '').toLowerCase();
+        if (currentLiveFilter === 'worldcup') {
+          return league.includes('world cup') || league.includes('fifa world') || country === 'world';
+        }
+        if (currentLiveFilter === 'ligue1') {
+          return country === 'france' && (league.includes('ligue 1') || league === 'ligue 1');
+        }
+        if (currentLiveFilter === 'ligue2') {
+          return country === 'france' && (league.includes('ligue 2') || league === 'ligue 2');
+        }
+        if (currentLiveFilter === 'premier') {
+          return country === 'england' && league.includes('premier league');
+        }
+        return true;
+      });
+    })();
     if (titleEl) titleEl.textContent = '🔴 ' + filteredLive.length + ' match' + (filteredLive.length > 1 ? 's' : '') + ' en direct';
     if (!filteredLive.length) {
       el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--txt2)"><div style="font-size:40px">&#x26BD;</div><div style="font-size:14px;font-weight:700;margin-top:8px">Aucun match en direct' + (currentLiveFilter !== 'all' ? ' pour cette comp.' : '') + '</div></div>';
