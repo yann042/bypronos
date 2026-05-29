@@ -880,7 +880,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .results-panel-body{overflow-y:auto;flex:1;padding:8px}
 
 /* Classement */
-.ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:#f7f7f7;border:1px solid #e0e0e0}
+.ranking-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:var(--bg2);border:1px solid var(--bord)}
 .ranking-row.gold{background:#ffffff !important;border:3px solid #c9960a !important;padding:12px 14px}
 .ranking-row.silver{background:linear-gradient(135deg,#f4f4f4,#e8e8e8);border:1.5px solid #b0b0b0}
 .ranking-row.bronze{background:linear-gradient(135deg,#fdf0e3,#f5dfc0);border:1.5px solid #c08040}
@@ -894,7 +894,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.me{background:var(--bg2);border:1px solid var(--bord)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px}
-.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#056b52}
+.rank-pts{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#111}
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--bord);flex-shrink:0}
@@ -2465,7 +2465,7 @@ function renderRankingPanel() {
     const cls = (podium[i] || '') + (isMe ? ' me' : '');
     return '<div class="ranking-row ' + cls + '">' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + (isMe ? '▶ ' : '') + r.name + '</span>' +
+      '<span class="rank-name">' + (isMe ? '▶ ' : '') + r.name + (i===0 ? ' <span style="background:#c9960a;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">🏆 VAINQUEUR</span>' : '') + '</span>' +
       '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
@@ -2591,7 +2591,7 @@ function renderRanking() {
       <td class="rank-bets">${r.bets} pari${r.bets>1?'s':''}</td>
       <td style="color:var(--acc);font-size:13px">+${fmtPts(r.ptsResult)}</td>
       <td style="color:var(--acc2);font-size:13px">+${fmtPts(r.ptsScore)}</td>
-      <td class="rank-pts">${fmtPts(r.total)}</td>
+      <td class="rank-pts" style="color:#111">${fmtPts(r.total)}</td>
     </tr>`;
   }).join('');
 }
