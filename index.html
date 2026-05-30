@@ -3026,15 +3026,14 @@ window.loginWithGoogle = async function() {
     currentPlayer = name;
     localStorage.setItem('bypronos_player', name);
     document.getElementById('loginOverlay').style.display = 'none';
-    const league = localStorage.getItem('bypronos_league');
-    if (!league) {
-      showLeagueModal();
-    } else {
-      await db.ref('leagues/' + league + '/players/' + result.user.uid).update({name, email: result.user.email, uid: result.user.uid});
-      syncFromFirebase();
-      watchFirebase();
-      renderMatches();
-    }
+    let league = localStorage.getItem('bypronos_league') || 'global';
+    try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
+    localStorage.setItem('bypronos_league', league);
+    await db.ref('leagues/' + league + '/players/' + result.user.uid).update({name, email: result.user.email, uid: result.user.uid});
+    syncFromFirebase();
+    watchFirebase();
+    renderMatches();
+    if (!localStorage.getItem('bypronos_league_chosen')) showLeagueModal();
   } catch(e) { alert('Erreur Google : ' + (e.message || e)); }
 }
 
@@ -3061,15 +3060,13 @@ window.loginWithEmail = async function() {
     currentPlayer = name;
     localStorage.setItem('bypronos_player', name);
     document.getElementById('loginOverlay').style.display = 'none';
-    const league = localStorage.getItem('bypronos_league');
-    if (!league) {
-      showLeagueModal();
-    } else {
-      await db.ref('leagues/' + league + '/players/' + user.uid).update({name, email: user.email, uid: user.uid});
-      syncFromFirebase();
-      watchFirebase();
-      renderMatches();
-    }
+    let league = localStorage.getItem('bypronos_league') || 'global';
+    try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
+    localStorage.setItem('bypronos_league', league);
+    await db.ref('leagues/' + league + '/players/' + user.uid).update({name, email: user.email, uid: user.uid});
+    syncFromFirebase();
+    watchFirebase();
+    renderMatches();
   } catch(e) {
     const msgs = {'auth/wrong-password':'Mot de passe incorrect','auth/user-not-found':'Compte introuvable','auth/weak-password':'Mot de passe trop faible (6 car. min)','auth/invalid-email':'Email invalide','auth/invalid-credential':'Email ou mot de passe incorrect'};
     alert(msgs[e.code] || e.message);
