@@ -2141,22 +2141,7 @@ window.showView = function showView(view, btn) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
-  if(view==='live') {
-    fetchGlobalLive();
-    // Déplacer le widget ScoreAxis préchargé dans le panneau live
-    setTimeout(function() {
-      const preload = document.getElementById('scoreaxisPreload');
-      const container = document.getElementById('liveScoreList');
-      if (preload && container && !container.dataset.widgetMoved) {
-        container.dataset.widgetMoved = '1';
-        preload.style.position = 'relative';
-        preload.style.left = '0';
-        preload.style.width = '100%';
-        preload.style.height = 'auto';
-        container.appendChild(preload);
-      }
-    }, 500);
-  }
+  if(view==='live') fetchGlobalLive();
 }
 
 function scrollToMatch(id, el) {
@@ -2374,15 +2359,13 @@ async function fetchGlobalLive() {
   const el = document.getElementById('liveScoreList');
   if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement...</div>';
   try {
-    const res = await fetch(APIFOOTBALL_HOST + '/fixtures?live=all', {
-      headers: {'x-apisports-key': APIFOOTBALL_KEY}
-    });
-    if (!res.ok) { console.warn('API-Football error:', res.status); renderLiveView(); return; }
+    const res = await fetch('https://livescores-huouv7kgya-uc.a.run.app');
+    if (!res.ok) { console.warn('Proxy error:', res.status); renderLiveView(); return; }
     const data = await res.json();
     globalLiveData = data.response || [];
     globalLiveLastFetch = Date.now();
-    console.log('✅ API-Football live:', globalLiveData.length, 'matchs');
-  } catch(e) { console.warn('API-Football live error:', e.message); }
+    console.log('✅ Live scores via proxy:', globalLiveData.length, 'matchs');
+  } catch(e) { console.warn('Proxy live error:', e.message); }
   renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
@@ -3281,11 +3264,6 @@ window.addEventListener('load', ()=>{ openLogin(); });
 <button class="mobile-slip-btn empty" id="mobileSlipBtn" onclick="openMobileSlip()">
   🎯 Coupon de pari <span class="slip-badge" id="betCountMobileBtn">0</span>
 </button>
-<!-- ScoreAxis préchargé hors écran -->
-<div id="scoreaxisPreload" style="position:fixed;left:-9999px;top:0;width:400px;height:600px;overflow:hidden">
-  <div class="scoreaxis-widget" style="width:100%;height:auto">
-    <script src="https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0" async></script>
-  </div>
-</div>
+
 </body>
 </html>
