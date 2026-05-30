@@ -3118,7 +3118,8 @@ function showLeagueModal() {
 function showPlayerMenu() {
   const menu = document.getElementById('playerMenu');
   const nameEl = document.getElementById('playerMenuName');
-  if (nameEl) nameEl.textContent = '👤 ' + currentPlayer;
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  if (nameEl) nameEl.innerHTML = '👤 ' + currentPlayer + '<br><span style="font-size:10px;color:var(--txt2);font-weight:500">Ligue : ' + league + '</span>';
   menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
