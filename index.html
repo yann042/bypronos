@@ -959,6 +959,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
     </nav>
     <div class="header-right">
+      <div id="leagueBadge" onclick="currentPlayer ? showPlayerMenu() : openLogin()" style="display:none;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:3px 10px;cursor:pointer">
+        <span style="font-size:9px;color:var(--txt2);font-weight:600">LIGUE</span>
+        <span id="leagueBadgeCode" style="font-size:11px;font-weight:800;color:var(--acc)"></span>
+      </div>
       <div class="player-badge" id="playerBadge" onclick="currentPlayer ? showPlayerMenu() : openLogin()" title="Mon profil">
         <div class="avatar" id="playerAvatar">?</div>
         <span id="playerName">Connexion</span>
@@ -3017,6 +3021,7 @@ window.addEventListener('firebaseReady', () => {
       if (avatar) { avatar.textContent = name.slice(0,2).toUpperCase(); avatar.style.background = 'var(--acc)'; avatar.style.color = '#fff'; }
       if (playerName) playerName.textContent = name;
       document.getElementById('loginOverlay').style.display = 'none';
+      updateLeagueBadge();
       syncFromFirebase();
       watchFirebase();
       renderMatches();
@@ -3054,7 +3059,7 @@ window.loginWithGoogle = async function() {
     syncFromFirebase();
     watchFirebase();
     renderMatches();
-    if (!localStorage.getItem('bypronos_league_chosen')) showLeagueModal();
+
   } catch(e) { alert('Erreur Google : ' + (e.message || e)); }
 }
 
@@ -3113,6 +3118,7 @@ window.doJoinLeagueAuth = function() {
   if (!code) return alert('Entrez un code de ligue');
   saveLeagueToHistory(code);
   localStorage.setItem('bypronos_league', code);
+  localStorage.setItem('bypronos_league_chosen', '1');
   document.getElementById('leagueModal').style.display = 'none';
   syncFromFirebase();
   watchFirebase();
@@ -3130,10 +3136,20 @@ function saveLeagueToHistory(code, name) {
 window.switchLeague = function(code) {
   localStorage.setItem('bypronos_league', code);
   document.getElementById('playerMenu').style.display = 'none';
+  const lb = document.getElementById('leagueBadgeCode');
+  if (lb) lb.textContent = code;
   syncFromFirebase();
   watchFirebase();
   renderMatches();
   showNotif('✅ Ligue ' + code + ' activée');
+}
+
+function updateLeagueBadge() {
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  const badge = document.getElementById('leagueBadge');
+  const code = document.getElementById('leagueBadgeCode');
+  if (badge) badge.style.display = currentPlayer ? 'flex' : 'none';
+  if (code) code.textContent = league;
 }
 
 window.doCreateLeagueAuth = async function() {
@@ -3141,6 +3157,7 @@ window.doCreateLeagueAuth = async function() {
   if (!name) return alert('Entrez un nom de ligue');
   const code = name.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10) + Math.floor(Math.random()*100);
   localStorage.setItem('bypronos_league', code);
+  localStorage.setItem('bypronos_league_chosen', '1');
   await db.ref('leagues/' + code + '/info').set({name, code, createdBy: currentPlayer, createdAt: Date.now()});
   document.getElementById('leagueModal').style.display = 'none';
   alert('Ligue créée ! Code : ' + code + '\nPartagez ce code à vos amis !');
