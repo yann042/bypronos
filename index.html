@@ -2141,7 +2141,22 @@ window.showView = function showView(view, btn) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
-  if(view==='live') fetchGlobalLive();
+  if(view==='live') {
+    fetchGlobalLive();
+    // Déplacer le widget ScoreAxis préchargé dans le panneau live
+    setTimeout(function() {
+      const preload = document.getElementById('scoreaxisPreload');
+      const container = document.getElementById('liveScoreList');
+      if (preload && container && !container.dataset.widgetMoved) {
+        container.dataset.widgetMoved = '1';
+        preload.style.position = 'relative';
+        preload.style.left = '0';
+        preload.style.width = '100%';
+        preload.style.height = 'auto';
+        container.appendChild(preload);
+      }
+    }, 500);
+  }
 }
 
 function scrollToMatch(id, el) {
@@ -2341,19 +2356,33 @@ window.setLiveFilter = function(filter, btn) {
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
-  if (Date.now() - globalLiveLastFetch < 60000 && globalLiveData.length > 0) {
+  // Cache 5 minutes — économie de quota
+  if (Date.now() - globalLiveLastFetch < 300000 && globalLiveLastFetch > 0) {
     renderLiveView(); return;
+  }
+  // Vérifier si un match CdM est en cours avant d'appeler l'API
+  const now = new Date();
+  const hasCdMToday = matches.some(function(m) {
+    return m.date === now.toISOString().slice(0,10) && isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id);
+  });
+  if (!hasCdMToday) {
+    // Pas de match CdM en cours : afficher les prochains sans API
+    globalLiveData = [];
+    renderLiveView();
+    return;
   }
   const el = document.getElementById('liveScoreList');
   if (el) el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement...</div>';
   try {
-    const res = await fetch('https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/scores/?apiKey=' + ODDS_API_KEY + '&daysFrom=1');
-    if (!res.ok) { console.warn('OddsAPI scores error:', res.status); renderLiveView(); return; }
+    const res = await fetch(APIFOOTBALL_HOST + '/fixtures?live=all', {
+      headers: {'x-apisports-key': APIFOOTBALL_KEY}
+    });
+    if (!res.ok) { console.warn('API-Football error:', res.status); renderLiveView(); return; }
     const data = await res.json();
-    globalLiveData = data || [];
+    globalLiveData = data.response || [];
     globalLiveLastFetch = Date.now();
-    console.log('✅ OddsAPI scores:', globalLiveData.length, 'matchs', JSON.stringify(data).slice(0,200));
-  } catch(e) { console.warn('OddsAPI scores error:', e.message); }
+    console.log('✅ API-Football live:', globalLiveData.length, 'matchs');
+  } catch(e) { console.warn('API-Football live error:', e.message); }
   renderLiveView();
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
@@ -2376,33 +2405,42 @@ function renderLiveView() {
   if (!el) return;
   const titleEl = document.getElementById('livePanelTitle');
   if (globalLiveData.length > 0) {
-    // Format The Odds API scores
-    const liveNow = globalLiveData.filter(function(m) { return m.scores && !m.completed; });
-    const finished = globalLiveData.filter(function(m) { return m.completed; });
-    const all = liveNow.concat(finished);
-    if (titleEl) titleEl.textContent = liveNow.length > 0 ? '🔴 ' + liveNow.length + ' match' + (liveNow.length > 1 ? 's' : '') + ' en direct' : '📅 Résultats récents';
-    if (!all.length) {
-      el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--txt2)"><div style="font-size:40px">&#x26BD;</div><div style="font-size:14px;font-weight:700;margin-top:8px">Aucun match en direct</div></div>';
-      return;
-    }
-    el.innerHTML = all.map(function(m) {
-      const getScore = function(team) { return m.scores ? ((m.scores.find(function(s){ return s.name === team; }) || {}).score || '?') : '?'; };
-      const hs = getScore(m.home_team);
-      const as = getScore(m.away_team);
-      const status = m.completed ? '<span style="color:var(--txt2)">&#x2705; FIN</span>' : '<span style="color:#e03030;font-weight:800">&#x1F534; LIVE</span>';
-      const isPronos = matches.some(function(p){ return p.home === m.home_team || p.away === m.away_team; });
-      const border = isPronos ? 'border:2px solid var(--acc)' : 'border:1px solid var(--bord)';
-      return '<div style="background:var(--bg2);' + border + ';border-radius:8px;margin-bottom:5px;padding:8px 10px">' +
-        '<div style="display:flex;align-items:center;gap:8px">' +
-          '<span style="font-size:11px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + m.home_team + '</span>' +
-          '<div style="flex-shrink:0;text-align:center">' +
-            '<div style="font-size:15px;font-weight:800;color:var(--acc)">' + hs + '-' + as + '</div>' +
-            '<div style="font-size:9px">' + status + '</div>' +
+    // Format API-Football
+    const byLeague = {};
+    globalLiveData.forEach(function(f) {
+      const key = f.league.name + ' · ' + f.league.country;
+      if (!byLeague[key]) byLeague[key] = {logo: f.league.logo, matches: []};
+      byLeague[key].matches.push(f);
+    });
+    if (titleEl) titleEl.textContent = '🔴 ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
+    el.innerHTML = Object.entries(byLeague).map(function(e) {
+      const lName = e[0], league = e[1];
+      const hdr = '<div style="display:flex;align-items:center;gap:6px;padding:5px 4px;margin-bottom:4px;border-bottom:1px solid var(--bord)">' +
+        (league.logo ? '<img src="' + league.logo + '" style="width:16px;height:16px;object-fit:contain">' : '') +
+        '<span style="font-size:10px;font-weight:700;color:var(--txt2)">' + lName + '</span></div>';
+      const cards = league.matches.map(function(f) {
+        const hs = f.goals.home !== null ? f.goals.home : '?';
+        const as = f.goals.away !== null ? f.goals.away : '?';
+        const min = f.fixture.status.elapsed ? f.fixture.status.elapsed + "'" : f.fixture.status.short;
+        const isPronos = matches.some(function(m){ return m.home === f.teams.home.name || m.away === f.teams.away.name; });
+        const border = isPronos ? 'border:2px solid var(--acc)' : 'border:1px solid var(--bord)';
+        return '<div style="background:var(--bg2);' + border + ';border-radius:6px;margin-bottom:4px;padding:10px 8px 4px;position:relative">' +
+          '<div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:#e03030;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:3px">' + min + '</div>' +
+          '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px">' +
+            '<div style="display:flex;align-items:center;gap:4px;min-width:0">' +
+              (f.teams.home.logo ? '<img src="' + f.teams.home.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
+              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
+            '</div>' +
+            '<span style="font-size:15px;font-weight:800;color:var(--acc);padding:0 6px">' + hs + '-' + as + '</span>' +
+            '<div style="display:flex;align-items:center;gap:4px;min-width:0;justify-content:flex-end">' +
+              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
+              (f.teams.away.logo ? '<img src="' + f.teams.away.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
+            '</div>' +
           '</div>' +
-          '<span style="font-size:11px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + m.away_team + '</span>' +
-        '</div>' +
-        (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:2px">&#x2605; Dans vos pronos</div>' : '') +
-      '</div>';
+          (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:2px">&#x2605; Dans vos pronos</div>' : '') +
+        '</div>';
+      }).join('');
+      return '<div style="margin-bottom:12px">' + hdr + cards + '</div>';
     }).join('');
     return;
   } // fin if globalLiveData
@@ -3243,5 +3281,11 @@ window.addEventListener('load', ()=>{ openLogin(); });
 <button class="mobile-slip-btn empty" id="mobileSlipBtn" onclick="openMobileSlip()">
   🎯 Coupon de pari <span class="slip-badge" id="betCountMobileBtn">0</span>
 </button>
+<!-- ScoreAxis préchargé hors écran -->
+<div id="scoreaxisPreload" style="position:fixed;left:-9999px;top:0;width:400px;height:600px;overflow:hidden">
+  <div class="scoreaxis-widget" style="width:100%;height:auto">
+    <script src="https://widgets.scoreaxis.com/api/football/livescore?lang=fr&teamLogo=1&header=1&links=0&font=heebo&fontSize=13&rowDensity=100&widgetWidth=100%25&widgetHeight=auto&bodyColor=%23ffffff&textColor=%23222222&linkColor=%2300aa66&borderColor=%23e0e0e0&tabColor=%23f5f5f0" async></script>
+  </div>
+</div>
 </body>
 </html>
