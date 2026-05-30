@@ -966,7 +966,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <!-- Menu profil -->
       <div id="playerMenu" style="display:none;position:absolute;top:52px;right:12px;background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:8px;z-index:200;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,.15)">
         <div style="padding:8px 12px;font-size:12px;font-weight:700;color:var(--txt2);border-bottom:1px solid var(--bord);margin-bottom:4px" id="playerMenuName"></div>
-        <div onclick="showLeagueModal()" style="padding:8px 12px;font-size:12px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🏆 Changer de ligue</div>
+        <div id="playerMenuLeagues" style="display:none;border-bottom:1px solid var(--bord);margin-bottom:4px;padding-bottom:4px"></div>
+        <div onclick="showLeagueModal()" style="padding:8px 12px;font-size:12px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">➕ Rejoindre une ligue</div>
         <div onclick="doLogout()" style="padding:8px 12px;font-size:12px;cursor:pointer;border-radius:6px;color:#e03030;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">🚪 Se déconnecter</div>
       </div>
     </div>
@@ -2994,11 +2995,31 @@ function watchFirebase() {
 window.addEventListener('firebaseReady', () => {
   // Init Firebase Auth
   const auth = firebase.auth();
-  auth.onAuthStateChanged(function(user) {
+  auth.onAuthStateChanged(async function(user) {
     if (user && !currentPlayer) {
-      // Auto-login via Firebase Auth
-      const displayName = user.displayName || user.email.split('@')[0];
-      doLoginName(displayName);
+      // Auto-reconnexion sans ressaisir le code ligue
+      const name = user.displayName || user.email.split('@')[0];
+      currentPlayer = name;
+      localStorage.setItem('bypronos_player', name);
+      // Récupérer la ligue sauvegardée ou utiliser global par défaut
+      let league = localStorage.getItem('bypronos_league') || 'global';
+      try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
+      localStorage.setItem('bypronos_league', league);
+      // Sauvegarder le joueur dans Firebase
+      try {
+        await db.ref('leagues/' + league + '/players/' + user.uid).update({
+          name: name, email: user.email, uid: user.uid
+        });
+      } catch(e) {}
+      // Mettre à jour l'UI
+      const avatar = document.getElementById('playerAvatar');
+      const playerName = document.getElementById('playerName');
+      if (avatar) { avatar.textContent = name.slice(0,2).toUpperCase(); avatar.style.background = 'var(--acc)'; avatar.style.color = '#fff'; }
+      if (playerName) playerName.textContent = name;
+      document.getElementById('loginOverlay').style.display = 'none';
+      syncFromFirebase();
+      watchFirebase();
+      renderMatches();
     }
   });
   window._firebaseAuth = auth;
@@ -3090,11 +3111,29 @@ function switchLeagueModalTab(tab) {
 window.doJoinLeagueAuth = function() {
   const code = document.getElementById('leagueCodeInput')?.value.trim().toUpperCase();
   if (!code) return alert('Entrez un code de ligue');
-  localStorage.setItem('bypronos_league', code.trim().toUpperCase());
+  saveLeagueToHistory(code);
+  localStorage.setItem('bypronos_league', code);
   document.getElementById('leagueModal').style.display = 'none';
   syncFromFirebase();
   watchFirebase();
   renderMatches();
+}
+
+function saveLeagueToHistory(code, name) {
+  let leagues = JSON.parse(localStorage.getItem('bypronos_leagues_history') || '[]');
+  if (!leagues.find(function(l){ return l.code === code; })) {
+    leagues.push({code: code, name: name || code});
+    localStorage.setItem('bypronos_leagues_history', JSON.stringify(leagues));
+  }
+}
+
+window.switchLeague = function(code) {
+  localStorage.setItem('bypronos_league', code);
+  document.getElementById('playerMenu').style.display = 'none';
+  syncFromFirebase();
+  watchFirebase();
+  renderMatches();
+  showNotif('✅ Ligue ' + code + ' activée');
 }
 
 window.doCreateLeagueAuth = async function() {
@@ -3119,7 +3158,25 @@ function showPlayerMenu() {
   const menu = document.getElementById('playerMenu');
   const nameEl = document.getElementById('playerMenuName');
   const league = localStorage.getItem('bypronos_league') || 'global';
-  if (nameEl) nameEl.innerHTML = '👤 ' + currentPlayer + '<br><span style="font-size:10px;color:var(--txt2);font-weight:500">Ligue : ' + league + '</span>';
+  if (nameEl) nameEl.innerHTML = '👤 ' + currentPlayer + '<br><span style="font-size:10px;color:var(--txt2);font-weight:500">Ligue active : <b>' + league + '</b></span>';
+  // Afficher les ligues mémorisées
+  const leaguesDiv = document.getElementById('playerMenuLeagues');
+  if (leaguesDiv) {
+    const history = JSON.parse(localStorage.getItem('bypronos_leagues_history') || '[]');
+    if (history.length > 1) {
+      leaguesDiv.innerHTML = '<div style="font-size:10px;color:var(--txt2);padding:4px 12px;font-weight:600">MES LIGUES</div>' +
+        history.map(function(l) {
+          const active = l.code === league;
+          return '<div onclick="switchLeague('' + l.code + '')" style="padding:7px 12px;font-size:12px;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:space-between;' + (active ? 'background:var(--bg3)' : '') + '" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='' + (active?'var(--bg3)':'') + ''">' +
+            '<span>' + l.name + '</span>' +
+            (active ? '<span style="color:var(--acc);font-size:10px;font-weight:700">✓ Active</span>' : '') +
+          '</div>';
+        }).join('');
+      leaguesDiv.style.display = 'block';
+    } else {
+      leaguesDiv.style.display = 'none';
+    }
+  }
   menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
