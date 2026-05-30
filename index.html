@@ -1021,7 +1021,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue LIVE ────────────────────────────────── -->
   <div id="view-live" class="view-panel" style="display:none">
-    <div id="scoreaxisContainer" style="padding:8px"></div>
+    <div id="liveScoreList" style="padding:8px"></div>
   </div><!-- /view-live -->
 
   <!-- ── Vue Classement ──────────────────────── -->
@@ -2131,13 +2131,7 @@ window.selectComp = function selectComp(comp, btn) {
 window.showView = function showView(view, btn) {
   document.querySelectorAll('.view-panel').forEach(p => p.style.display='none');
   document.getElementById('view-'+view).style.display='block';
-  if (view === 'live') {
-    const c = document.getElementById('scoreaxisContainer');
-    if (c && !c.dataset.loaded) {
-      c.dataset.loaded = '1';
-      c.innerHTML = '<iframe src="https://www.soccerstand.com/fr/livescore/" style="width:100%;height:calc(100vh - 56px);border:none" title="Live scores"></iframe>';
-    }
-  }
+
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
@@ -2327,16 +2321,7 @@ window.setLiveFilter = function(filter, btn) {
   currentLiveFilter = filter;
   document.querySelectorAll('[id^="liveFilter-"]').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const scoreaxis = document.getElementById('scoreaxisWidget');
-  const scoreList = document.getElementById('liveScoreList');
-  if (filter === 'all') {
-    if (scoreaxis) scoreaxis.style.display = 'block';
-    if (scoreList) scoreList.style.display = 'none';
-  } else {
-    if (scoreaxis) scoreaxis.style.display = 'none';
-    if (scoreList) scoreList.style.display = 'block';
-    renderLiveView();
-  }
+  fetchGlobalLive();
 }
 var globalLiveLastFetch = 0;
 
