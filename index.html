@@ -959,10 +959,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
     </nav>
     <div class="header-right">
-      <div id="leagueBadge" onclick="currentPlayer ? showPlayerMenu() : openLogin()" style="display:none;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:3px 10px;cursor:pointer">
-        <span style="font-size:9px;color:var(--txt2);font-weight:600">LIGUE</span>
-        <span id="leagueBadgeCode" style="font-size:11px;font-weight:800;color:var(--acc)"></span>
-      </div>
+
       <div class="player-badge" id="playerBadge" onclick="currentPlayer ? showPlayerMenu() : openLogin()" title="Mon profil">
         <div class="avatar" id="playerAvatar">?</div>
         <span id="playerName">Connexion</span>
@@ -3021,7 +3018,6 @@ window.addEventListener('firebaseReady', () => {
       if (avatar) { avatar.textContent = name.slice(0,2).toUpperCase(); avatar.style.background = 'var(--acc)'; avatar.style.color = '#fff'; }
       if (playerName) playerName.textContent = name;
       document.getElementById('loginOverlay').style.display = 'none';
-      updateLeagueBadge();
       syncFromFirebase();
       watchFirebase();
       renderMatches();
@@ -3056,7 +3052,6 @@ window.loginWithGoogle = async function() {
     try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
     localStorage.setItem('bypronos_league', league);
     await db.ref('leagues/' + league + '/players/' + result.user.uid).update({name, email: result.user.email, uid: result.user.uid});
-    updateLeagueBadge();
     syncFromFirebase();
     watchFirebase();
     renderMatches();
@@ -3091,7 +3086,6 @@ window.loginWithEmail = async function() {
     try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
     localStorage.setItem('bypronos_league', league);
     await db.ref('leagues/' + league + '/players/' + user.uid).update({name, email: user.email, uid: user.uid});
-    updateLeagueBadge();
     syncFromFirebase();
     watchFirebase();
     renderMatches();
@@ -3144,14 +3138,6 @@ window.switchLeague = function(code) {
   watchFirebase();
   renderMatches();
   showNotif('✅ Ligue ' + code + ' activée');
-}
-
-function updateLeagueBadge() {
-  const league = localStorage.getItem('bypronos_league') || 'global';
-  const badge = document.getElementById('leagueBadge');
-  const code = document.getElementById('leagueBadgeCode');
-  if (badge) badge.style.display = currentPlayer ? 'flex' : 'none';
-  if (code) code.textContent = league;
 }
 
 window.doCreateLeagueAuth = async function() {
