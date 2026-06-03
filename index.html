@@ -1148,6 +1148,91 @@ function fmtPts(val) {
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
+// ── Cashout ────────────────────────────────────────────────────
+function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
+  if (!bet || liveHome === null || liveAway === null) return 0;
+
+  const potentialPts = bet.resultOdd + (bet.scoreOdd || 0);
+  if (!potentialPts) return 0;
+
+  // Facteur de temps (plus le match avance, plus c'est certain)
+  const timeFactor = Math.min(elapsed || 0, 90) / 90;
+
+  // Résultat actuel vs résultat pronostiqué
+  const currentResult = liveHome > liveAway ? 'W' : liveHome < liveAway ? 'L' : 'D';
+  const pronoResult = bet.h > bet.a ? 'W' : bet.h < bet.a ? 'L' : 'D';
+  const resultMatch = currentResult === pronoResult;
+
+  // Proximité du score exact
+  const scoreDiff = Math.abs(bet.h - liveHome) + Math.abs(bet.a - liveAway);
+  const exactMatch = bet.h === liveHome && bet.a === liveAway;
+
+  // Score factor : résultat en route + proximité score
+  let scoreFactor;
+  if (exactMatch) {
+    scoreFactor = 0.85 + (0.10 * timeFactor); // Score exact en cours → très bon cashout
+  } else if (resultMatch && scoreDiff <= 1) {
+    scoreFactor = 0.55 + (0.20 * timeFactor); // Bon résultat, score proche
+  } else if (resultMatch) {
+    scoreFactor = 0.35 + (0.15 * timeFactor); // Bon résultat mais score différent
+  } else {
+    scoreFactor = Math.max(0.05, 0.20 - (0.15 * timeFactor)); // Mauvais résultat → très faible
+  }
+
+  const cashout = potentialPts * scoreFactor * 0.90; // Marge bookmaker 10%
+  return Math.max(0, parseFloat(cashout.toFixed(2)));
+}
+
+async function doCashout(matchId) {
+  if (!currentPlayer) return;
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  const m = matches.find(function(x){ return x.id === matchId; });
+  if (!m) return;
+
+  const live = liveData[matchId];
+  // Chercher le pari validé
+  let bet = null;
+  if (betslip[matchId] && betslip[matchId].submitted) {
+    bet = betslip[matchId];
+  } else {
+    const players = loadPlayers();
+    const p = players[currentPlayer];
+    if (p && p.validatedBets) {
+      bet = p.validatedBets[matchId] || p.validatedBets[String(matchId)];
+    }
+  }
+  if (!bet) return alert('Aucun pari à encaisser sur ce match');
+
+  const cashoutVal = calcCashoutValue(bet, live ? parseInt(live.homeScore) : null, live ? parseInt(live.awayScore) : null, live ? (live.minute || 45) : 45);
+  if (cashoutVal <= 0) return alert('Cashout non disponible pour ce pari');
+
+  const confirm = window.confirm(
+    'CASHOUT — ' + m.home + ' vs ' + m.away + '\n' +
+    'Score actuel : ' + (live ? live.homeScore + '-' + live.awayScore : '?') + ' (' + (live ? live.minute + "'" : '?') + ')\n' +
+    'Votre prono : ' + bet.h + '-' + bet.a + '\n\n' +
+    'Valeur cashout : ' + fmtPts(cashoutVal) + ' pts\n\n' +
+    'Confirmer le cashout ?'
+  );
+  if (!confirm) return;
+
+  try {
+    const auth = window._firebaseAuth || firebase.auth();
+    const uid = auth.currentUser?.uid;
+    if (!uid) return alert('Connectez-vous pour encaisser');
+    await db.ref('leagues/' + league + '/bets/' + uid + '/' + matchId).update({
+      cashedOut: true,
+      cashoutValue: cashoutVal,
+      cashoutTime: Date.now(),
+      cashoutScore: (live ? live.homeScore + '-' + live.awayScore : '?'),
+      cashoutMinute: live ? live.minute : 0
+    });
+    betslip[matchId].cashedOut = true;
+    betslip[matchId].cashoutValue = cashoutVal;
+    showNotif('✅ Cashout effectué : +' + fmtPts(cashoutVal) + ' pts garantis !');
+    renderMatches();
+  } catch(e) { alert('Erreur cashout : ' + e.message); }
+}
+
 function parseKickoff(dateStr, timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
   if (dateStr) {
@@ -1500,11 +1585,18 @@ function renderLiveProno(matchId, hs, as) {
     '<span style="color:#ccc;font-size:10px">=</span>' +
     '<span style="background:' + totalBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
   '</span>';
+  // Cashout
+  const cashedOut = b.cashedOut;
+  const cashoutVal = !cashedOut && (hs !== '?' && as !== '?') ? calcCashoutValue(b, parseInt(hs), parseInt(as), 45) : 0;
+  const cashoutHtml = cashedOut
+    ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT ' + fmtPts(b.cashoutValue) + ' pts</span>'
+    : (cashoutVal > 0 ? '<button onclick="doCashout(' + matchId + ')" style="background:#e03030;color:#fff;border:none;border-radius:6px;padding:2px 7px;font-size:9px;font-weight:700;cursor:pointer;margin-left:4px">💸 ' + fmtPts(cashoutVal) + ' pts</button>' : '');
+
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
     '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap">' +
       '<span style="font-size:8px;font-weight:700;color:#8a9a88;letter-spacing:.5px;text-transform:uppercase">Mon prono</span>' +
       '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:#1a1f1a">' + b.h + '-' + b.a + '</span>' +
-      
+      cashoutHtml +
     '</div>' +
     ptsBubbles +
   '</div>';
