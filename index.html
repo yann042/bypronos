@@ -1142,7 +1142,7 @@ window.doJoinLeague = async function() {
 <script>
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
-const TEST_MODE = false;
+const TEST_MODE = true;
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -1385,7 +1385,7 @@ function loadPlayersFromLeague() {
 
 // État live des matchs
 const liveData = {
-  1: { homeScore: 1, awayScore: 1, minute: 54 }, // Lorient-Le Havre en live test
+  1: { homeScore: 1, awayScore: 0, minute: 67, status: 'LIVE' }, // Mexique-Afrique du Sud en live test
 };
 
 const SCORES = {
@@ -2418,6 +2418,20 @@ let historyFilterDay = 'all';
 let rankTab = 'saison';
 
 var globalLiveData = [];
+// Données live de test
+if (typeof TEST_MODE !== 'undefined' && TEST_MODE) {
+  globalLiveData = [{
+    league: { name: 'FIFA World Cup', country: 'World', logo: 'https://media.api-sports.io/football/leagues/1.png' },
+    fixture: { status: { elapsed: 67, short: 'LIVE' } },
+    teams: { home: { name: 'Mexique', logo: 'https://flagcdn.com/w40/mx.png' }, away: { name: 'Afrique du Sud', logo: 'https://flagcdn.com/w40/za.png' } },
+    goals: { home: 1, away: 0 }
+  }, {
+    league: { name: 'Premier League', country: 'England', logo: '' },
+    fixture: { status: { elapsed: 34, short: 'LIVE' } },
+    teams: { home: { name: 'Arsenal', logo: '' }, away: { name: 'Chelsea', logo: '' } },
+    goals: { home: 2, away: 1 }
+  }];
+}
 var currentLiveFilter = 'all';
 
 window.setLiveFilter = function(filter, btn) {
