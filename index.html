@@ -1457,6 +1457,9 @@ function ptsChip(vb, matchId) {
   if (!live) return '';
   const pts = calcLivePts(vb, live.homeScore, live.awayScore);
   if (!pts) return '';
+  // Masquer si cashout disponible (évite doublon)
+  const cashoutVal = calcCashoutValue(vb, parseInt(live.homeScore), parseInt(live.awayScore), live.minute || 45);
+  if (cashoutVal > 0 && !vb.cashedOut) return '';
   const sign = pts.pts > 0 ? '+' : '';
   const bg   = pts.pts > 0 ? '#057a3a' : '#cc2200';
   return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + fmtPts(pts.pts) + '</span>';
@@ -2490,20 +2493,20 @@ function renderLiveView() {
         const min = f.fixture.status.elapsed ? f.fixture.status.elapsed + "'" : f.fixture.status.short;
         const isPronos = matches.some(function(m){ return m.home === f.teams.home.name || m.away === f.teams.away.name; });
         const border = isPronos ? 'border:2px solid var(--acc)' : 'border:1px solid var(--bord)';
-        return '<div style="background:var(--bg2);' + border + ';border-radius:6px;margin-bottom:4px;padding:10px 8px 4px;position:relative">' +
-          '<div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:#e03030;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:3px">' + min + '</div>' +
-          '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px">' +
-            '<div style="display:flex;align-items:center;gap:4px;min-width:0">' +
-              (f.teams.home.logo ? '<img src="' + f.teams.home.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
-              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
+        return '<div style="background:var(--bg2);' + border + ';border-radius:6px;margin-bottom:3px;padding:6px 8px 4px;position:relative">' +
+          '<div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#e03030;color:#fff;font-size:9px;font-weight:800;padding:1px 7px;border-radius:3px;white-space:nowrap">' + min + '</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 44px 1fr;align-items:center;gap:4px;margin-top:2px">' +
+            '<div style="display:flex;align-items:center;gap:3px;min-width:0">' +
+              (f.teams.home.logo ? '<img src="' + f.teams.home.logo + '" style="width:14px;height:14px;object-fit:contain;flex-shrink:0">' : '') +
+              '<span style="font-size:10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.teams.home.name + '</span>' +
             '</div>' +
-            '<span style="font-size:15px;font-weight:800;color:var(--acc);padding:0 6px">' + hs + '-' + as + '</span>' +
-            '<div style="display:flex;align-items:center;gap:4px;min-width:0;justify-content:flex-end">' +
-              '<span style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
-              (f.teams.away.logo ? '<img src="' + f.teams.away.logo + '" style="width:16px;height:16px;object-fit:contain;flex-shrink:0">' : '') +
+            '<span style="font-size:13px;font-weight:800;color:var(--acc);text-align:center">' + hs + '-' + as + '</span>' +
+            '<div style="display:flex;align-items:center;gap:3px;min-width:0;justify-content:flex-end">' +
+              '<span style="font-size:10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right">' + f.teams.away.name + '</span>' +
+              (f.teams.away.logo ? '<img src="' + f.teams.away.logo + '" style="width:14px;height:14px;object-fit:contain;flex-shrink:0">' : '') +
             '</div>' +
           '</div>' +
-          (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:2px">&#x2605; Dans vos pronos</div>' : '') +
+          (isPronos ? '<div style="font-size:8px;color:var(--acc);font-weight:700;text-align:center;margin-top:1px">★ Votre prono</div>' : '') +
         '</div>';
       }).join('');
       return '<div style="margin-bottom:12px">' + hdr + cards + '</div>';
