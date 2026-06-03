@@ -1588,9 +1588,15 @@ function renderLiveProno(matchId, hs, as) {
   // Cashout
   const cashedOut = b.cashedOut;
   const cashoutVal = !cashedOut && (hs !== '?' && as !== '?') ? calcCashoutValue(b, parseInt(hs), parseInt(as), 45) : 0;
+  const maxPts = b.resultOdd + (b.scoreOdd || 0);
   const cashoutHtml = cashedOut
-    ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT ' + fmtPts(b.cashoutValue) + ' pts</span>'
-    : (cashoutVal > 0 ? '<button onclick="doCashout(' + matchId + ')" style="background:#e03030;color:#fff;border:none;border-radius:6px;padding:2px 7px;font-size:9px;font-weight:700;cursor:pointer;margin-left:4px">💸 ' + fmtPts(cashoutVal) + ' pts</button>' : '');
+    ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT encaissé : ' + fmtPts(b.cashoutValue) + ' pts</span>'
+    : (cashoutVal > 0
+      ? '<div style="display:flex;align-items:center;gap:4px;margin-top:3px">' +
+          '<span style="font-size:9px;color:var(--txt2)">Max : <b>' + fmtPts(maxPts) + ' pts</b></span>' +
+          '<button onclick="doCashout(' + matchId + ')" style="background:#e03030;color:#fff;border:none;border-radius:6px;padding:3px 9px;font-size:10px;font-weight:800;cursor:pointer">💸 CASHOUT ' + fmtPts(cashoutVal) + ' pts</button>' +
+        '</div>'
+      : '');
 
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
     '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap">' +
