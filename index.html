@@ -1142,7 +1142,7 @@ window.doJoinLeague = async function() {
 <script>
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
-const TEST_MODE = false;
+const TEST_MODE = true;
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -1829,7 +1829,7 @@ if (typeof testGoalTriggered === 'undefined') {
       if (m && liveData[1]) {
         checkGoals(1, 2, 1, m.home, m.away); // Lorient marque → 2-1
         liveData[1].homeScore = 2;
-        liveData[1].minute = 67;
+        liveData[1] = { homeScore: 1, awayScore: 0, minute: 67, status: 'LIVE' };
         renderMatches();
       }
     }
