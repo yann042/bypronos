@@ -1152,7 +1152,9 @@ function fmtPts(val) {
 function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
   if (!bet || liveHome === null || liveAway === null) return 0;
 
-  const potentialPts = bet.resultOdd + (bet.scoreOdd || 0);
+  const potentialResult = bet.resultOdd || 0; // Pts pour le bon résultat seul
+  const potentialScore = bet.scoreOdd || 0;   // Pts bonus score exact
+  const potentialPts = potentialResult + potentialScore;
   if (!potentialPts) return 0;
 
   // Facteur de temps (plus le match avance, plus c'est certain)
@@ -1163,30 +1165,32 @@ function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
   const pronoResult = bet.h > bet.a ? 'W' : bet.h < bet.a ? 'L' : 'D';
   const resultMatch = currentResult === pronoResult;
 
-  // Si le score exact pronostiqué est impossible à atteindre → cashout = 0
-  // Ex: prono 0-0 mais il y a déjà 1 but → impossible
-  if (liveHome > bet.h || liveAway > bet.a) return 0;
-  // Ex: prono 1-0 mais score est 0-1 → impossible
-  if (!resultMatch && (liveHome > bet.h || liveAway > bet.a)) return 0;
+  // Score exact impossible si le score live dépasse le score pronostiqué
+  const scoreImpossible = liveHome > bet.h || liveAway > bet.a;
 
   // Proximité du score exact
   const scoreDiff = Math.abs(bet.h - liveHome) + Math.abs(bet.a - liveAway);
   const exactMatch = bet.h === liveHome && bet.a === liveAway;
 
   // Score factor : résultat en route + proximité score
-  let scoreFactor;
-  if (exactMatch) {
-    scoreFactor = 0.85 + (0.10 * timeFactor); // Score exact en cours → très bon cashout
-  } else if (resultMatch && scoreDiff <= 1) {
-    scoreFactor = 0.55 + (0.20 * timeFactor); // Bon résultat, score proche
+  let cashout;
+  if (!scoreImpossible && exactMatch) {
+    // Score exact toujours possible → cashout sur totalité
+    const factor = 0.85 + (0.10 * timeFactor);
+    cashout = potentialPts * factor * 0.90;
+  } else if (!scoreImpossible && resultMatch) {
+    // Bon résultat + score encore possible → cashout sur totalité
+    const factor = scoreDiff <= 1 ? (0.55 + 0.20 * timeFactor) : (0.35 + 0.15 * timeFactor);
+    cashout = potentialPts * factor * 0.75;
   } else if (resultMatch) {
-    scoreFactor = 0.35 + (0.15 * timeFactor); // Bon résultat mais score différent
+    // Score exact impossible MAIS résultat encore possible → cashout sur pts résultat uniquement
+    const factor = Math.max(0.10, 0.50 - (0.35 * timeFactor));
+    cashout = potentialResult * factor * 0.75;
   } else {
-    scoreFactor = Math.max(0.05, 0.20 - (0.15 * timeFactor)); // Mauvais résultat → très faible
+    // Mauvais résultat → cashout très faible sur pts résultat
+    const factor = Math.max(0.02, 0.15 - (0.12 * timeFactor));
+    cashout = potentialResult * factor * 0.65;
   }
-
-  const margin = exactMatch ? 0.90 : (resultMatch ? 0.75 : 0.65); // 10% score exact, 25% bon résultat, 35% mauvais résultat
-  const cashout = potentialPts * scoreFactor * margin;
   return Math.max(0, parseFloat(cashout.toFixed(2)));
 }
 
