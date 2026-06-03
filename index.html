@@ -1142,7 +1142,7 @@ window.doJoinLeague = async function() {
 <script>
 // Vérifie si un match a démarré selon l'heure locale
 // MODE TEST — simuler matchs en cours
-const TEST_MODE = true;
+const TEST_MODE = false;
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -1459,7 +1459,9 @@ function ptsChip(vb, matchId) {
   if (!pts) return '';
   // Masquer si cashout disponible (évite doublon)
   const cashoutVal = calcCashoutValue(vb, parseInt(live.homeScore), parseInt(live.awayScore), live.minute || 45);
-  if (cashoutVal > 0 && !vb.cashedOut) return '';
+  const mid2 = parseInt(matchId);
+  const isCashedOut = vb.cashedOut || (betslip[mid2] && betslip[mid2].cashedOut);
+  if (cashoutVal > 0 && !isCashedOut) return '';
   const sign = pts.pts > 0 ? '+' : '';
   const bg   = pts.pts > 0 ? '#057a3a' : '#cc2200';
   return '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px">' + sign + fmtPts(pts.pts) + '</span>';
