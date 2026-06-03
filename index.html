@@ -1579,17 +1579,17 @@ function renderLiveProno(matchId, hs, as) {
   }
 
   const resultIcon = (livePts && livePts.type === 'zero') ? '❌' : '✅';
+  // Cashout calculé avant ptsBubbles pour masquer le total si cashout dispo
+  const cashedOut = b.cashedOut;
+  const cashoutVal = !cashedOut && (hs !== '?' && as !== '?') ? calcCashoutValue(b, parseInt(hs), parseInt(as), 45) : 0;
+  const maxPts = b.resultOdd + (b.scoreOdd || 0);
+  const showTotal = !cashedOut && cashoutVal <= 0; // Masquer le total si cashout disponible
   const ptsBubbles = '<span style="display:inline-flex;align-items:center;gap:3px;flex-wrap:nowrap;flex-shrink:0">' +
     '<span style="background:' + resultBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + '</span>' +
     '<span style="color:#ccc;font-size:10px">+</span>' +
     '<span style="background:' + scoreBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + scoreColor + '">🎯 ' + ptsScore + '</span>' +
-    '<span style="color:#ccc;font-size:10px">=</span>' +
-    '<span style="background:' + totalBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
+    (showTotal ? '<span style="color:#ccc;font-size:10px">=</span><span style="background:' + totalBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' : '') +
   '</span>';
-  // Cashout
-  const cashedOut = b.cashedOut;
-  const cashoutVal = !cashedOut && (hs !== '?' && as !== '?') ? calcCashoutValue(b, parseInt(hs), parseInt(as), 45) : 0;
-  const maxPts = b.resultOdd + (b.scoreOdd || 0);
   const cashoutHtml = cashedOut
     ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT encaissé : ' + fmtPts(b.cashoutValue) + ' pts</span>'
     : (cashoutVal > 0
