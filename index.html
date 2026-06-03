@@ -1593,7 +1593,7 @@ function renderLiveProno(matchId, hs, as) {
   const cashoutHtml = cashedOut
     ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT encaissé : ' + fmtPts(b.cashoutValue) + ' pts</span>'
     : (cashoutVal > 0
-      ? '<button onclick="doCashout(' + matchId + ')" style="background:#fff;color:#2d6bc4;border:1.5px solid #2d6bc4;border:none;border-radius:6px;padding:4px 10px;font-size:9px;font-weight:800;cursor:pointer;line-height:1.4;text-align:center;margin-left:4px;display:inline-flex;flex-direction:column;align-items:center">CASHOUT<span style="font-size:10px;font-weight:900">' + fmtPts(cashoutVal) + ' pts</span></button>'
+      ? '<button onclick="doCashout(' + matchId + ')" style="background:#1a6fd4;color:#fff;border:none;border:none;border-radius:6px;padding:4px 10px;font-size:9px;font-weight:800;cursor:pointer;line-height:1.4;text-align:center;margin-left:4px;display:inline-flex;flex-direction:column;align-items:center">CASHOUT<span style="font-size:10px;font-weight:900">' + fmtPts(cashoutVal) + ' pts</span></button>'
       : '');
 
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
