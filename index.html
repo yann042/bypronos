@@ -1179,7 +1179,8 @@ function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
     scoreFactor = Math.max(0.05, 0.20 - (0.15 * timeFactor)); // Mauvais résultat → très faible
   }
 
-  const cashout = potentialPts * scoreFactor * 0.90; // Marge bookmaker 10%
+  const margin = exactMatch ? 0.90 : 0.75; // 10% si score exact, 25% sinon
+  const cashout = potentialPts * scoreFactor * margin;
   return Math.max(0, parseFloat(cashout.toFixed(2)));
 }
 
@@ -1592,7 +1593,7 @@ function renderLiveProno(matchId, hs, as) {
   const cashoutHtml = cashedOut
     ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT encaissé : ' + fmtPts(b.cashoutValue) + ' pts</span>'
     : (cashoutVal > 0
-      ? '<button onclick="doCashout(' + matchId + ')" style="background:#e03030;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:800;cursor:pointer;line-height:1.3;text-align:center;margin-left:4px">💸 Cashout<br>' + fmtPts(cashoutVal) + ' pts</button>'
+      ? '<button onclick="doCashout(' + matchId + ')" style="background:#1a6fd4;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:9px;font-weight:800;cursor:pointer;line-height:1.4;text-align:center;margin-left:4px;display:inline-flex;flex-direction:column;align-items:center">CASHOUT<span style="font-size:10px;font-weight:900">' + fmtPts(cashoutVal) + ' pts</span></button>'
       : '');
 
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
