@@ -1622,7 +1622,7 @@ function renderLiveProno(matchId, hs, as) {
       '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:#1a1f1a">' + b.h + '-' + b.a + '</span>' +
       cashoutHtml +
     '</div>' +
-    ptsBubbles +
+    (cashoutVal > 0 || cashedOut ? '' : ptsBubbles) +
   '</div>';
 }
 
