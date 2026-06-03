@@ -1608,12 +1608,13 @@ function renderLiveProno(matchId, hs, as) {
     '<span style="background:' + resultBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + resultColor + '">' + resultIcon + ' ' + ptsResult + '</span>' +
     '<span style="color:#ccc;font-size:10px">+</span>' +
     '<span style="background:' + scoreBg + ';border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:' + scoreColor + '">🎯 ' + ptsScore + '</span>' +
-
+    '<span style="color:#ccc;font-size:10px">=</span>' +
+    '<span style="background:#056b52;border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff">' + ptsTotal + '</span>' +
   '</span>';
   const cashoutHtml = cashedOut
     ? '<span style="background:#056b52;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">✅ CASHOUT encaissé : ' + fmtPts(b.cashoutValue) + ' pts</span>'
     : (cashoutVal > 0
-      ? '<span onclick="doCashout(' + matchId + ')" style="background:#dceeff;border-radius:12px;padding:3px 10px;font-size:10px;font-weight:700;color:#1a6fd4;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;line-height:1.4;margin-left:4px"><span style=\"font-size:9px;font-weight:600\">Cashout</span><span style=\"font-size:11px;font-weight:800\">💸 ' + fmtPts(cashoutVal) + ' pts</span></span>'
+      ? '<span onclick="doCashout(' + matchId + ')" style="background:#dceeff;border-radius:12px;padding:3px 10px;font-size:10px;font-weight:700;color:#1a6fd4;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;line-height:1.4;margin-left:4px"><span style=\"font-size:9px;font-weight:600\">Cashout</span><span style=\"font-size:11px;font-weight:800\">💸 ' + fmtPts(cashoutVal) + '</span></span>'
       : '');
 
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 10px;background:#ffffff;border:1px solid #d8ddd5;border-radius:7px;padding:4px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-wrap:nowrap;gap:6px;overflow:hidden">' +
