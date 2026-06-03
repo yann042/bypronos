@@ -1163,6 +1163,12 @@ function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
   const pronoResult = bet.h > bet.a ? 'W' : bet.h < bet.a ? 'L' : 'D';
   const resultMatch = currentResult === pronoResult;
 
+  // Si le score exact pronostiqué est impossible à atteindre → cashout = 0
+  // Ex: prono 0-0 mais il y a déjà 1 but → impossible
+  if (liveHome > bet.h || liveAway > bet.a) return 0;
+  // Ex: prono 1-0 mais score est 0-1 → impossible
+  if (!resultMatch && (liveHome > bet.h || liveAway > bet.a)) return 0;
+
   // Proximité du score exact
   const scoreDiff = Math.abs(bet.h - liveHome) + Math.abs(bet.a - liveAway);
   const exactMatch = bet.h === liveHome && bet.a === liveAway;
@@ -1179,7 +1185,7 @@ function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
     scoreFactor = Math.max(0.05, 0.20 - (0.15 * timeFactor)); // Mauvais résultat → très faible
   }
 
-  const margin = exactMatch ? 0.90 : 0.75; // 10% si score exact, 25% sinon
+  const margin = exactMatch ? 0.90 : (resultMatch ? 0.75 : 0.65); // 10% score exact, 25% bon résultat, 35% mauvais résultat
   const cashout = potentialPts * scoreFactor * margin;
   return Math.max(0, parseFloat(cashout.toFixed(2)));
 }
@@ -1528,7 +1534,12 @@ function getPronoHeader(matchId) {
         const sign = pts.pts > 0 ? '+' : '';
         const isPos = pts.pts > 0;
         const bg  = isPos ? '#057a3a' : '#cc2200';
-        ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + fmtPts(pts.pts) + ' pts</span>';
+        // Masquer si cashout disponible
+        const live2 = liveData[parseInt(matchId)];
+        const cashoutAvail = live2 ? calcCashoutValue(vb, parseInt(live2.homeScore), parseInt(live2.awayScore), live2.minute || 45) : 0;
+        if (!cashoutAvail) {
+          ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + fmtPts(pts.pts) + ' pts</span>';
+        }
       }
     }
     let out = '<span class="header-prono-badge">🎯 Mon prono : ' + vb.h + '-' + vb.a + '</span>';
