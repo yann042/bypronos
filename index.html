@@ -1028,14 +1028,22 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
   <!-- ── Vue Classement ──────────────────────── -->
   <div id="view-ranking" class="view-panel" style="display:none">
+    <!-- Section équipe du joueur -->
+    <div id="teamSection" style="display:none;padding:8px 12px 0"></div>
       <div class="results-view">
         <!-- Classement -->
         <div class="results-panel">
           <div class="results-panel-header">
             🏆 Classement
-            <div style="display:flex;gap:4px">
-              <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
-              <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee',this)">Journée</button>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <div style="display:flex;gap:4px">
+                <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
+                <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee',this)">Journée</button>
+              </div>
+              <div id="teamToggle" style="display:none;gap:4px">
+                <button class="history-filter-btn active" id="rankTabIndividuel" onclick="window.switchRankMode('individuel',this)">Individuel</button>
+                <button class="history-filter-btn" id="rankTabEquipes" onclick="window.switchRankMode('equipes',this)">Équipes</button>
+              </div>
             </div>
           </div>
           <div class="results-panel-body" id="rankingList"></div>
@@ -3149,6 +3157,7 @@ window.addEventListener('firebaseReady', () => {
       if (avatar) { avatar.textContent = name.slice(0,2).toUpperCase(); avatar.style.background = 'var(--acc)'; avatar.style.color = '#fff'; }
       if (playerName) playerName.textContent = name;
       document.getElementById('loginOverlay').style.display = 'none';
+      loadLeagueInfo();
       syncFromFirebase();
       watchFirebase();
       renderMatches();
@@ -3252,6 +3261,179 @@ window.doJoinLeagueAuth = function() {
   renderMatches();
 }
 
+// ── Équipes ────────────────────────────────────────────────────
+var currentTeamsMode = false;
+var currentUserTeam = null;
+
+async function loadLeagueInfo() {
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  try {
+    const snap = await db.ref('leagues/' + league + '/info').once('value');
+    const info = snap.val();
+    currentTeamsMode = info && info.teamsMode ? true : false;
+    // Charger l'équipe du joueur
+    const auth = window._firebaseAuth || firebase.auth();
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      const pSnap = await db.ref('leagues/' + league + '/players/' + uid + '/team').once('value');
+      currentUserTeam = pSnap.val() || null;
+    }
+    renderTeamSection();
+  } catch(e) {}
+}
+
+async function loadTeams() {
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  const snap = await db.ref('leagues/' + league + '/teams').once('value');
+  return snap.val() || {};
+}
+
+window.joinTeam = async function(teamId) {
+  if (currentUserTeam) return alert('Vous êtes déjà dans une équipe et ne pouvez pas en changer en cours de saison.');
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  const auth = window._firebaseAuth || firebase.auth();
+  const uid = auth.currentUser?.uid;
+  if (!uid) return alert('Connectez-vous d'abord');
+  await db.ref('leagues/' + league + '/players/' + uid + '/team').set(teamId);
+  await db.ref('leagues/' + league + '/teams/' + teamId + '/members/' + uid).set(currentPlayer);
+  currentUserTeam = teamId;
+  renderTeamSection();
+  showNotif('✅ Équipe rejointe !');
+}
+
+window.createTeam = async function() {
+  const name = prompt('Nom de votre équipe :');
+  if (!name || !name.trim()) return;
+  const league = localStorage.getItem('bypronos_league') || 'global';
+  const teamId = name.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,15) + '_' + Date.now().toString().slice(-4);
+  const colors = ['#e03030','#056b52','#1a6fd4','#c9960a','#9b59b6','#e67e22','#16a085','#2c3e50'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const auth = window._firebaseAuth || firebase.auth();
+  const uid = auth.currentUser?.uid;
+  await db.ref('leagues/' + league + '/teams/' + teamId).set({name: name.trim(), color, createdBy: currentPlayer, members: {[uid]: currentPlayer}});
+  await db.ref('leagues/' + league + '/players/' + uid + '/team').set(teamId);
+  currentUserTeam = teamId;
+  renderTeamSection();
+  showNotif('✅ Équipe "' + name.trim() + '" créée !');
+}
+
+async function renderTeamSection() {
+  const section = document.getElementById('teamSection');
+  if (!section) return;
+  const toggle = document.getElementById('teamToggle');
+  if (!currentTeamsMode) {
+    section.style.display = 'none';
+    if (toggle) toggle.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  if (toggle) toggle.style.display = 'flex';
+  const teams = await loadTeams();
+  const teamIds = Object.keys(teams);
+
+  if (currentUserTeam && teams[currentUserTeam]) {
+    const t = teams[currentUserTeam];
+    section.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:10px 12px;margin-bottom:8px">' +
+      '<div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:4px">MON ÉQUIPE</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="width:12px;height:12px;border-radius:50%;background:' + t.color + ';flex-shrink:0;display:inline-block"></span>' +
+        '<span style="font-weight:700;font-size:14px">' + t.name + '</span>' +
+        '<span style="font-size:10px;color:var(--txt2)">' + Object.keys(t.members||{}).length + ' membre(s)</span>' +
+      '</div>' +
+    '</div>';
+  } else {
+    const teamsHtml = teamIds.length > 0
+      ? teamIds.map(function(id) {
+          const t = teams[id];
+          return '<div onclick="window.joinTeam('' + id + '')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--bord);border-radius:8px;cursor:pointer;margin-bottom:4px;background:var(--bg2)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">' +
+            '<span style="width:10px;height:10px;border-radius:50%;background:' + t.color + ';flex-shrink:0;display:inline-block"></span>' +
+            '<span style="font-size:12px;font-weight:700;flex:1">' + t.name + '</span>' +
+            '<span style="font-size:10px;color:var(--txt2)">' + Object.keys(t.members||{}).length + ' membre(s)</span>' +
+          '</div>';
+        }).join('')
+      : '<div style="font-size:11px;color:var(--txt2);text-align:center;padding:8px">Aucune équipe créée. Soyez le premier !</div>';
+
+    section.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:10px 12px;margin-bottom:8px">' +
+      '<div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:8px">REJOINDRE UNE ÉQUIPE</div>' +
+      teamsHtml +
+      '<button onclick="window.createTeam()" style="width:100%;padding:8px;border:1px dashed var(--acc);border-radius:8px;background:transparent;color:var(--acc);font-size:12px;font-weight:700;cursor:pointer;margin-top:4px">+ Créer une équipe</button>' +
+    '</div>';
+  }
+}
+
+var currentRankMode = 'individuel';
+
+window.switchRankMode = function(mode, btn) {
+  currentRankMode = mode;
+  document.getElementById('rankTabIndividuel').classList.toggle('active', mode === 'individuel');
+  document.getElementById('rankTabEquipes').classList.toggle('active', mode === 'equipes');
+  if (mode === 'equipes') renderTeamsRanking();
+  else renderRankingPanel();
+}
+
+async function renderTeamsRanking() {
+  const el = document.getElementById('rankingList');
+  if (!el) return;
+  const league = localStorage.getItem('bypronos_league') || 'global';
+
+  // Charger équipes et joueurs
+  const [teamsSnap, playersSnap, betsSnap] = await Promise.all([
+    db.ref('leagues/' + league + '/teams').once('value'),
+    db.ref('leagues/' + league + '/players').once('value'),
+    db.ref('leagues/' + league + '/bets').once('value')
+  ]);
+
+  const teams = teamsSnap.val() || {};
+  const players = playersSnap.val() || {};
+  const bets = betsSnap.val() || {};
+
+  // Calculer les pts par équipe
+  const teamScores = {};
+  Object.keys(teams).forEach(function(tid) {
+    teamScores[tid] = { name: teams[tid].name, color: teams[tid].color, pts: 0, members: 0 };
+  });
+
+  Object.keys(players).forEach(function(uid) {
+    const p = players[uid];
+    if (!p.team || !teamScores[p.team]) return;
+    teamScores[p.team].members++;
+    // Calculer pts du joueur
+    const playerBets = bets[uid] || {};
+    let pts = 0;
+    matches.forEach(function(m) {
+      const b = playerBets[m.id];
+      if (!b) return;
+      const live = liveData[m.id];
+      if (live) {
+        const r = calcLivePts(b, live.homeScore, live.awayScore);
+        if (r) pts += r.pts;
+      }
+    });
+    teamScores[p.team].pts += pts;
+  });
+
+  const rows = Object.entries(teamScores).sort(function(a,b){ return b[1].pts - a[1].pts; });
+  if (!rows.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucune équipe créée</div>'; return; }
+
+  const medals = ['🥇','🥈','🥉'];
+  const podium = ['gold','silver','bronze'];
+
+  el.innerHTML = rows.map(function(entry, i) {
+    const tid = entry[0], t = entry[1];
+    const cls = podium[i] || '';
+    const isMe = currentUserTeam === tid;
+    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
+    return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + ';' + (isMe?'outline:2px solid var(--acc)':'') + '">' + vLabel +
+      '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '▶' : '') + '</span>' +
+      '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
+      '<span style="width:10px;height:10px;border-radius:50%;background:' + t.color + ';flex-shrink:0;display:inline-block"></span>' +
+      '<span class="rank-name">' + t.name + (i===0?' <span style="font-size:18px">🏆</span>':'') + '</span>' +
+      '<span style="font-size:10px;color:var(--txt2);margin-left:auto;margin-right:8px">' + t.members + ' joueur(s)</span>' +
+      '<span class="rank-pts" style="color:' + (i<3?'':'#111') + '">' + fmtPts(t.pts) + ' pts</span>' +
+    '</div>';
+  }).join('');
+}
+
 function saveLeagueToHistory(code, name) {
   let leagues = JSON.parse(localStorage.getItem('bypronos_leagues_history') || '[]');
   if (!leagues.find(function(l){ return l.code === code; })) {
@@ -3274,10 +3456,11 @@ window.switchLeague = function(code) {
 window.doCreateLeagueAuth = async function() {
   const name = document.getElementById('leagueNameInput')?.value.trim();
   if (!name) return alert('Entrez un nom de ligue');
+  const teamsMode = document.getElementById('leagueTeamsMode')?.checked || false;
   const code = name.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10) + Math.floor(Math.random()*100);
   localStorage.setItem('bypronos_league', code);
   localStorage.setItem('bypronos_league_chosen', '1');
-  await db.ref('leagues/' + code + '/info').set({name, code, createdBy: currentPlayer, createdAt: Date.now()});
+  await db.ref('leagues/' + code + '/info').set({name, code, createdBy: currentPlayer, createdAt: Date.now(), teamsMode});
   document.getElementById('leagueModal').style.display = 'none';
   alert('Ligue créée ! Code : ' + code + '\nPartagez ce code à vos amis !');
   syncFromFirebase();
@@ -3383,6 +3566,10 @@ window.addEventListener('load', ()=>{ openLogin(); });
     <div id="leaguePanelCreate" style="display:none">
       <label class="login-label" style="margin-top:12px">NOM DE LA LIGUE</label>
       <input class="login-input" id="leagueNameInput" type="text" placeholder="Ex: Les Potes du Lundi" maxlength="30" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+        <input type="checkbox" id="leagueTeamsMode" style="width:16px;height:16px;accent-color:var(--acc);cursor:pointer">
+        <label for="leagueTeamsMode" style="font-size:12px;font-weight:600;cursor:pointer">Activer le classement par équipes 🏆</label>
+      </div>
       <button class="login-btn" style="background:#c45a00" onclick="window.doCreateLeagueAuth()">CRÉER MA LIGUE →</button>
     </div>
   </div>
