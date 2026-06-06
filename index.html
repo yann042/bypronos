@@ -1307,6 +1307,27 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
+const SPORTSDB_KEY = '123456'; // Clé gratuite TheSportsDB
+
+// Cache des images d'equipes
+var teamImageCache = {};
+
+async function fetchTeamImage(teamName) {
+  if (teamImageCache[teamName]) return teamImageCache[teamName];
+  try {
+    const url = 'https://www.thesportsdb.com/api/v1/json/' + SPORTSDB_KEY + '/searchteams.php?t=' + encodeURIComponent(teamName);
+    const res = await fetch(url);
+    const data = await res.json();
+    const team = data.teams && data.teams[0];
+    if (team) {
+      const img = team.strTeamFanart1 || team.strTeamBanner || team.strTeamJersey || null;
+      teamImageCache[teamName] = img ? img + '/small' : null;
+      return teamImageCache[teamName];
+    }
+  } catch(e) {}
+  teamImageCache[teamName] = null;
+  return null;
+}
 const SPORTDB_KEY = 'WnSpv63Ra6DLCOYWjn5s3YgnB7HuMqjrls6KlXJR';
 const SPORTDB_HOST = 'https://api.sportdb.dev';
 const BSD_HOST = 'https://sports.bzzoiro.com';
@@ -1780,23 +1801,30 @@ function buildCard(m) {
     ${getAllPronosHtml(m.id, hs, as)}`;
   }
 
-  return `<div class="match-card ${cardCls}" data-id="${m.id}">
-    <div class="match-header">
-      <div class="league"><span>${m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷'}</span> ${m.comp === 'worldcup' ? 'Coupe du Monde' : m.comp === 'premier' ? 'Premier League' : 'Ligue 1'}</div>
+  const compLabel = m.comp === 'worldcup' ? 'Coupe du Monde 2026' : m.comp === 'premier' ? 'Premier League' : m.comp === 'ligue2' ? 'Ligue 2' : 'Ligue 1';
+  const compIcon = m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷';
+  const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:700;color:#e03030;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
+  const bannerImg = teamImageCache[m.home] || teamImageCache[m.away] || null;
+  if (!teamImageCache.hasOwnProperty(m.home)) fetchTeamImage(m.home).then(function(img){ if(img){ teamImageCache[m.home]=img; renderMatches(); } });
+  if (!teamImageCache.hasOwnProperty(m.away)) fetchTeamImage(m.away).then(function(img){ if(img){ teamImageCache[m.away]=img; renderMatches(); } });
 
-      <span class="match-time">${started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:700;color:var(--acc3);margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time}</span>
+  return `<div class="match-card ${cardCls}" data-id="${m.id}">
+    <!-- Bandeau visuel style Unibet -->
+    <div style="position:relative;height:80px;background:linear-gradient(135deg,#0d2137,#1a3a5c);border-radius:10px 10px 0 0;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between">
+      ${bannerImg ? `<div style="position:absolute;inset:0;background:url('${bannerImg}') center/cover no-repeat;opacity:0.18"></div>` : ''}
+      <div style="position:relative;z-index:2;padding:0 0 8px 10px;display:flex;flex-direction:column;align-items:center">
+        ${homeLogo ? `<img src="${homeLogo}" style="width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">` : ''}
+        <span style="color:#fff;font-size:10px;font-weight:500;margin-top:3px;text-shadow:0 1px 2px rgba(0,0,0,0.6);max-width:70px;text-align:center;line-height:1.2">${homeName}</span>
+      </div>
+      <div style="position:relative;z-index:2;text-align:center;padding-bottom:8px">
+        <div style="color:rgba(255,255,255,0.6);font-size:8px;letter-spacing:.5px">${compIcon} ${compLabel}</div>
+        <div style="color:#fff;font-size:10px;margin-top:2px">${timeStr}</div>
+      </div>
+      <div style="position:relative;z-index:2;padding:0 10px 8px 0;display:flex;flex-direction:column;align-items:center">
+        ${awayLogo ? `<img src="${awayLogo}" style="width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">` : ''}
+        <span style="color:#fff;font-size:10px;font-weight:500;margin-top:3px;text-shadow:0 1px 2px rgba(0,0,0,0.6);max-width:70px;text-align:center;line-height:1.2">${awayName}</span>
+      </div>
     </div>
-    ${!started ? `<div class="match-teams-row">
-      <div class="mtr-home">
-        ${homeLogo ? `<img src="${homeLogo}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px" onerror="this.style.display='none'">` : ''}
-        <span>${homeName}</span>
-      </div>
-      <div class="mtr-vs">vs</div>
-      <div class="mtr-away">
-        <span>${awayName}</span>
-        ${awayLogo ? `<img src="${awayLogo}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-left:5px" onerror="this.style.display='none'">` : ''}
-      </div>
-    </div>` : ''}
     <div class="match-body">
       <div class="teams" style="display:none"></div>
       ${started ? liveBlock : resultRow + scoreBlock}
