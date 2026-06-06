@@ -1108,44 +1108,6 @@ window.switchLeagueTab = function(tab) {
   if (panelJoin) panelJoin.style.display = tab === 'join' ? '' : 'none';
   if (panelCreate) panelCreate.style.display = tab === 'create' ? '' : 'none';
 };
-
-window.doCreateLeague = async function() {
-  var FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
-  var name = document.getElementById('leagueNameInput').value.trim();
-  var admin = document.getElementById('loginInputCreate').value.trim();
-  if (!name || !admin) { alert('⚠️ Remplis tous les champs !'); return; }
-  var clean = name.toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,6);
-  var rand = Math.random().toString(36).substring(2,6).toUpperCase();
-  var code = clean + rand;
-  var config = { name: name, admin: admin, createdAt: Date.now(), code: code };
-  await fetch(FB_URL + '/leagues/' + code + '/config.json', {
-    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(config)
-  });
-  localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: name, isAdmin: true }));
-  document.getElementById('loginOverlay').style.display = 'none';
-  alert('🎉 Ligue "' + name + '" créée !\nCode : ' + code + '\nPartagez ce code à vos amis !');
-  var tryLoginAdmin = function() {
-    if (window.doLoginName) { window.doLoginName(admin); }
-    else { setTimeout(tryLoginAdmin, 100); }
-  };
-  tryLoginAdmin();
-};
-
-window.doJoinLeague = async function() {
-  var FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
-  var code = (document.getElementById('leagueCodeInput').value || '').trim().toUpperCase();
-  var name = (document.getElementById('loginInput').value || '').trim();
-  if (!code || !name) { alert('⚠️ Remplis tous les champs !'); return; }
-  var res = await fetch(FB_URL + '/leagues/' + code + '/config.json').then(function(r){ return r.json(); });
-  if (!res || !res.name) { alert('❌ Code de ligue invalide !'); return; }
-  localStorage.setItem('bypronos_league', JSON.stringify({ code: code, name: res.name, isAdmin: res.admin === name }));
-  document.getElementById('loginOverlay').style.display = 'none';
-  var tryLogin = function() {
-    if (window.doLoginName) { window.doLoginName(name); }
-    else { setTimeout(tryLogin, 100); }
-  };
-  tryLogin();
-};
 </script>
 <script>
 // Vérifie si un match a démarré selon l'heure locale
