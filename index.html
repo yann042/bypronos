@@ -1307,26 +1307,52 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
-const SPORTSDB_KEY = '123456'; // Clé gratuite TheSportsDB
+// Images par match (fanart TheSportsDB - libres d'acces)
+const MATCH_IMAGES = {
+  1:  'https://www.thesportsdb.com/images/media/team/fanart/Mexico_National/xvsqxu1668427702.jpg',
+  2:  'https://www.thesportsdb.com/images/media/team/fanart/South_Korea_National/sqp1qz1668427702.jpg',
+  3:  'https://www.thesportsdb.com/images/media/team/fanart/Canada_National/vp1ty71668427702.jpg',
+  4:  'https://www.thesportsdb.com/images/media/team/fanart/USA_National/wq5ry61668427702.jpg',
+  5:  'https://www.thesportsdb.com/images/media/team/fanart/Qatar_National/tvq5r61668427702.jpg',
+  6:  'https://www.thesportsdb.com/images/media/team/fanart/Brazil_National/xpwsrw1421853005.jpg',
+  7:  'https://www.thesportsdb.com/images/media/team/fanart/Haiti_National/tvq5r61668427702.jpg',
+  8:  'https://www.thesportsdb.com/images/media/team/fanart/Australia_National/tvq5r61668427702.jpg',
+  9:  'https://www.thesportsdb.com/images/media/team/fanart/Germany_National/xvsqxu1668427702.jpg',
+  10: 'https://www.thesportsdb.com/images/media/team/fanart/Netherlands_National/tvq5r61668427702.jpg',
+};
 
-// Cache des images d'equipes
+// Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
+const TEAM_BANNERS = {
+  'Mexique':          'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/320px-Flag_of_Mexico.svg.png',
+  'Afrique du Sud':   'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/320px-Flag_of_South_Africa.svg.png',
+  'Brésil':           'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/320px-Flag_of_Brazil.svg.png',
+  'Maroc':            'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/320px-Flag_of_Morocco.svg.png',
+  'États-Unis':       'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/320px-Flag_of_the_United_States.svg.png',
+  'Canada':           'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/320px-Flag_of_Canada_%28Pantone%29.svg.png',
+  'Allemagne':        'https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png',
+  'France':           'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/320px-Flag_of_France.svg.png',
+  'Espagne':          'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/320px-Flag_of_Spain.svg.png',
+  'Pays-Bas':         'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/320px-Flag_of_the_Netherlands.svg.png',
+  'Portugal':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Portugal.svg/320px-Flag_of_Portugal.svg.png',
+  'Argentine':        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/320px-Flag_of_Argentina.svg.png',
+  'Japon':            'https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/320px-Flag_of_Japan.svg.png',
+  'Corée du Sud':     'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Flag_of_South_Korea.svg/320px-Flag_of_South_Korea.svg.png',
+  'Australie':        'https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/Flag_of_Australia.svg/320px-Flag_of_Australia.svg.png',
+  'Turquie':          'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/320px-Flag_of_Turkey.svg.png',
+  'Qatar':            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Qatar.svg/320px-Flag_of_Qatar.svg.png',
+  'Suisse':           'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/240px-Flag_of_Switzerland.svg.png',
+  'Haïti':            'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Flag_of_Haiti.svg/320px-Flag_of_Haiti.svg.png',
+  'Écosse':           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Flag_of_Scotland.svg/320px-Flag_of_Scotland.svg.png',
+  'Bosnie-Herzég.':   'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Flag_of_Bosnia_and_Herzegovina.svg/320px-Flag_of_Bosnia_and_Herzegovina.svg.png',
+  'Curaçao':          'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Flag_of_Cura%C3%A7ao.svg/320px-Flag_of_Cura%C3%A7ao.svg.png',
+  'Paraguay':         'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Flag_of_Paraguay.svg/320px-Flag_of_Paraguay.svg.png',
+  'Rép. Tchèque':     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/320px-Flag_of_the_Czech_Republic.svg.png',
+};
+
 var teamImageCache = {};
 
-async function fetchTeamImage(teamName) {
-  if (teamImageCache[teamName]) return teamImageCache[teamName];
-  try {
-    const url = 'https://www.thesportsdb.com/api/v1/json/' + SPORTSDB_KEY + '/searchteams.php?t=' + encodeURIComponent(teamName);
-    const res = await fetch(url);
-    const data = await res.json();
-    const team = data.teams && data.teams[0];
-    if (team) {
-      const img = team.strTeamFanart1 || team.strTeamBanner || team.strTeamJersey || null;
-      teamImageCache[teamName] = img ? img + '/small' : null;
-      return teamImageCache[teamName];
-    }
-  } catch(e) {}
-  teamImageCache[teamName] = null;
-  return null;
+function fetchTeamImage(teamName) {
+  return Promise.resolve(TEAM_BANNERS[teamName] || null);
 }
 const SPORTDB_KEY = 'WnSpv63Ra6DLCOYWjn5s3YgnB7HuMqjrls6KlXJR';
 const SPORTDB_HOST = 'https://api.sportdb.dev';
@@ -1809,20 +1835,24 @@ function buildCard(m) {
   if (!teamImageCache.hasOwnProperty(m.away)) fetchTeamImage(m.away).then(function(img){ if(img){ teamImageCache[m.away]=img; renderMatches(); } });
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
-    <!-- Bandeau visuel style Unibet -->
-    <div style="position:relative;height:80px;background:linear-gradient(135deg,#0d2137,#1a3a5c);border-radius:10px 10px 0 0;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between">
-      ${bannerImg ? `<div style="position:absolute;inset:0;background:url('${bannerImg}') center/cover no-repeat;opacity:0.18"></div>` : ''}
-      <div style="position:relative;z-index:2;padding:0 0 8px 10px;display:flex;flex-direction:column;align-items:center">
-        ${homeLogo ? `<img src="${homeLogo}" style="width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">` : ''}
-        <span style="color:#fff;font-size:10px;font-weight:500;margin-top:3px;text-shadow:0 1px 2px rgba(0,0,0,0.6);max-width:70px;text-align:center;line-height:1.2">${homeName}</span>
+    <!-- Bandeau style Betclic - image plein cadre + gradient + cotes en bas -->
+    <div style="position:relative;height:130px;border-radius:10px 10px 0 0;overflow:hidden;background:#0d2137">
+      <div id="banner-${m.id}" style="position:absolute;inset:0;background:url('${MATCH_IMAGES[m.id] || bannerImg || ''}') center/cover no-repeat;opacity:0.9"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.75) 100%)"></div>
+      <div style="position:absolute;top:8px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="color:rgba(255,255,255,0.85);font-size:9px;font-weight:500">${compIcon} ${compLabel}</span>
+        <span style="color:rgba(255,255,255,0.85);font-size:9px">${timeStr}</span>
       </div>
-      <div style="position:relative;z-index:2;text-align:center;padding-bottom:8px">
-        <div style="color:rgba(255,255,255,0.6);font-size:8px;letter-spacing:.5px">${compIcon} ${compLabel}</div>
-        <div style="color:#fff;font-size:10px;margin-top:2px">${timeStr}</div>
-      </div>
-      <div style="position:relative;z-index:2;padding:0 10px 8px 0;display:flex;flex-direction:column;align-items:center">
-        ${awayLogo ? `<img src="${awayLogo}" style="width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">` : ''}
-        <span style="color:#fff;font-size:10px;font-weight:500;margin-top:3px;text-shadow:0 1px 2px rgba(0,0,0,0.6);max-width:70px;text-align:center;line-height:1.2">${awayName}</span>
+      <div style="position:absolute;bottom:8px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:5px">
+          ${homeLogo ? `<img src="${homeLogo}" style="width:20px;height:20px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8))">` : ''}
+          <span style="color:#fff;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.8)">${homeName}</span>
+        </div>
+        <span style="color:rgba(255,255,255,0.7);font-size:10px;font-weight:500">vs</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="color:#fff;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.8)">${awayName}</span>
+          ${awayLogo ? `<img src="${awayLogo}" style="width:20px;height:20px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8))">` : ''}
+        </div>
       </div>
     </div>
     <div class="match-body">
