@@ -3211,13 +3211,79 @@ function switchLeagueModalTab(tab) {
   document.getElementById('tabCreate').classList.toggle('active', tab === 'create');
 }
 
-window.doJoinLeagueAuth = function() {
+window.checkLeagueAndJoin = async function() {
   const code = document.getElementById('leagueCodeInput')?.value.trim().toUpperCase();
+  if (!code) return alert('Entrez un code de ligue');
+  // Vérifier si la ligue a le mode équipes
+  try {
+    const snap = await db.ref('leagues/' + code + '/info').once('value');
+    const info = snap.val();
+    if (info && info.teamsMode) {
+      // Charger les équipes existantes
+      const teamsSnap = await db.ref('leagues/' + code + '/teams').once('value');
+      const teams = teamsSnap.val() || {};
+      const teamIds = Object.keys(teams);
+      const list = document.getElementById('joinTeamList');
+      if (list) {
+        list.innerHTML = teamIds.length > 0
+          ? '<div style="font-size:10px;color:var(--txt2);margin-bottom:4px">Équipes disponibles :</div>' +
+            teamIds.map(function(id) {
+              const t = teams[id];
+              const sel = window._selectedJoinTeam === id ? 'outline:2px solid var(--acc)' : '';
+              return '<div onclick="window.selectJoinTeam(this)" data-team-id="' + id + '" class="team-opt" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--bord);border-radius:8px;cursor:pointer;margin-bottom:4px;background:var(--bg2)">' +                '<span style="width:10px;height:10px;border-radius:50%;background:' + t.color + ';display:inline-block;flex-shrink:0"></span>' +
+                '<span style="font-size:12px;font-weight:700">' + t.name + '</span>' +
+                '<span style="font-size:10px;color:var(--txt2);margin-left:auto">' + Object.keys(t.members||{}).length + ' membre(s)</span>' +
+              '</div>';
+            }).join('')
+          : '<div style="font-size:11px;color:var(--txt2);padding:8px 0">Aucune équipe — soyez le premier !</div>';
+      }
+      document.getElementById('joinTeamSection').style.display = 'block';
+      // Stocker le code pour doJoinLeagueAuth
+      window._pendingLeagueCode = code;
+      return; // Ne pas rejoindre encore, attendre choix équipe
+    }
+  } catch(e) {}
+  // Pas de teamsMode → rejoindre directement
+  window.doJoinLeagueAuth();
+}
+window._selectedJoinTeam = null;
+window.selectJoinTeam = function(el) {
+  window._selectedJoinTeam = el.dataset.teamId;
+  document.querySelectorAll('#joinTeamList .team-opt').forEach(function(d){ d.style.outline = ''; });
+  el.style.outline = '2px solid var(--acc)';
+};
+window._pendingLeagueCode = null;
+
+window.doJoinLeagueAuth = async function() {
+  const code = (window._pendingLeagueCode || document.getElementById('leagueCodeInput')?.value.trim().toUpperCase());
   if (!code) return alert('Entrez un code de ligue');
   saveLeagueToHistory(code);
   localStorage.setItem('bypronos_league', code);
   localStorage.setItem('bypronos_league_chosen', '1');
+  window._pendingLeagueCode = null;
   document.getElementById('leagueModal').style.display = 'none';
+  // Gérer le choix d'équipe
+  const selectedTeam = window._selectedJoinTeam;
+  const newTeamName = document.getElementById('joinNewTeamName')?.value.trim();
+  const auth = window._firebaseAuth || firebase.auth();
+  const uid = auth?.currentUser?.uid;
+  if (uid) {
+    if (newTeamName) {
+      // Créer une nouvelle équipe
+      const teamId = newTeamName.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,15) + '_' + Date.now().toString().slice(-4);
+      const colors = ['#e03030','#056b52','#1a6fd4','#c9960a','#9b59b6','#e67e22','#16a085','#2c3e50'];
+      const color = colors[Math.floor(Math.random()*colors.length)];
+      await db.ref('leagues/' + code + '/teams/' + teamId).set({name: newTeamName, color, createdBy: currentPlayer, members: {[uid]: currentPlayer}});
+      await db.ref('leagues/' + code + '/players/' + uid + '/team').set(teamId);
+      currentUserTeam = teamId;
+    } else if (selectedTeam) {
+      // Rejoindre une équipe existante
+      await db.ref('leagues/' + code + '/teams/' + selectedTeam + '/members/' + uid).set(currentPlayer);
+      await db.ref('leagues/' + code + '/players/' + uid + '/team').set(selectedTeam);
+      currentUserTeam = selectedTeam;
+    }
+  }
+  window._selectedJoinTeam = null;
   syncFromFirebase();
   watchFirebase();
   renderMatches();
@@ -3527,7 +3593,15 @@ window.addEventListener('load', ()=>{ openLogin(); });
     <div id="leaguePanelJoin">
       <label class="login-label" style="margin-top:12px">CODE DE LIGUE</label>
       <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: AMIS2024" maxlength="12" style="text-transform:uppercase;margin-bottom:8px" oninput="this.value=this.value.toUpperCase()">
-      <button class="login-btn" onclick="window.doJoinLeagueAuth()">REJOINDRE →</button>
+      <!-- Sélection équipe (affiché si teamsMode) -->
+      <div id="joinTeamSection" style="display:none;margin-bottom:10px">
+        <label class="login-label">CHOISIR UNE ÉQUIPE (optionnel)</label>
+        <div id="joinTeamList" style="max-height:160px;overflow-y:auto;margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px">
+          <input id="joinNewTeamName" type="text" placeholder="Ou créer une équipe..." maxlength="30" style="flex:1;padding:7px 10px;border:1px solid var(--bord);border-radius:8px;font-size:12px;background:var(--bg);color:var(--txt)">
+        </div>
+      </div>
+      <button class="login-btn" onclick="window.checkLeagueAndJoin()">REJOINDRE →</button>
     </div>
     <div id="leaguePanelCreate" style="display:none">
       <label class="login-label" style="margin-top:12px">NOM DE LA LIGUE</label>
