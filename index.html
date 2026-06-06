@@ -1307,18 +1307,18 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
-// Images par match via Unsplash Source (libres de droits)
+// Images football - Pixabay CDN public (sans CORS)
 const MATCH_IMAGES = {
-  1:  'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80',
-  2:  'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&q=80',
-  3:  'https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=600&q=80',
-  4:  'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&q=80',
-  5:  'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&q=80',
-  6:  'https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=600&q=80',
-  7:  'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=600&q=80',
-  8:  'https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=600&q=80',
-  9:  'https://images.unsplash.com/photo-1504680177321-2e6a879aac86?w=600&q=80',
-  10: 'https://images.unsplash.com/photo-1486286701208-1d58e9338013?w=600&q=80',
+  1:  'https://cdn.pixabay.com/photo/2016/07/07/10/47/football-1502611_640.jpg',
+  2:  'https://cdn.pixabay.com/photo/2014/10/14/20/24/ball-488718_640.jpg',
+  3:  'https://cdn.pixabay.com/photo/2017/07/31/14/46/football-2558115_640.jpg',
+  4:  'https://cdn.pixabay.com/photo/2016/03/27/22/05/football-1284248_640.jpg',
+  5:  'https://cdn.pixabay.com/photo/2018/05/22/10/45/soccer-3420898_640.jpg',
+  6:  'https://cdn.pixabay.com/photo/2015/02/05/23/03/brazil-624665_640.jpg',
+  7:  'https://cdn.pixabay.com/photo/2016/11/29/01/34/football-1867437_640.jpg',
+  8:  'https://cdn.pixabay.com/photo/2014/10/14/20/24/ball-488718_640.jpg',
+  9:  'https://cdn.pixabay.com/photo/2016/03/27/22/05/football-1284248_640.jpg',
+  10: 'https://cdn.pixabay.com/photo/2017/07/31/14/46/football-2558115_640.jpg',
 };
 
 // Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
@@ -1856,8 +1856,8 @@ function buildCard(m) {
           ${awayLogo ? `<img src="${awayLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
         </div>
       </div>
-      <!-- Cotes en bas -->
-      <div style="position:absolute;bottom:6px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <!-- Cotes en bas - cachées si résultat déjà sélectionné -->
+      <div style="position:absolute;bottom:6px;left:8px;right:8px;display:${state.resultCls ? 'none' : 'grid'};grid-template-columns:1fr 1fr 1fr;gap:5px">
         <div onclick="selectResult(${m.id},'win')" style="background:rgba(255,255,255,0.15);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 0;text-align:center;cursor:pointer">
           <div style="color:rgba(255,255,255,0.7);font-size:8px">${homeName.slice(0,8)}</div>
           <div style="color:#fff;font-size:14px;font-weight:700">${m.odds[0].toFixed(2)}</div>
@@ -1874,7 +1874,7 @@ function buildCard(m) {
     </div>
     <div class="match-body">
       <div class="teams" style="display:none"></div>
-      ${started ? liveBlock : resultRow + scoreBlock}
+      ${started ? liveBlock : scoreBlock}
       ${!started ? renderLiveProno(m.id, '?', '?') + getAllPronosHtml(m.id, '?', '?') : ''}
     </div>
   </div>`;
