@@ -3271,15 +3271,14 @@ async function loadLeagueInfo() {
     const snap = await db.ref('leagues/' + league + '/info').once('value');
     const info = snap.val();
     currentTeamsMode = info && info.teamsMode ? true : false;
-    // Charger l'équipe du joueur
-    const auth = window._firebaseAuth || firebase.auth();
-    const uid = auth.currentUser?.uid;
+    // Charger l'équipe du joueur via betslip ou Firebase
+    const uid = (window._firebaseAuth || firebase.auth())?.currentUser?.uid;
     if (uid) {
       const pSnap = await db.ref('leagues/' + league + '/players/' + uid + '/team').once('value');
       currentUserTeam = pSnap.val() || null;
     }
     renderTeamSection();
-  } catch(e) {}
+  } catch(e) { console.warn('loadLeagueInfo error:', e); }
 }
 
 async function loadTeams() {
