@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>By Pronos — Pronostics entre amis</title>
+<title>By Pronos - Pronostics entre amis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -66,7 +66,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .team.right .team-name,.team.right .team-info{text-align:right}
 .vs-box{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt2);text-align:center;min-width:36px}
 
-/* ── Étape 1 : boutons résultat ── */
+/* -- Étape 1 : boutons résultat -- */
 .result-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:0;margin-top:2px}
 .result-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:6px;padding:4px 3px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
 .result-btn:hover{border-color:var(--acc);background:rgba(0,212,170,.07)}
@@ -79,7 +79,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .result-btn.sel-draw .rb-odd{color:var(--acc2)}
 .result-btn.sel-lose .rb-odd{color:var(--acc3)}
 
-/* ── Étape 2 : bloc score exact ── */
+/* -- Étape 2 : bloc score exact -- */
 .score-step{margin-top:10px;border-radius:8px;padding:10px 12px;animation:fadeIn .2s ease}
 .result-btn.btn-other{border-color:rgba(168,85,247,.35);background:rgba(168,85,247,.06)}
 .result-btn.btn-other:hover{border-color:#a855f7;background:rgba(168,85,247,.12)}
@@ -194,7 +194,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 .view-panel{position:absolute;top:56px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
 
-/* ── Login overlay ── */
+/* -- Login overlay -- */
 .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center}
 .login-box{position:relative;z-index:10000;background:var(--bg2);border:1px solid var(--bord);border-radius:14px;padding:36px 32px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .login-logo{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:6px}
@@ -210,12 +210,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .login-player-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 12px;margin:3px 3px 0 0;cursor:pointer;transition:all .15s;font-size:13px}
 .login-player-chip:hover{border-color:var(--acc);color:var(--acc)}
 
-/* ── Header joueur ── */
+/* -- Header joueur -- */
 .player-badge{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .15s}
 .player-badge:hover{border-color:var(--acc3)}
 .player-badge .avatar{width:22px;height:22px;border-radius:50%;background:var(--acc);color:#0d1117;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 
-/* ── Vue Classement ── */
+/* -- Vue Classement -- */
 .ranking-view{height:100%;overflow-y:auto;padding:24px 28px;background:var(--bg)}
 .ranking-header{margin-bottom:22px}
 .ranking-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700}
@@ -256,7 +256,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .live-fallback-sub a{color:var(--acc);text-decoration:none}
 .live-fallback-sub a:hover{text-decoration:underline}
 
-/* ── Tchat flottant ── */
+/* -- Tchat flottant -- */
 .chat-bubble{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .chat-toggle{width:52px;height:52px;border-radius:50%;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,212,170,.4);transition:all .2s}
 .chat-toggle:hover{transform:scale(1.08);background:#00bfa5}
@@ -332,9 +332,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-btn:hover{border-color:var(--acc2);background:rgba(247,201,72,.08)}
 .ranking-btn .pts-total{font-size:16px;color:var(--acc2)}
 
-/* ══════════════════════════════════════════════
+/* ==============================================
    RESPONSIVE MOBILE
-   ══════════════════════════════════════════════ */
+   ============================================== */
 @media (max-width: 768px) {
 
   /* Layout principal : 1 colonne */
@@ -485,7 +485,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   /* Betslip desktop caché sur mobile */
   .betslip { display: none; }
 
-  /* ── Bouton flottant bulletin ── */
+  /* -- Bouton flottant bulletin -- */
   .mobile-slip-btn { display:none !important;
     display: flex;
     position: fixed;
@@ -523,7 +523,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .mobile-slip-btn.has-bets { background: var(--acc); }
   .mobile-slip-btn.empty { background: var(--bg3); color: var(--txt2); box-shadow: none; }
 
-  /* ── Tiroir bulletin mobile ── */
+  /* -- Tiroir bulletin mobile -- */
   .mobile-slip-drawer { display:none !important;
     display: flex;
     flex-direction: column;
@@ -750,7 +750,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .prono-chip .chip-pts.pos{background:#057a3a;color:#fff}
 .prono-chip .chip-pts.neg{background:#cc2200;color:#fff}
 
-/* ── Animation but ── */
+/* -- Animation but -- */
 .goal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
 .goal-overlay.show{animation:goalAnim 2.5s ease forwards}
 @keyframes goalAnim{
@@ -771,7 +771,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall linear forwards}
 @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 
-/* ── Cadran score style tableau de stade ── */
+/* -- Cadran score style tableau de stade -- */
 .live-score{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--acc-win);min-width:70px;text-align:center;line-height:1}
 .score-digit{display:inline-flex;align-items:center;justify-content:center;background:#1a1a1a;color:#f7c948;font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;width:34px;height:40px;border-radius:6px;border:1px solid #333;box-shadow:inset 0 2px 8px rgba(0,0,0,.5);position:relative;overflow:hidden;transition:none}
 .score-digit.flip{animation:digitFlip .4s ease forwards}
@@ -784,7 +784,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 }
 .score-sep{color:#f7c948;font-size:28px;font-weight:700;margin:0 2px}
 
-/* ── Score slide effet ── */
+/* -- Score slide effet -- */
 .score-num{display:inline-block;overflow:hidden;height:36px;vertical-align:middle;position:relative;min-width:20px}
 .score-num-inner{display:flex;flex-direction:column;transition:transform 0.5s cubic-bezier(.25,.8,.25,1)}
 .score-num-inner span{height:36px;line-height:36px;display:block;text-align:center}
@@ -810,7 +810,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pronos-row-label{font-size:9px;font-weight:700;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}.pronos-row-label.mine{color:#056b52;background:#fff;border:1px solid #056b52;border-radius:8px;padding:1px 6px;font-size:9px}
 .pronos-row-divider{width:1px;height:14px;background:var(--bord);flex-shrink:0}
 
-/* ── Modale ligue ── */
+/* -- Modale ligue -- */
 .league-tabs{display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid var(--bord)}
 .league-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer !important;pointer-events:all !important;background:var(--bg3);color:var(--txt2);transition:all .15s;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;user-select:none}
 .league-tab.active{background:#056b52;color:#fff}
@@ -1021,12 +1021,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 </div>
   </div><!-- /view-sports -->
 
-  <!-- ── Vue LIVE ────────────────────────────────── -->
+  <!-- -- Vue LIVE ---------------------------------- -->
   <div id="view-live" class="view-panel" style="display:none">
     <div id="liveScoreList" style="padding:8px"></div>
   </div><!-- /view-live -->
 
-  <!-- ── Vue Classement ──────────────────────── -->
+  <!-- -- Vue Classement ------------------------ -->
   <div id="view-ranking" class="view-panel" style="display:none">
     <!-- Section équipe du joueur -->
     <div id="teamSection" style="display:none;padding:8px 12px 0"></div>
@@ -1097,7 +1097,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 
 <script>
-// ── Fonctions ligue globales (chargées en premier) ────────────────
+// -- Fonctions ligue globales (chargées en premier) ----------------
 window.switchLeagueTab = function(tab) {
   var tabJoin = document.getElementById('tabJoin');
   var tabCreate = document.getElementById('tabCreate');
@@ -1110,15 +1110,15 @@ window.switchLeagueTab = function(tab) {
 };
 </script>
 <script>
-// Vérifie si un match a démarré selon l'heure locale
-// MODE TEST — simuler matchs en cours
+// Verifie si un match a demarre selon l'heure locale
+// MODE TEST - simuler matchs en cours
 const TEST_MODE = true;
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-// ── Cashout ────────────────────────────────────────────────────
+// -- Cashout ----------------------------------------------------
 function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
   if (!bet || liveHome === null || liveAway === null) return 0;
 
@@ -1188,7 +1188,7 @@ async function doCashout(matchId) {
   if (cashoutVal <= 0) return alert('Cashout non disponible pour ce pari');
 
   const confirm = window.confirm(
-    'CASHOUT — ' + m.home + ' vs ' + m.away + '\n' +
+    'CASHOUT - ' + m.home + ' vs ' + m.away + '\n' +
     'Score actuel : ' + (live ? live.homeScore + '-' + live.awayScore : '?') + ' (' + (live ? live.minute + "'" : '?') + ')\n' +
     'Votre prono : ' + bet.h + '-' + bet.a + '\n\n' +
     'Valeur cashout : ' + fmtPts(cashoutVal) + ' pts\n\n' +
@@ -1252,7 +1252,7 @@ function isMatchExpired(timeStr, matchId) {
 }
 
 const LOGOS = {
-  // ── Coupe du Monde 2026 ─────────────────────────────────────
+  // -- Coupe du Monde 2026 -------------------------------------
   "Mexique": "https://flagcdn.com/w40/mx.png",
   "Afrique du Sud": "https://flagcdn.com/w40/za.png",
   "Corée du Sud": "https://flagcdn.com/w40/kr.png",
@@ -1289,7 +1289,7 @@ const LOGOS = {
   "Norvège": "https://flagcdn.com/w40/no.png",
   "Irak": "https://flagcdn.com/w40/iq.png",
   "Algérie": "https://flagcdn.com/w40/dz.png",
-  // ── Clubs Ligue 1 ───────────────────────────────────────────
+  // -- Clubs Ligue 1 -------------------------------------------
   "Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg","Paris FC": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604733a591a18ae67f120_paris-fc-footballlogos-org.svg", "Angers": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6044473059916e3a126b6_angers-sco-footballlogos-org.svg", "Auxerre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f604000025e698ff8be374_aj-auxerre-footballlogos-org.svg", "Metz": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603d9c19d41ee7ff7f9a2_fc-metz-footballlogos-org.svg", "Lorient": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f603b4555e8b80e10e6e00_fc-lorient-footballlogos-org.svg", "Nantes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6037717f207f26068359f_fc-nantes-footballlogos-org.svg", "Le Havre": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6034b2c4dba4d15325577_le-havre-ac-footballlogos-org.svg", "Brest": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f6031ff8cd65c6ad62fa0e_brest-footballlogos-org.svg", "Toulouse": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602ea024ee46f704e7e95_toulouse-fc-footballlogos-org.svg", "Strasbourg": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602be5a5d10d0cabe9a5c_rc-strasbourg-alsace-footballlogos-org.svg", "Rennes": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f602903fd5f4df637cbe5b_stade-rennais-footballlogos-org.svg", "Lens": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60258dd4d4729426f3082_rc-lens-footballlogos-org.svg", "Lille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60227a28dc9b483bf1ab7_losc-lille-footballlogos-org.svg", "Lyon": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601f4555ff54bb38a9743_olympique-lyonnais-footballlogos-org.svg", "Monaco": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f601bc2d95f01cf7da34fc_as-monaco-footballlogos-org.svg", "Marseille": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/69f3f418117ceba672d60345_marseille-footylogos.png", "Nice": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f60156f059b025091ea26e_ofc-nice-footballlogos-org.svg", "Paris SG": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68f600ecd5c3338dd7b8791a_paris-saint-germain-footballlogos-org.svg", "Saint-Etienne": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68fab0b7340930fc63b96454_as-saint-etienne-footballlogos-org.svg", "Rodez": "https://cdn.prod.website-files.com/68f550992570ca0322737dc2/68faaec887e08ca920676ef3_rodez-af-footballlogos-org.svg"};
 
 function getLogo(name) {
@@ -1299,10 +1299,10 @@ function getLogo(name) {
   }
   return null;
 }
-// ══════════════════════════════════════════════
-// ── Données matchs ────────────────────────────
-// ══════════════════════════════════════════════
-// ── Clé API RapidAPI / Sofascore ─────────────────────────────────
+// ==============================================
+// -- Données matchs ----------------------------
+// ==============================================
+// -- Clé API RapidAPI / Sofascore ---------------------------------
 const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
@@ -1329,10 +1329,10 @@ const matches = [
   {id:10, comp:'worldcup', home:'Pays-Bas',     away:'Japon',          date:'2026-06-14', time:'22:00', odds:[1.95,3.40,4.00], sofaId:null},
 ];
 
-// ── Ligue courante ───────────────────────────────────────────────
+// -- Ligue courante -----------------------------------------------
 let currentLeague = null; // { code, name, isAdmin }
 
-// ── 2. Structure Firebase avec ligues ────────────────────────────
+// -- 2. Structure Firebase avec ligues ----------------------------
 // /ligues/{code}/players/{nom} → paris du joueur
 // /ligues/{code}/config → { name, admin, matches, createdAt }
 
@@ -1377,9 +1377,9 @@ const SCORES = {
   other_lose: [{h:0,a:6},{h:1,a:6},{h:2,a:6},{h:3,a:6},{h:4,a:6},{h:5,a:6},{h:0,a:7},{h:1,a:7},{h:2,a:7},{h:3,a:7},{h:4,a:7},{h:5,a:7},{h:6,a:7},{h:0,a:8},{h:1,a:8},{h:2,a:8},{h:3,a:8},{h:4,a:8},{h:5,a:8},{h:6,a:8},{h:7,a:8},{h:0,a:9},{h:1,a:9},{h:2,a:9},{h:3,a:9},{h:4,a:9},{h:5,a:9},{h:6,a:9},{h:7,a:9},{h:8,a:9}],
 };
 
-// ══════════════════════════════════════════════
-// ── Calculs cotes & résultat ──────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Calculs cotes & résultat ------------------
+// ==============================================
 function scoreOdd(m, h, a) {
   const [o1,oN,o2] = m.odds;
   const p1=1/o1, pN=1/oN, p2=1/o2, tot=p1+pN+p2;
@@ -1632,15 +1632,15 @@ function calcPoints(b, realH, realA) {
   return { result, score, bonus, total: Math.round((result+score)*100)/100 };
 }
 
-// ══════════════════════════════════════════════
-// ── État ─────────────────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- État -------------------------------------
+// ==============================================
 let betslip    = {};
 let matchState = {};
 let currentPlayer = null;
-// ══════════════════════════════════════════════
-// ── Rendu matchs ─────────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Rendu matchs -----------------------------
+// ==============================================
 function buildCard(m) {
   const state = matchState[m.id] || {resultCls: null};
   // Chercher le resultCls dans validatedBets si matchState est vide
@@ -1690,12 +1690,12 @@ function buildCard(m) {
     const pillCls = scoreKey.startsWith('other') ? 'other' : scoreKey;
 
     const clsLabel = {
-      win:        '✦ ' + m.home + ' gagne — choisissez le score',
-      draw:       '◆ Match nul — choisissez le score',
-      lose:       '✦ ' + m.away + ' gagne — choisissez le score',
-      other_win:  '🔥 ' + m.home + ' gagne (6+ buts) — score exact',
-      other_draw: '🔥 Match nul (6+ buts) — score exact',
-      other_lose: '🔥 ' + m.away + ' gagne (6+ buts) — score exact',
+      win:        '✦ ' + m.home + ' gagne - choisissez le score',
+      draw:       '◆ Match nul - choisissez le score',
+      lose:       '✦ ' + m.away + ' gagne - choisissez le score',
+      other_win:  '🔥 ' + m.home + ' gagne (6+ buts) - score exact',
+      other_draw: '🔥 Match nul (6+ buts) - score exact',
+      other_lose: '🔥 ' + m.away + ' gagne (6+ buts) - score exact',
     };
 
     const scores = (SCORES[scoreKey] || []).map(s => ({
@@ -1831,7 +1831,7 @@ if (typeof testGoalTriggered === 'undefined') {
   }, 5000);
 }
 
-// ── Fetch scores live via Sofascore RapidAPI ──────────────────────
+// -- Fetch scores live via Sofascore RapidAPI ----------------------
 async function fetchLiveScores() {
   const started = matches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
   if (!started.length) return;
@@ -1860,7 +1860,7 @@ async function fetchLiveScores() {
 }
 
 
-// ── Chargement automatique des matchs + cotes via API-Football ────
+// -- Chargement automatique des matchs + cotes via API-Football ----
 async function fetchUpcomingMatches() {
   // Verrou Firebase : 1 seule requête API par heure maximum
   try {
@@ -1908,7 +1908,7 @@ async function fetchUpcomingMatches() {
         // Essayer plusieurs bookmakers
         for (var b of bookmakers) {
           var bets = b.bets || [];
-          // Score exact — noms possibles selon bookmaker
+          // Score exact - noms possibles selon bookmaker
           var exact = bets.find(function(bet) {
             return bet.name === 'Exact Score' || bet.name === 'Score' || bet.name === 'Correct Score' || bet.name === 'Result/Both Teams Score';
           });
@@ -1928,7 +1928,7 @@ async function fetchUpcomingMatches() {
 }
 
 
-// ── Récupération cotes 1X2 via BSD (illimité, gratuit) ───────────
+// -- Récupération cotes 1X2 via BSD (illimité, gratuit) -----------
 async function fetchBSDOdds() {
   console.log('🔄 Chargement cotes 1X2 via BSD...');
   try {
@@ -2000,9 +2000,9 @@ fetchUpcomingMatches();
 // Charger les cotes 1X2 via BSD
 fetchBSDOdds();
 
-// ══════════════════════════════════════════════
-// ── Interactions paris ────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Interactions paris ------------------------
+// ==============================================
 function selectResult(matchId, cls) {
   if(!currentPlayer){ openLogin(); return; }
   if(cls.startsWith('other')) return; // géré par openOtherModal
@@ -2041,9 +2041,9 @@ function toggleScore(matchId, h, a) {
   }
 }
 
-// ══════════════════════════════════════════════
-// ── Bulletin ─────────────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Bulletin ---------------------------------
+// ==============================================
 function renderBetslip() {
   const keys=Object.keys(betslip);
   const countEl=document.getElementById('betCount');
@@ -2065,7 +2065,7 @@ function renderBetslip() {
     return `<div class="bet-item">
       <button class="remove-bet" onclick="removeBet('${k}')" title="Supprimer">×</button>
       <div class="bet-match">${b.matchName}</div>
-      <div class="bet-score-big ${b.resultCls}">${b.h} — ${b.a}</div>
+      <div class="bet-score-big ${b.resultCls}">${b.h} - ${b.a}</div>
       <div class="bet-result-deduced ${b.resultCls}"><span class="arrow">↳</span><span class="label ${b.resultCls}">${b.resultLabel} (${b.resultShort})</span></div>
       <div class="bet-pts-badges">
         <div class="pts-badge result"><span class="pts-badge-label">✅ Bon résultat</span><span class="pts-badge-val">${ptsR} pts</span><span class="pts-badge-sub">si résultat correct</span></div>
@@ -2191,16 +2191,16 @@ function placeBets() {
   });
   savePlayers(players);
   const totalPts=keys.reduce((s,k)=>s+calcPoints(betslip[k]).total,0);
-  showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' — max '+totalPts.toFixed(2)+' pts potentiels');
+  showNotif('✅ '+keys.length+' pari'+(keys.length>1?'s':'')+' validé'+(keys.length>1?'s':'')+' - max '+totalPts.toFixed(2)+' pts potentiels');
   betslip={};
   matchState={};
   renderMatches();
   renderBetslip();
 }
 
-// ══════════════════════════════════════════════
-// ── Navigation vues ──────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Navigation vues --------------------------
+// ==============================================
 window.selectComp = function selectComp(comp, btn) {
   document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -2236,9 +2236,9 @@ function scrollToMatch(id, el) {
   if (window.innerWidth <= 768) toggleSidebar();
 }
 
-// ══════════════════════════════════════════════
-// ── Système joueurs ───────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Système joueurs ---------------------------
+// ==============================================
 const STORAGE_KEY='bypronos_players';
 
 function loadPlayers() {
@@ -2267,7 +2267,7 @@ function openOtherModal(matchId) {
   overlay.innerHTML = `<div style="background:#161b22;border:1px solid #30363d;border-radius:14px;padding:28px 24px;width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
     <div style="font-size:22px;margin-bottom:6px">🔥</div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">${m.home} - ${m.away}</div>
-    <div style="font-size:12px;color:#8b949e;margin-bottom:18px">Score avec 6 buts ou plus — qui gagne ?</div>
+    <div style="font-size:12px;color:#8b949e;margin-bottom:18px">Score avec 6 buts ou plus - qui gagne ?</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button onclick="selectOtherResult(${matchId},'other_win',this.closest('[style*=fixed]'))"
         style="background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.4);color:#16a34a;border-radius:8px;padding:10px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer">
@@ -2389,9 +2389,9 @@ window.doLoginName = function doLoginName(name) {
   renderBetslip();
 }
 
-// ══════════════════════════════════════════════
-// ── Classement ───────────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Classement -------------------------------
+// ==============================================
 function switchRankTab(tab, btn) {
   rankTab=tab;
   document.querySelectorAll('.ranking-tab').forEach(b=>b.classList.remove('active'));
@@ -2429,7 +2429,7 @@ window.setLiveFilter = function(filter, btn) {
 var globalLiveLastFetch = 0;
 
 async function fetchGlobalLive() {
-  // Cache 5 minutes — économie de quota
+  // Cache 5 minutes - économie de quota
   if (Date.now() - globalLiveLastFetch < 300000 && globalLiveLastFetch > 0) {
     renderLiveView(); return;
   }
@@ -2483,7 +2483,7 @@ function renderLiveView() {
       if (!byLeague[key]) byLeague[key] = {logo: f.league.logo, matches: []};
       byLeague[key].matches.push(f);
     });
-    if (titleEl) titleEl.textContent = '🔴 ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
+    if (titleEl) titleEl.textContent = ' ' + globalLiveData.length + ' match' + (globalLiveData.length > 1 ? 's' : '') + ' en direct';
     el.innerHTML = Object.entries(byLeague).map(function(e) {
       const lName = e[0], league = e[1];
       const hdr = '<div style="display:flex;align-items:center;gap:6px;padding:5px 4px;margin-bottom:4px;border-bottom:1px solid var(--bord)">' +
@@ -2515,7 +2515,7 @@ function renderLiveView() {
     }).join('');
     return;
   } // fin if globalLiveData
-  // Pas de live — afficher prochains matchs
+  // Pas de live - afficher prochains matchs
   const today = new Date().toISOString().slice(0, 10);
   let dm = matches.filter(function(m){ return m.date === today; });
   if (!dm.length) {
@@ -2530,7 +2530,7 @@ function renderLiveView() {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt2)"><div style="font-size:48px">&#x26BD;</div><div style="font-size:16px;font-weight:700;margin-top:12px">Aucun match en direct</div></div>';
     return;
   }
-  if (titleEl) titleEl.textContent = dm[0].date > today ? '📅 Prochains matchs · ' + dm[0].date : '🔴 Matchs du jour';
+  if (titleEl) titleEl.textContent = dm[0].date > today ? '📅 Prochains matchs · ' + dm[0].date : ' Matchs du jour';
   const banner = '';
   el.innerHTML = banner + dm.map(function(m) {
     const live = liveData[m.id];
@@ -2583,7 +2583,7 @@ function renderRankingPanel() {
     const cls = (podium[i] || '') + (isMe ? ' me' : '');
     const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + '">' + vLabel +
-      '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '▶' : '') + '</span>' +
+      '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '>' : '') + '</span>' +
       '<span class="rank-pos" style="' + (i===0?'background:rgba(0,0,0,.15);border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-size:20px':'') + '">' + (medals[i] || (i+1)) + '</span>' +
       '<span class="rank-name">' + r.name + (i===0 ? ' <span style="font-size:18px">🏆</span>' : '') + '</span>' +
       '<span class="rank-pts" style="color:' + (i<3?'':'#111') + '">' + fmtPts(r.pts) + ' pts</span>' +
@@ -2656,7 +2656,7 @@ function renderHistoryPanel() {
       const rankNum = live ? '<span style="font-size:9px;color:var(--txt2);width:14px;text-align:center;flex-shrink:0">' + (idx+1) + '</span>' : '';
       return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-bottom:1px solid var(--bg3);gap:6px' + '">' +
         '<div style="display:flex;align-items:center;gap:5px;min-width:0">' +
-          '<span style="width:10px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '▶' : '') + '</span>' +
+          '<span style="width:10px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '>' : '') + '</span>' +
           rankNum +
           ptsBubble +
           '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
@@ -2706,7 +2706,7 @@ function renderRanking() {
     const isYou=r.name===currentPlayer;
     const cls=['gold','silver','bronze'][i]||'';
     return `<tr class="ranking-row ${cls} ${isYou?'me':''}">
-      <td style="width:14px;padding:0 2px;text-align:center">${isYou?'<span style="color:var(--acc);font-weight:900;font-size:12px">▶</span>':''}</td>
+      <td style="width:14px;padding:0 2px;text-align:center">${isYou?'<span style="color:var(--acc);font-weight:900;font-size:12px">></span>':''}</td>
       ${i===0?'<td style="width:14px;padding:0"><span style="writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);background:#c9960a;color:#fff;font-size:7px;font-weight:800;letter-spacing:1px;padding:4px 3px;border-radius:4px 0 0 4px;height:100%;display:flex;align-items:center;justify-content:center">VAINQUEUR</span></td>':'<td style="width:14px"></td>'}
       <td class="rank-pos" style="text-align:center">${i<3?medals[i]:i+1}</td>
       <td class="rank-name">${r.name}${i===0?' <span style="font-size:18px">🏆</span>':''}</td>
@@ -2718,9 +2718,9 @@ function renderRanking() {
   }).join('');
 }
 
-// ══════════════════════════════════════════════
-// ── Notif & Init ─────────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Notif & Init -----------------------------
+// ==============================================
 function testFirebase() {
   console.log('fbSavePlayers:', typeof window.fbSavePlayers);
   console.log('firebaseReady:', window.firebaseReady);
@@ -2853,9 +2853,9 @@ function showNotif(msg) {
 }
 
 
-// ══════════════════════════════════════════════
-// ── Tchat local ──────────────────────────────
-// ══════════════════════════════════════════════
+// ==============================================
+// -- Tchat local ------------------------------
+// ==============================================
 const CHAT_KEY = 'bypronos_chat';
 let chatOpen = false;
 let unreadCount = 0;
@@ -2969,7 +2969,7 @@ window.addEventListener('load', () => {
 });
 
 
-// ── Bulletin mobile ───────────────────────────────────────────────
+// -- Bulletin mobile -----------------------------------------------
 function openMobileSlip() {
   document.getElementById('mobileSlipDrawer').classList.add('open');
   document.getElementById('mobileSlipOverlay').classList.add('open');
@@ -3019,7 +3019,7 @@ function syncMobileSlip() {
     return '<div class="bet-item">' +
       '<button class="remove-bet" onclick="removeBet(\'' + k + '\')" title="Supprimer">×</button>' +
       '<div class="bet-match">' + b.matchName + '</div>' +
-      '<div class="bet-score-big ' + b.resultCls + '">' + b.h + ' — ' + b.a + '</div>' +
+      '<div class="bet-score-big ' + b.resultCls + '">' + b.h + ' - ' + b.a + '</div>' +
       '<div class="bet-result-deduced ' + b.resultCls + '"><span class="arrow">↳</span><span class="label ' + b.resultCls + '">' + b.resultLabel + ' (' + b.resultShort + ')</span></div>' +
       '<div class="bet-pts-badges">' +
         '<div class="pts-badge result"><span class="pts-badge-label">✅ Bon résultat</span><span class="pts-badge-val">' + ptsR + ' pts</span><span class="pts-badge-sub">si résultat correct</span></div>' +
@@ -3047,7 +3047,7 @@ function syncMobileSlip() {
 
 renderMatches();
 
-// ── Fonctions Firebase sync ──────────────────────────────────────
+// -- Fonctions Firebase sync --------------------------------------
 const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
 
 function loadPlayersFromFirebase() {
@@ -3223,7 +3223,7 @@ window.doJoinLeagueAuth = function() {
   renderMatches();
 }
 
-// ── Équipes ────────────────────────────────────────────────────
+// -- Équipes ----------------------------------------------------
 var currentTeamsMode = false;
 var currentUserTeam = null;
 
@@ -3306,8 +3306,7 @@ async function renderTeamSection() {
     const teamsHtml = teamIds.length > 0
       ? teamIds.map(function(id) {
           const t = teams[id];
-          return '<div onclick="window.joinTeam('' + id + '')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--bord);border-radius:8px;cursor:pointer;margin-bottom:4px;background:var(--bg2)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">' +
-            '<span style="width:10px;height:10px;border-radius:50%;background:' + t.color + ';flex-shrink:0;display:inline-block"></span>' +
+          return '<div onclick="window.joinTeam(this.dataset.code)" data-code="' + id + '" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--bord);border-radius:8px;cursor:pointer;margin-bottom:4px;background:var(--bg2)">' +            '<span style="width:10px;height:10px;border-radius:50%;background:' + t.color + ';flex-shrink:0;display:inline-block"></span>' +
             '<span style="font-size:12px;font-weight:700;flex:1">' + t.name + '</span>' +
             '<span style="font-size:10px;color:var(--txt2)">' + Object.keys(t.members||{}).length + ' membre(s)</span>' +
           '</div>';
@@ -3385,7 +3384,7 @@ async function renderTeamsRanking() {
     const isMe = currentUserTeam === tid;
     const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + ';' + (isMe?'outline:2px solid var(--acc)':'') + '">' + vLabel +
-      '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '▶' : '') + '</span>' +
+      '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '>' : '') + '</span>' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
       '<span style="width:10px;height:10px;border-radius:50%;background:' + t.color + ';flex-shrink:0;display:inline-block"></span>' +
       '<span class="rank-name">' + t.name + (i===0?' <span style="font-size:18px">🏆</span>':'') + '</span>' +
@@ -3483,7 +3482,7 @@ function doLogout() {
 window.addEventListener('load', ()=>{ openLogin(); });
 </script>
 
-<!-- ── Login overlay ─────────────────────────── -->
+<!-- -- Login overlay --------------------------- -->
 <div class="login-overlay" id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center">
   <div class="login-box">
     <div class="login-logo">BY <span>PRONOS</span></div>
@@ -3536,7 +3535,7 @@ window.addEventListener('load', ()=>{ openLogin(); });
   </div>
 </div>
 
-<!-- ── Tchat flottant ── -->
+<!-- -- Tchat flottant -- -->
 <div class="chat-bubble" id="chatBubble">
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
@@ -3560,7 +3559,7 @@ window.addEventListener('load', ()=>{ openLogin(); });
   </div>
 </div>
 
-<!-- ── Bulletin mobile flottant ── -->
+<!-- -- Bulletin mobile flottant -- -->
 <div class="mobile-slip-overlay" id="mobileSlipOverlay" onclick="closeMobileSlip()"></div>
 
 <div class="mobile-slip-drawer" id="mobileSlipDrawer">
