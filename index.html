@@ -3292,7 +3292,7 @@ window.joinTeam = async function(teamId) {
   const league = localStorage.getItem('bypronos_league') || 'global';
   const auth = window._firebaseAuth || firebase.auth();
   const uid = auth.currentUser?.uid;
-  if (!uid) return alert('Connectez-vous d'abord');
+  if (!uid) return alert('Connectez-vous dabord');
   await db.ref('leagues/' + league + '/players/' + uid + '/team').set(teamId);
   await db.ref('leagues/' + league + '/teams/' + teamId + '/members/' + uid).set(currentPlayer);
   currentUserTeam = teamId;
