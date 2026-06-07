@@ -1307,62 +1307,69 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
-// Page Wikipedia de l'equipe nationale -> photos de matchs en action
-const TEAM_STAR_PLAYER = {
-  'Mexique':        'Mexico_national_football_team',
-  'Afrique du Sud': 'South_Africa_national_football_team',
-  'Corée du Sud':   'South_Korea_national_football_team',
-  'Rép. Tchèque':   'Czech_Republic_national_football_team',
-  'Canada':         'Canada_national_soccer_team',
-  'Bosnie-Herzég.': 'Bosnia_and_Herzegovina_national_football_team',
-  'États-Unis':     'United_States_men%27s_national_soccer_team',
-  'Paraguay':       'Paraguay_national_football_team',
-  'Qatar':          'Qatar_national_football_team',
-  'Suisse':         'Switzerland_national_football_team',
-  'Brésil':         'Brazil_national_football_team',
-  'Maroc':          'Morocco_national_football_team',
-  'Haïti':          'Haiti_national_football_team',
-  'Écosse':         'Scotland_national_football_team',
-  'Australie':      'Australia_national_football_team',
-  'Turquie':        'Turkey_national_football_team',
-  'Allemagne':      'Germany_national_football_team',
-  'Curaçao':        'Cura%C3%A7ao_national_football_team',
-  'Pays-Bas':       'Netherlands_national_football_team',
-  'Japon':          'Japan_national_football_team',
+// Mots-cles de recherche Wikimedia Commons par equipe
+const TEAM_SEARCH_KEYWORDS = {
+  'Mexique':        'Mexico football action',
+  'Afrique du Sud': 'South Africa football match',
+  'Corée du Sud':   'South Korea football action Son',
+  'Rép. Tchèque':   'Czech Republic football match',
+  'Canada':         'Canada football Davies action',
+  'Bosnie-Herzég.': 'Bosnia football match',
+  'États-Unis':     'United States soccer Pulisic action',
+  'Paraguay':       'Paraguay football match',
+  'Qatar':          'Qatar football match',
+  'Suisse':         'Switzerland football match',
+  'Brésil':         'Brazil football Vinicius action',
+  'Maroc':          'Morocco football Hakimi match',
+  'Haïti':          'Haiti football match',
+  'Écosse':         'Scotland football match',
+  'Australie':      'Australia football match',
+  'Turquie':        'Turkey football match',
+  'Allemagne':      'Germany football action',
+  'Curaçao':        'Curacao football match',
+  'Pays-Bas':       'Netherlands football match action',
+  'Japon':          'Japan football match action',
 };
 
 // Cache images Wikipedia
 var MATCH_IMAGES = {};
 var wikiImageCache = {};
 
-async function fetchWikiImage(playerSlug) {
-  if (wikiImageCache[playerSlug] !== undefined) return wikiImageCache[playerSlug];
-  wikiImageCache[playerSlug] = null;
+async function fetchWikiImage(keywords) {
+  if (wikiImageCache[keywords] !== undefined) return wikiImageCache[keywords];
+  wikiImageCache[keywords] = null;
   try {
-    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(playerSlug) + '&prop=pageimages&pithumbsize=400&format=json&origin=*';
+    const url = 'https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(keywords) + '&srnamespace=6&srlimit=5&format=json&origin=*';
     const res = await fetch(url);
     if (!res.ok) return null;
     const data = await res.json();
-    const pages = data.query && data.query.pages;
-    if (!pages) return null;
-    const page = Object.values(pages)[0];
-    const img = page && page.thumbnail ? page.thumbnail.source : null;
-    wikiImageCache[playerSlug] = img;
-    console.log('Wiki image for', playerSlug, ':', img ? 'OK' : 'not found');
+    const results = data.query && data.query.search;
+    if (!results || !results.length) return null;
+    // Prendre la première image trouvée et récupérer son URL
+    const title = results[0].title; // ex: "File:Brazil vs Argentina.jpg"
+    const imgRes = await fetch('https://commons.wikimedia.org/w/api.php?action=query&titles=' + encodeURIComponent(title) + '&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*');
+    const imgData = await imgRes.json();
+    const imgPages = imgData.query && imgData.query.pages;
+    if (!imgPages) return null;
+    const imgPage = Object.values(imgPages)[0];
+    const img = imgPage && imgPage.imageinfo && imgPage.imageinfo[0] ? imgPage.imageinfo[0].thumburl || imgPage.imageinfo[0].url : null;
+    wikiImageCache[keywords] = img;
+    console.log('Commons image:', keywords, '->', img ? 'OK' : 'not found');
     return img;
-  } catch(e) { console.warn('Wiki fetch error:', e); return null; }
+  } catch(e) { console.warn('Commons fetch error:', e); return null; }
 }
 
 async function preloadMatchImages() {
   const promises = matches.map(async function(m) {
-    const homePlayer = TEAM_STAR_PLAYER[m.home];
-    const awayPlayer = TEAM_STAR_PLAYER[m.away];
+    if (MATCH_IMAGES[m.id]) return; // Déjà chargé
+    const homeKw = TEAM_SEARCH_KEYWORDS[m.home];
+    const awayKw = TEAM_SEARCH_KEYWORDS[m.away];
     let img = null;
-    if (homePlayer) img = await fetchWikiImage(homePlayer);
-    if (!img && awayPlayer) img = await fetchWikiImage(awayPlayer);
+    if (homeKw) img = await fetchWikiImage(homeKw);
+    if (!img && awayKw) img = await fetchWikiImage(awayKw);
     if (img) {
       MATCH_IMAGES[m.id] = img;
-      renderMatches(); // Re-render dès qu'une image est disponible
+      renderMatches();
     }
   });
   await Promise.all(promises);
