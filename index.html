@@ -1842,7 +1842,7 @@ function buildCard(m) {
 
   const compLabel = m.comp === 'worldcup' ? 'Coupe du Monde 2026' : m.comp === 'premier' ? 'Premier League' : m.comp === 'ligue2' ? 'Ligue 2' : 'Ligue 1';
   const compIcon = m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷';
-  const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:700;color:#e03030;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
+  const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:800;color:#fff;background:#e03030;padding:1px 5px;border-radius:3px;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
   const bannerImg = MATCH_IMAGES[m.id] || null;
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
