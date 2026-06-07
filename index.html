@@ -1307,19 +1307,61 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
-// Images football - Pixabay CDN public (sans CORS)
-const MATCH_IMAGES = {
-  1:  'https://cdn.pixabay.com/photo/2016/07/07/10/47/football-1502611_640.jpg',
-  2:  'https://cdn.pixabay.com/photo/2014/10/14/20/24/ball-488718_640.jpg',
-  3:  'https://cdn.pixabay.com/photo/2017/07/31/14/46/football-2558115_640.jpg',
-  4:  'https://cdn.pixabay.com/photo/2016/03/27/22/05/football-1284248_640.jpg',
-  5:  'https://cdn.pixabay.com/photo/2018/05/22/10/45/soccer-3420898_640.jpg',
-  6:  'https://cdn.pixabay.com/photo/2015/02/05/23/03/brazil-624665_640.jpg',
-  7:  'https://cdn.pixabay.com/photo/2016/11/29/01/34/football-1867437_640.jpg',
-  8:  'https://cdn.pixabay.com/photo/2014/10/14/20/24/ball-488718_640.jpg',
-  9:  'https://cdn.pixabay.com/photo/2016/03/27/22/05/football-1284248_640.jpg',
-  10: 'https://cdn.pixabay.com/photo/2017/07/31/14/46/football-2558115_640.jpg',
+// Joueur star par equipe -> page Wikipedia anglaise
+const TEAM_STAR_PLAYER = {
+  'Mexique':        'Hirving_Lozano',
+  'Afrique du Sud': 'Percy_Tau',
+  'Corée du Sud':   'Son_Heung-min',
+  'Rép. Tchèque':   'Patrik_Schick',
+  'Canada':         'Alphonso_Davies',
+  'Bosnie-Herzég.': 'Edin_Džeko',
+  'États-Unis':     'Christian_Pulisic',
+  'Paraguay':       'Miguel_Almirón',
+  'Qatar':          'Akram_Afif',
+  'Suisse':         'Granit_Xhaka',
+  'Brésil':         'Vinicius_Junior',
+  'Maroc':          'Achraf_Hakimi',
+  'Haïti':          'Frantzdy_Pierrot',
+  'Écosse':         'Andy_Robertson',
+  'Australie':      'Mat_Ryan',
+  'Turquie':        'Hakan_Çalhanoğlu',
+  'Allemagne':      'Toni_Kroos',
+  'Curaçao':        'Cuco_Martina',
+  'Pays-Bas':       'Virgil_van_Dijk',
+  'Japon':          'Takumi_Minamino',
 };
+
+// Cache images Wikipedia
+var MATCH_IMAGES = {};
+var wikiImageCache = {};
+
+async function fetchWikiImage(playerSlug) {
+  if (wikiImageCache[playerSlug] !== undefined) return wikiImageCache[playerSlug];
+  wikiImageCache[playerSlug] = null; // Marquer comme en cours
+  try {
+    const res = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + playerSlug);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const img = data.thumbnail ? data.thumbnail.source.replace(/\/\d+px-/, '/320px-') : null;
+    wikiImageCache[playerSlug] = img;
+    return img;
+  } catch(e) { return null; }
+}
+
+async function preloadMatchImages() {
+  const promises = matches.map(async function(m) {
+    const homePlayer = TEAM_STAR_PLAYER[m.home];
+    const awayPlayer = TEAM_STAR_PLAYER[m.away];
+    let img = null;
+    if (homePlayer) img = await fetchWikiImage(homePlayer);
+    if (!img && awayPlayer) img = await fetchWikiImage(awayPlayer);
+    if (img) {
+      MATCH_IMAGES[m.id] = img;
+      renderMatches(); // Re-render dès qu'une image est disponible
+    }
+  });
+  await Promise.all(promises);
+}
 
 // Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
 const TEAM_BANNERS = {
@@ -1830,9 +1872,7 @@ function buildCard(m) {
   const compLabel = m.comp === 'worldcup' ? 'Coupe du Monde 2026' : m.comp === 'premier' ? 'Premier League' : m.comp === 'ligue2' ? 'Ligue 2' : 'Ligue 1';
   const compIcon = m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷';
   const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:700;color:#e03030;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
-  const bannerImg = teamImageCache[m.home] || teamImageCache[m.away] || null;
-  if (!teamImageCache.hasOwnProperty(m.home)) fetchTeamImage(m.home).then(function(img){ if(img){ teamImageCache[m.home]=img; renderMatches(); } });
-  if (!teamImageCache.hasOwnProperty(m.away)) fetchTeamImage(m.away).then(function(img){ if(img){ teamImageCache[m.away]=img; renderMatches(); } });
+  const bannerImg = MATCH_IMAGES[m.id] || null;
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
@@ -3203,10 +3243,12 @@ window.addEventListener('firebaseReady', () => {
   window._firebaseAuth = auth;
   syncFromFirebase();
   watchFirebase();
+  preloadMatchImages();
 });
 if (window.firebaseReady) {
   syncFromFirebase();
   watchFirebase();
+  preloadMatchImages();
 }
 
 // Connexion Google
