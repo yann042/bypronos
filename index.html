@@ -1337,15 +1337,20 @@ var wikiImageCache = {};
 
 async function fetchWikiImage(playerSlug) {
   if (wikiImageCache[playerSlug] !== undefined) return wikiImageCache[playerSlug];
-  wikiImageCache[playerSlug] = null; // Marquer comme en cours
+  wikiImageCache[playerSlug] = null;
   try {
-    const res = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + playerSlug);
+    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(playerSlug) + '&prop=pageimages&pithumbsize=400&format=json&origin=*';
+    const res = await fetch(url);
     if (!res.ok) return null;
     const data = await res.json();
-    const img = data.thumbnail ? data.thumbnail.source.replace(/\/\d+px-/, '/320px-') : null;
+    const pages = data.query && data.query.pages;
+    if (!pages) return null;
+    const page = Object.values(pages)[0];
+    const img = page && page.thumbnail ? page.thumbnail.source : null;
     wikiImageCache[playerSlug] = img;
+    console.log('Wiki image for', playerSlug, ':', img ? 'OK' : 'not found');
     return img;
-  } catch(e) { return null; }
+  } catch(e) { console.warn('Wiki fetch error:', e); return null; }
 }
 
 async function preloadMatchImages() {
