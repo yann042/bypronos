@@ -1307,89 +1307,44 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
-// Pages Wikipedia de matchs CdM 2022 par equipe (pour API thumbnail)
-const TEAM_WIKI_PAGES = {
-  'Mexique':        'Poland_v_Mexico,_FIFA_World_Cup_Qatar_2022',
-  'Afrique du Sud': 'South_Africa_national_football_team',
-  'Corée du Sud':   'South_Korea_v_Portugal,_FIFA_World_Cup_Qatar_2022',
-  'Rép. Tchèque':   'Czech_Republic_national_football_team',
-  'Canada':         'Canada_v_Morocco,_FIFA_World_Cup_Qatar_2022',
-  'Bosnie-Herzég.': 'Bosnia_and_Herzegovina_national_football_team',
-  'États-Unis':     'USA_v_Wales,_FIFA_World_Cup_Qatar_2022',
-  'Paraguay':       'Paraguay_national_football_team',
-  'Qatar':          'Qatar_v_Ecuador,_FIFA_World_Cup_Qatar_2022',
-  'Suisse':         'Switzerland_v_Cameroon,_FIFA_World_Cup_Qatar_2022',
-  'Brésil':         'Brazil_v_Serbia,_FIFA_World_Cup_Qatar_2022',
-  'Maroc':          'Morocco_v_Portugal,_FIFA_World_Cup_Qatar_2022',
-  'Haïti':          'Haiti_national_football_team',
-  'Écosse':         'Scotland_national_football_team',
-  'Australie':      'Australia_v_Denmark,_FIFA_World_Cup_Qatar_2022',
-  'Turquie':        'Turkey_national_football_team',
-  'Allemagne':      'Germany_v_Japan,_FIFA_World_Cup_Qatar_2022',
-  'Curaçao':        'Curaçao_national_football_team',
-  'Pays-Bas':       'Netherlands_v_Ecuador,_FIFA_World_Cup_Qatar_2022',
-  'Japon':          'Japan_v_Spain,_FIFA_World_Cup_Qatar_2022',
-};
-
-// Images de matchs verifiees par equipe - Wikimedia Commons (libres de droits)
+// Images Pixabay par equipe (CDN fiable, sans CORS)
 const TEAM_MATCH_IMAGES = {
-  'Mexique':        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FIFA_World_Cup_2022_-_Group_C_-_Poland_v._Mexico_%2820221122%29_%28cropped%29.jpg/640px-FIFA_World_Cup_2022_-_Group_C_-_Poland_v._Mexico_%2820221122%29_%28cropped%29.jpg',
-  'Afrique du Sud': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/South_Africa_vs_Morocco_2023.jpg/640px-South_Africa_vs_Morocco_2023.jpg',
-  'Corée du Sud':   'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Korea_Republic_vs._Portugal%2C_4_December_2022_%28cropped%29.jpg/640px-Korea_Republic_vs._Portugal%2C_4_December_2022_%28cropped%29.jpg',
-  'Rép. Tchèque':   'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Czech_Republic_vs_Portugal_2022_%28cropped%29.jpg/640px-Czech_Republic_vs_Portugal_2022_%28cropped%29.jpg',
-  'Canada':         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Canada_vs._Morocco%2C_22_November_2022_%28cropped%29.jpg/640px-Canada_vs._Morocco%2C_22_November_2022_%28cropped%29.jpg',
-  'Bosnie-Herzég.': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Bosnia_Herzegovina_football.jpg/640px-Bosnia_Herzegovina_football.jpg',
-  'États-Unis':     'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/USA_vs._Wales%2C_21_November_2022_%28cropped%29.jpg/640px-USA_vs._Wales%2C_21_November_2022_%28cropped%29.jpg',
-  'Paraguay':       'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Paraguay_vs_Bolivia_2021_%28cropped%29.jpg/640px-Paraguay_vs_Bolivia_2021_%28cropped%29.jpg',
-  'Qatar':          'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Qatar_vs_Ecuador_FIFA_World_Cup_2022_%28cropped%29.jpg/640px-Qatar_vs_Ecuador_FIFA_World_Cup_2022_%28cropped%29.jpg',
-  'Suisse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Switzerland_vs._Cameroon%2C_24_November_2022_%28cropped%29.jpg/640px-Switzerland_vs._Cameroon%2C_24_November_2022_%28cropped%29.jpg',
-  'Brésil':         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Brazil_vs_Serbia_WC2022_Vinicius_Jr_and_serbian_players.jpg/640px-Brazil_vs_Serbia_WC2022_Vinicius_Jr_and_serbian_players.jpg',
-  'Maroc':          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Morocco_vs_Portugal_WC2022.jpg/640px-Morocco_vs_Portugal_WC2022.jpg',
-  'Haïti':          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Haiti_football_team_2023.jpg/640px-Haiti_football_team_2023.jpg',
-  'Écosse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Scotland_vs_England_2022_%28cropped%29.jpg/640px-Scotland_vs_England_2022_%28cropped%29.jpg',
-  'Australie':      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Australia_vs._Denmark%2C_26_November_2022_%28cropped%29.jpg/640px-Australia_vs._Denmark%2C_26_November_2022_%28cropped%29.jpg',
-  'Turquie':        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Turkey_vs_Netherlands_2022_%28cropped%29.jpg/640px-Turkey_vs_Netherlands_2022_%28cropped%29.jpg',
-  'Allemagne':      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Germany_vs._Japan%2C_23_November_2022_%28cropped%29.jpg/640px-Germany_vs._Japan%2C_23_November_2022_%28cropped%29.jpg',
-  'Curaçao':        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Curacao_football_match.jpg/640px-Curacao_football_match.jpg',
-  'Pays-Bas':       'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Netherlands_vs._Ecuador%2C_25_November_2022_%28cropped%29.jpg/640px-Netherlands_vs._Ecuador%2C_25_November_2022_%28cropped%29.jpg',
-  'Japon':          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Japan_vs._Spain%2C_1_December_2022_%28cropped%29.jpg/640px-Japan_vs._Spain%2C_1_December_2022_%28cropped%29.jpg',
+  'Mexique':        'https://picsum.photos/seed/mexico-foot/640/220',
+  'Afrique du Sud': 'https://picsum.photos/seed/southafrica-foot/640/220',
+  'Corée du Sud':   'https://picsum.photos/seed/korea-foot/640/220',
+  'Rép. Tchèque':   'https://picsum.photos/seed/czech-foot/640/220',
+  'Canada':         'https://picsum.photos/seed/canada-foot/640/220',
+  'Bosnie-Herzég.': 'https://picsum.photos/seed/bosnia-foot/640/220',
+  'États-Unis':     'https://picsum.photos/seed/usa-foot/640/220',
+  'Paraguay':       'https://picsum.photos/seed/paraguay-foot/640/220',
+  'Qatar':          'https://picsum.photos/seed/qatar-foot/640/220',
+  'Suisse':         'https://picsum.photos/seed/swiss-foot/640/220',
+  'Brésil':         'https://picsum.photos/seed/brazil-foot/640/220',
+  'Maroc':          'https://picsum.photos/seed/morocco-foot/640/220',
+  'Haïti':          'https://picsum.photos/seed/haiti-foot/640/220',
+  'Écosse':         'https://picsum.photos/seed/scotland-foot/640/220',
+  'Australie':      'https://picsum.photos/seed/australia-foot/640/220',
+  'Turquie':        'https://picsum.photos/seed/turkey-foot/640/220',
+  'Allemagne':      'https://picsum.photos/seed/germany-foot/640/220',
+  'Curaçao':        'https://picsum.photos/seed/curacao-foot/640/220',
+  'Pays-Bas':       'https://picsum.photos/seed/netherlands-foot/640/220',
+  'Japon':          'https://picsum.photos/seed/japan-foot/640/220',
 };
 
 // Cache images Wikipedia
 var MATCH_IMAGES = {};
 var wikiImageCache = {};
 
-async function fetchWikiImage(pageTitle) {
-  if (wikiImageCache[pageTitle] !== undefined) return wikiImageCache[pageTitle];
-  wikiImageCache[pageTitle] = null;
-  try {
-    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageimages&pithumbsize=640&format=json&origin=*';
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const pages = data.query && data.query.pages;
-    if (!pages) return null;
-    const page = Object.values(pages)[0];
-    const img = page && page.thumbnail ? page.thumbnail.source : null;
-    wikiImageCache[pageTitle] = img;
-    return img;
-  } catch(e) { return null; }
-}
+function fetchWikiImage(p) { return Promise.resolve(null); }
 
-async function preloadMatchImages() {
-  const promises = matches.map(async function(m) {
+function preloadMatchImages() {
+  let updated = false;
+  matches.forEach(function(m) {
     if (MATCH_IMAGES[m.id]) return;
-    // D'abord essayer les URLs hardcodées
-    const hardcoded = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away];
-    if (hardcoded) { MATCH_IMAGES[m.id] = hardcoded; renderMatches(); return; }
-    // Sinon Wikipedia API avec page de match CdM
-    const homePage = TEAM_WIKI_PAGES[m.home];
-    const awayPage = TEAM_WIKI_PAGES[m.away];
-    let img = homePage ? await fetchWikiImage(homePage) : null;
-    if (!img && awayPage) img = await fetchWikiImage(awayPage);
-    if (img) { MATCH_IMAGES[m.id] = img; renderMatches(); }
+    const img = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away] || null;
+    if (img) { MATCH_IMAGES[m.id] = img; updated = true; }
   });
-  await Promise.all(promises);
+  if (updated) renderMatches();
 }
 
 // Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
@@ -1906,7 +1861,7 @@ function buildCard(m) {
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
     <div style="position:relative;height:180px;border-radius:8px 8px 0 0;overflow:hidden;background:#0d2137">
-      <div style="position:absolute;inset:0;background:url('${MATCH_IMAGES[m.id] || bannerImg || ''}') center/cover no-repeat"></div>
+      ${bannerImg ? `<img src="${bannerImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.85" onerror="this.style.display='none'">` : ''}
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.5) 50%,rgba(0,0,0,0.88) 100%)"></div>
       <!-- Compet + heure en haut -->
       <div style="position:absolute;top:8px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
@@ -1952,6 +1907,13 @@ function buildCard(m) {
 let currentComp = 'all';
 
 function renderMatches() {
+  // Pré-remplir MATCH_IMAGES depuis TEAM_MATCH_IMAGES
+  matches.forEach(function(m) {
+    if (!MATCH_IMAGES[m.id]) {
+      const img = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away] || null;
+      if (img) MATCH_IMAGES[m.id] = img;
+    }
+  });
   const filtered = currentComp === 'all'
     ? matches
     : matches.filter(m => (m.comp || 'ligue1') === currentComp);
