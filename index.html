@@ -1307,72 +1307,46 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
-// Mots-cles de recherche Wikimedia Commons par equipe
-const TEAM_SEARCH_KEYWORDS = {
-  'Mexique':        'Mexico football action',
-  'Afrique du Sud': 'South Africa football match',
-  'Corée du Sud':   'South Korea football action Son',
-  'Rép. Tchèque':   'Czech Republic football match',
-  'Canada':         'Canada football Davies action',
-  'Bosnie-Herzég.': 'Bosnia football match',
-  'États-Unis':     'United States soccer Pulisic action',
-  'Paraguay':       'Paraguay football match',
-  'Qatar':          'Qatar football match',
-  'Suisse':         'Switzerland football match',
-  'Brésil':         'Brazil football Vinicius action',
-  'Maroc':          'Morocco football Hakimi match',
-  'Haïti':          'Haiti football match',
-  'Écosse':         'Scotland football match',
-  'Australie':      'Australia football match',
-  'Turquie':        'Turkey football match',
-  'Allemagne':      'Germany football action',
-  'Curaçao':        'Curacao football match',
-  'Pays-Bas':       'Netherlands football match action',
-  'Japon':          'Japan football match action',
+// Images de matchs verifiees par equipe - Wikimedia Commons (libres de droits)
+const TEAM_MATCH_IMAGES = {
+  'Mexique':        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FIFA_World_Cup_2022_-_Group_C_-_Poland_v._Mexico_%2820221122%29_%28cropped%29.jpg/640px-FIFA_World_Cup_2022_-_Group_C_-_Poland_v._Mexico_%2820221122%29_%28cropped%29.jpg',
+  'Afrique du Sud': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/South_Africa_vs_Morocco_2023.jpg/640px-South_Africa_vs_Morocco_2023.jpg',
+  'Corée du Sud':   'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Korea_Republic_vs._Portugal%2C_4_December_2022_%28cropped%29.jpg/640px-Korea_Republic_vs._Portugal%2C_4_December_2022_%28cropped%29.jpg',
+  'Rép. Tchèque':   'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Czech_Republic_vs_Portugal_2022_%28cropped%29.jpg/640px-Czech_Republic_vs_Portugal_2022_%28cropped%29.jpg',
+  'Canada':         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Canada_vs._Morocco%2C_22_November_2022_%28cropped%29.jpg/640px-Canada_vs._Morocco%2C_22_November_2022_%28cropped%29.jpg',
+  'Bosnie-Herzég.': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Bosnia_Herzegovina_football.jpg/640px-Bosnia_Herzegovina_football.jpg',
+  'États-Unis':     'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/USA_vs._Wales%2C_21_November_2022_%28cropped%29.jpg/640px-USA_vs._Wales%2C_21_November_2022_%28cropped%29.jpg',
+  'Paraguay':       'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Paraguay_vs_Bolivia_2021_%28cropped%29.jpg/640px-Paraguay_vs_Bolivia_2021_%28cropped%29.jpg',
+  'Qatar':          'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Qatar_vs_Ecuador_FIFA_World_Cup_2022_%28cropped%29.jpg/640px-Qatar_vs_Ecuador_FIFA_World_Cup_2022_%28cropped%29.jpg',
+  'Suisse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Switzerland_vs._Cameroon%2C_24_November_2022_%28cropped%29.jpg/640px-Switzerland_vs._Cameroon%2C_24_November_2022_%28cropped%29.jpg',
+  'Brésil':         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Brazil_vs_Serbia_WC2022_Vinicius_Jr_and_serbian_players.jpg/640px-Brazil_vs_Serbia_WC2022_Vinicius_Jr_and_serbian_players.jpg',
+  'Maroc':          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Morocco_vs_Portugal_WC2022.jpg/640px-Morocco_vs_Portugal_WC2022.jpg',
+  'Haïti':          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Haiti_football_team_2023.jpg/640px-Haiti_football_team_2023.jpg',
+  'Écosse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Scotland_vs_England_2022_%28cropped%29.jpg/640px-Scotland_vs_England_2022_%28cropped%29.jpg',
+  'Australie':      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Australia_vs._Denmark%2C_26_November_2022_%28cropped%29.jpg/640px-Australia_vs._Denmark%2C_26_November_2022_%28cropped%29.jpg',
+  'Turquie':        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Turkey_vs_Netherlands_2022_%28cropped%29.jpg/640px-Turkey_vs_Netherlands_2022_%28cropped%29.jpg',
+  'Allemagne':      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Germany_vs._Japan%2C_23_November_2022_%28cropped%29.jpg/640px-Germany_vs._Japan%2C_23_November_2022_%28cropped%29.jpg',
+  'Curaçao':        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Curacao_football_match.jpg/640px-Curacao_football_match.jpg',
+  'Pays-Bas':       'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Netherlands_vs._Ecuador%2C_25_November_2022_%28cropped%29.jpg/640px-Netherlands_vs._Ecuador%2C_25_November_2022_%28cropped%29.jpg',
+  'Japon':          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Japan_vs._Spain%2C_1_December_2022_%28cropped%29.jpg/640px-Japan_vs._Spain%2C_1_December_2022_%28cropped%29.jpg',
 };
 
 // Cache images Wikipedia
 var MATCH_IMAGES = {};
 var wikiImageCache = {};
 
-async function fetchWikiImage(keywords) {
-  if (wikiImageCache[keywords] !== undefined) return wikiImageCache[keywords];
-  wikiImageCache[keywords] = null;
-  try {
-    const url = 'https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(keywords) + '&srnamespace=6&srlimit=5&format=json&origin=*';
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const results = data.query && data.query.search;
-    if (!results || !results.length) return null;
-    // Prendre la première image trouvée et récupérer son URL
-    const title = results[0].title; // ex: "File:Brazil vs Argentina.jpg"
-    const imgRes = await fetch('https://commons.wikimedia.org/w/api.php?action=query&titles=' + encodeURIComponent(title) + '&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*');
-    const imgData = await imgRes.json();
-    const imgPages = imgData.query && imgData.query.pages;
-    if (!imgPages) return null;
-    const imgPage = Object.values(imgPages)[0];
-    const img = imgPage && imgPage.imageinfo && imgPage.imageinfo[0] ? imgPage.imageinfo[0].thumburl || imgPage.imageinfo[0].url : null;
-    wikiImageCache[keywords] = img;
-    console.log('Commons image:', keywords, '->', img ? 'OK' : 'not found');
-    return img;
-  } catch(e) { console.warn('Commons fetch error:', e); return null; }
+function fetchWikiImage(keywords) {
+  return Promise.resolve(null); // Plus utilisé
 }
 
-async function preloadMatchImages() {
-  const promises = matches.map(async function(m) {
-    if (MATCH_IMAGES[m.id]) return; // Déjà chargé
-    const homeKw = TEAM_SEARCH_KEYWORDS[m.home];
-    const awayKw = TEAM_SEARCH_KEYWORDS[m.away];
-    let img = null;
-    if (homeKw) img = await fetchWikiImage(homeKw);
-    if (!img && awayKw) img = await fetchWikiImage(awayKw);
-    if (img) {
-      MATCH_IMAGES[m.id] = img;
-      renderMatches();
-    }
+function preloadMatchImages() {
+  let updated = false;
+  matches.forEach(function(m) {
+    if (MATCH_IMAGES[m.id]) return;
+    const img = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away] || null;
+    if (img) { MATCH_IMAGES[m.id] = img; updated = true; }
   });
-  await Promise.all(promises);
+  if (updated) renderMatches();
 }
 
 // Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
