@@ -52,7 +52,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;margin-bottom:14px}
 
 /* Match card */
-.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:12px;margin-bottom:10px;overflow:hidden;transition:border-color .15s;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.match-card{background:var(--bg2);border:1px solid var(--bord);border-radius:8px;margin-bottom:10px;overflow:hidden;transition:border-color .15s;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .match-card:hover{border-color:rgba(0,212,170,.3)}
 .match-header{display:flex;align-items:center;justify-content:space-between;padding:2px 8px;border-bottom:1px solid var(--bord)}
 .league{font-size:10px;color:var(--txt2);font-weight:500;display:flex;align-items:center;gap:4px}
@@ -1844,8 +1844,8 @@ function buildCard(m) {
         <span style="color:rgba(255,255,255,0.9);font-size:9px;font-weight:600;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${compIcon} ${compLabel}</span>
         <span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${timeStr}</span>
       </div>
-      <!-- Equipes au milieu-bas -->
-      <div style="position:absolute;bottom:42px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+      <!-- Equipes au milieu -->
+      <div style="position:absolute;bottom:52px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:5px">
           ${homeLogo ? `<img src="${homeLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
           <span style="color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,1)">${homeName}</span>
@@ -1859,15 +1859,15 @@ function buildCard(m) {
       <!-- Cotes en bas - toujours visibles avec couleurs -->
       <div style="position:absolute;bottom:6px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
         <div onclick="selectResult(${m.id},'win')" style="background:${state.resultCls==='win'?'rgba(22,163,74,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='win'?'#4ade80':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:9px;font-weight:600;margin-bottom:2px">${homeName.slice(0,9)}</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:8px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${homeName.length>8?homeName.slice(0,7)+'.':homeName}</div>
           <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[0].toFixed(2)}</div>
         </div>
         <div onclick="selectResult(${m.id},'draw')" style="background:${state.resultCls==='draw'?'rgba(234,179,8,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='draw'?'#fbbf24':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:9px;font-weight:600;margin-bottom:2px">Nul</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:8px;font-weight:600;margin-bottom:2px">Nul</div>
           <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[1].toFixed(2)}</div>
         </div>
         <div onclick="selectResult(${m.id},'lose')" style="background:${state.resultCls==='lose'?'rgba(220,38,38,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='lose'?'#f87171':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:9px;font-weight:600;margin-bottom:2px">${awayName.slice(0,9)}</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:8px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${awayName.length>8?awayName.slice(0,7)+'.':awayName}</div>
           <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[2].toFixed(2)}</div>
         </div>
       </div>
