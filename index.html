@@ -1307,6 +1307,30 @@ const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
+// Pages Wikipedia de matchs CdM 2022 par equipe (pour API thumbnail)
+const TEAM_WIKI_PAGES = {
+  'Mexique':        'Poland_v_Mexico,_FIFA_World_Cup_Qatar_2022',
+  'Afrique du Sud': 'South_Africa_national_football_team',
+  'Corée du Sud':   'South_Korea_v_Portugal,_FIFA_World_Cup_Qatar_2022',
+  'Rép. Tchèque':   'Czech_Republic_national_football_team',
+  'Canada':         'Canada_v_Morocco,_FIFA_World_Cup_Qatar_2022',
+  'Bosnie-Herzég.': 'Bosnia_and_Herzegovina_national_football_team',
+  'États-Unis':     'USA_v_Wales,_FIFA_World_Cup_Qatar_2022',
+  'Paraguay':       'Paraguay_national_football_team',
+  'Qatar':          'Qatar_v_Ecuador,_FIFA_World_Cup_Qatar_2022',
+  'Suisse':         'Switzerland_v_Cameroon,_FIFA_World_Cup_Qatar_2022',
+  'Brésil':         'Brazil_v_Serbia,_FIFA_World_Cup_Qatar_2022',
+  'Maroc':          'Morocco_v_Portugal,_FIFA_World_Cup_Qatar_2022',
+  'Haïti':          'Haiti_national_football_team',
+  'Écosse':         'Scotland_national_football_team',
+  'Australie':      'Australia_v_Denmark,_FIFA_World_Cup_Qatar_2022',
+  'Turquie':        'Turkey_national_football_team',
+  'Allemagne':      'Germany_v_Japan,_FIFA_World_Cup_Qatar_2022',
+  'Curaçao':        'Curaçao_national_football_team',
+  'Pays-Bas':       'Netherlands_v_Ecuador,_FIFA_World_Cup_Qatar_2022',
+  'Japon':          'Japan_v_Spain,_FIFA_World_Cup_Qatar_2022',
+};
+
 // Images de matchs verifiees par equipe - Wikimedia Commons (libres de droits)
 const TEAM_MATCH_IMAGES = {
   'Mexique':        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FIFA_World_Cup_2022_-_Group_C_-_Poland_v._Mexico_%2820221122%29_%28cropped%29.jpg/640px-FIFA_World_Cup_2022_-_Group_C_-_Poland_v._Mexico_%2820221122%29_%28cropped%29.jpg',
@@ -1335,18 +1359,37 @@ const TEAM_MATCH_IMAGES = {
 var MATCH_IMAGES = {};
 var wikiImageCache = {};
 
-function fetchWikiImage(keywords) {
-  return Promise.resolve(null); // Plus utilisé
+async function fetchWikiImage(pageTitle) {
+  if (wikiImageCache[pageTitle] !== undefined) return wikiImageCache[pageTitle];
+  wikiImageCache[pageTitle] = null;
+  try {
+    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageimages&pithumbsize=640&format=json&origin=*';
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const pages = data.query && data.query.pages;
+    if (!pages) return null;
+    const page = Object.values(pages)[0];
+    const img = page && page.thumbnail ? page.thumbnail.source : null;
+    wikiImageCache[pageTitle] = img;
+    return img;
+  } catch(e) { return null; }
 }
 
-function preloadMatchImages() {
-  let updated = false;
-  matches.forEach(function(m) {
+async function preloadMatchImages() {
+  const promises = matches.map(async function(m) {
     if (MATCH_IMAGES[m.id]) return;
-    const img = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away] || null;
-    if (img) { MATCH_IMAGES[m.id] = img; updated = true; }
+    // D'abord essayer les URLs hardcodées
+    const hardcoded = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away];
+    if (hardcoded) { MATCH_IMAGES[m.id] = hardcoded; renderMatches(); return; }
+    // Sinon Wikipedia API avec page de match CdM
+    const homePage = TEAM_WIKI_PAGES[m.home];
+    const awayPage = TEAM_WIKI_PAGES[m.away];
+    let img = homePage ? await fetchWikiImage(homePage) : null;
+    if (!img && awayPage) img = await fetchWikiImage(awayPage);
+    if (img) { MATCH_IMAGES[m.id] = img; renderMatches(); }
   });
-  if (updated) renderMatches();
+  await Promise.all(promises);
 }
 
 // Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
@@ -1885,7 +1928,7 @@ function buildCard(m) {
       <!-- Cotes en bas - toujours visibles avec couleurs -->
       <div style="position:absolute;bottom:6px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
         <div onclick="selectResult(${m.id},'win')" style="background:${state.resultCls==='win'?'rgba(22,163,74,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='win'?'#4ade80':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:8px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${homeName.length>8?homeName.slice(0,7)+'.':homeName}</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${homeName}</div>
           <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[0].toFixed(2)}</div>
         </div>
         <div onclick="selectResult(${m.id},'draw')" style="background:${state.resultCls==='draw'?'rgba(234,179,8,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='draw'?'#fbbf24':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
@@ -1893,7 +1936,7 @@ function buildCard(m) {
           <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[1].toFixed(2)}</div>
         </div>
         <div onclick="selectResult(${m.id},'lose')" style="background:${state.resultCls==='lose'?'rgba(220,38,38,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='lose'?'#f87171':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:8px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${awayName.length>8?awayName.slice(0,7)+'.':awayName}</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${awayName}</div>
           <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[2].toFixed(2)}</div>
         </div>
       </div>
