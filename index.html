@@ -1876,7 +1876,7 @@ function buildCard(m) {
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
-    <div style="position:relative;height:180px;border-radius:10px 10px 0 0;overflow:hidden;background:#0d2137">
+    <div style="position:relative;height:180px;border-radius:8px 8px 0 0;overflow:hidden;background:#0d2137">
       <div style="position:absolute;inset:0;background:url('${MATCH_IMAGES[m.id] || bannerImg || ''}') center/cover no-repeat"></div>
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.5) 50%,rgba(0,0,0,0.88) 100%)"></div>
       <!-- Compet + heure en haut -->
@@ -3174,6 +3174,7 @@ function loadPlayersFromFirebase() {
 }
 
 async function syncFromFirebase() {
+  preloadMatchImages();
   try {
     const fbPlayers = currentLeague ? await loadPlayersFromLeague() : await loadPlayersFromFirebase();
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
@@ -3668,7 +3669,7 @@ function doLogout() {
   openLogin();
 }
 
-window.addEventListener('load', ()=>{ openLogin(); });
+window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages, 1000); });
 </script>
 
 <!-- -- Login overlay --------------------------- -->
