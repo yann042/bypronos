@@ -1309,26 +1309,26 @@ const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
 // Images Pixabay par equipe (CDN fiable, sans CORS)
 const TEAM_MATCH_IMAGES = {
-  'Mexique':        'https://picsum.photos/seed/mexico-foot/640/220',
-  'Afrique du Sud': 'https://picsum.photos/seed/southafrica-foot/640/220',
-  'Corée du Sud':   'https://picsum.photos/seed/korea-foot/640/220',
-  'Rép. Tchèque':   'https://picsum.photos/seed/czech-foot/640/220',
-  'Canada':         'https://picsum.photos/seed/canada-foot/640/220',
-  'Bosnie-Herzég.': 'https://picsum.photos/seed/bosnia-foot/640/220',
-  'États-Unis':     'https://picsum.photos/seed/usa-foot/640/220',
-  'Paraguay':       'https://picsum.photos/seed/paraguay-foot/640/220',
-  'Qatar':          'https://picsum.photos/seed/qatar-foot/640/220',
-  'Suisse':         'https://picsum.photos/seed/swiss-foot/640/220',
-  'Brésil':         'https://picsum.photos/seed/brazil-foot/640/220',
-  'Maroc':          'https://picsum.photos/seed/morocco-foot/640/220',
-  'Haïti':          'https://picsum.photos/seed/haiti-foot/640/220',
-  'Écosse':         'https://picsum.photos/seed/scotland-foot/640/220',
-  'Australie':      'https://picsum.photos/seed/australia-foot/640/220',
-  'Turquie':        'https://picsum.photos/seed/turkey-foot/640/220',
-  'Allemagne':      'https://picsum.photos/seed/germany-foot/640/220',
-  'Curaçao':        'https://picsum.photos/seed/curacao-foot/640/220',
-  'Pays-Bas':       'https://picsum.photos/seed/netherlands-foot/640/220',
-  'Japon':          'https://picsum.photos/seed/japan-foot/640/220',
+  'Mexique':        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/320px-Flag_of_Mexico.svg.png',
+  'Afrique du Sud': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/320px-Flag_of_South_Africa.svg.png',
+  'Corée du Sud':   'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Flag_of_South_Korea.svg/320px-Flag_of_South_Korea.svg.png',
+  'Rép. Tchèque':   'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/320px-Flag_of_the_Czech_Republic.svg.png',
+  'Canada':         'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/320px-Flag_of_Canada_%28Pantone%29.svg.png',
+  'Bosnie-Herzég.': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Flag_of_Bosnia_and_Herzegovina.svg/320px-Flag_of_Bosnia_and_Herzegovina.svg.png',
+  'États-Unis':     'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/320px-Flag_of_the_United_States.svg.png',
+  'Paraguay':       'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Flag_of_Paraguay.svg/320px-Flag_of_Paraguay.svg.png',
+  'Qatar':          'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Qatar.svg/320px-Flag_of_Qatar.svg.png',
+  'Suisse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/240px-Flag_of_Switzerland.svg.png',
+  'Brésil':         'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/320px-Flag_of_Brazil.svg.png',
+  'Maroc':          'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/320px-Flag_of_Morocco.svg.png',
+  'Haïti':          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Flag_of_Haiti.svg/320px-Flag_of_Haiti.svg.png',
+  'Écosse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Flag_of_Scotland.svg/320px-Flag_of_Scotland.svg.png',
+  'Australie':      'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Flag_of_Australia_%28converted%29.svg/320px-Flag_of_Australia_%28converted%29.svg.png',
+  'Turquie':        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/320px-Flag_of_Turkey.svg.png',
+  'Allemagne':      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png',
+  'Curaçao':        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Flag_of_Cura%C3%A7ao.svg/320px-Flag_of_Cura%C3%A7ao.svg.png',
+  'Pays-Bas':       'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/320px-Flag_of_the_Netherlands.svg.png',
+  'Japon':          'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Flag_of_Japan.svg/320px-Flag_of_Japan.svg.png',
 };
 
 // Cache images Wikipedia
@@ -1861,7 +1861,7 @@ function buildCard(m) {
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
     <div style="position:relative;height:180px;border-radius:8px 8px 0 0;overflow:hidden;background:#0d2137">
-      ${bannerImg ? `<img src="${bannerImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.85" onerror="this.style.display='none'">` : ''}
+      ${bannerImg ? `<img src="${bannerImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.25;filter:blur(2px) saturate(1.5)" onerror="this.style.display='none'">` : ''}
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.5) 50%,rgba(0,0,0,0.88) 100%)"></div>
       <!-- Compet + heure en haut -->
       <div style="position:absolute;top:8px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
@@ -1882,17 +1882,17 @@ function buildCard(m) {
       </div>
       <!-- Cotes en bas - toujours visibles avec couleurs -->
       <div style="position:absolute;bottom:6px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
-        <div onclick="selectResult(${m.id},'win')" style="background:${state.resultCls==='win'?'rgba(22,163,74,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='win'?'#4ade80':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${homeName}</div>
-          <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[0].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'win')" style="background:${state.resultCls==='win'?'#16a34a':'#e8e8e8'};border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.25)">
+          <div style="color:${state.resultCls==='win'?'rgba(255,255,255,0.85)':'#555'};font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${homeName}</div>
+          <div style="color:${state.resultCls==='win'?'#fff':'#111'};font-size:15px;font-weight:800">${m.odds[0].toFixed(2)}</div>
         </div>
-        <div onclick="selectResult(${m.id},'draw')" style="background:${state.resultCls==='draw'?'rgba(234,179,8,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='draw'?'#fbbf24':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:8px;font-weight:600;margin-bottom:2px">Nul</div>
-          <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[1].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'draw')" style="background:${state.resultCls==='draw'?'#16a34a':'#e8e8e8'};border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.25)">
+          <div style="color:${state.resultCls==='draw'?'rgba(255,255,255,0.85)':'#555'};font-size:7px;font-weight:600;margin-bottom:2px">Nul</div>
+          <div style="color:${state.resultCls==='draw'?'#fff':'#111'};font-size:15px;font-weight:800">${m.odds[1].toFixed(2)}</div>
         </div>
-        <div onclick="selectResult(${m.id},'lose')" style="background:${state.resultCls==='lose'?'rgba(220,38,38,0.95)':'rgba(255,255,255,0.12)'};backdrop-filter:blur(8px);border:2px solid ${state.resultCls==='lose'?'#f87171':'rgba(255,255,255,0.35)'};border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
-          <div style="color:rgba(255,255,255,0.75);font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${awayName}</div>
-          <div style="color:#fff;font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.5)">${m.odds[2].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'lose')" style="background:${state.resultCls==='lose'?'#16a34a':'#e8e8e8'};border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.25)">
+          <div style="color:${state.resultCls==='lose'?'rgba(255,255,255,0.85)':'#555'};font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${awayName}</div>
+          <div style="color:${state.resultCls==='lose'?'#fff':'#111'};font-size:15px;font-weight:800">${m.odds[2].toFixed(2)}</div>
         </div>
       </div>
     </div>
