@@ -1308,43 +1308,30 @@ const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
 const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
 const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
 // Images Pixabay par equipe (CDN fiable, sans CORS)
-const TEAM_MATCH_IMAGES = {
-  'Mexique':        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Football_in_Bloomington,_Indiana,_1995.jpg/640px-Football_in_Bloomington,_Indiana,_1995.jpg',
-  'Afrique du Sud': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2_guys_playing_soccer_-_good.jpg/640px-2_guys_playing_soccer_-_good.jpg',
-  'Corée du Sud':   'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg/640px-Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg',
-  'Rép. Tchèque':   'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Football_in_Bloomington,_Indiana,_1995.jpg/640px-Football_in_Bloomington,_Indiana,_1995.jpg',
-  'Canada':         'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2_guys_playing_soccer_-_good.jpg/640px-2_guys_playing_soccer_-_good.jpg',
-  'Bosnie-Herzég.': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg/640px-Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg',
-  'États-Unis':     'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Michael_Bradley_shooting_vs_Honduras.jpg/640px-Michael_Bradley_shooting_vs_Honduras.jpg',
-  'Paraguay':       'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Football_in_Bloomington,_Indiana,_1995.jpg/640px-Football_in_Bloomington,_Indiana,_1995.jpg',
-  'Qatar':          'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2_guys_playing_soccer_-_good.jpg/640px-2_guys_playing_soccer_-_good.jpg',
-  'Suisse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg/640px-Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg',
-  'Brésil':         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Brasil_conquista_primeiro_ouro_olímpico_no_futebol_1039242-20082016-_mg_3306.jpg/640px-Brasil_conquista_primeiro_ouro_olímpico_no_futebol_1039242-20082016-_mg_3306.jpg',
-  'Maroc':          'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Football_in_Bloomington,_Indiana,_1995.jpg/640px-Football_in_Bloomington,_Indiana,_1995.jpg',
-  'Haïti':          'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2_guys_playing_soccer_-_good.jpg/640px-2_guys_playing_soccer_-_good.jpg',
-  'Écosse':         'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg/640px-Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg',
-  'Australie':      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Football_in_Bloomington,_Indiana,_1995.jpg/640px-Football_in_Bloomington,_Indiana,_1995.jpg',
-  'Turquie':        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2_guys_playing_soccer_-_good.jpg/640px-2_guys_playing_soccer_-_good.jpg',
-  'Allemagne':      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg/640px-Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg',
-  'Curaçao':        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Football_in_Bloomington,_Indiana,_1995.jpg/640px-Football_in_Bloomington,_Indiana,_1995.jpg',
-  'Pays-Bas':       'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg/640px-Germany_and_Argentina_face_off_in_the_final_of_the_World_Cup_2014_03.jpg',
-  'Japon':          'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/2_guys_playing_soccer_-_good.jpg/640px-2_guys_playing_soccer_-_good.jpg',
-};
+const TEAM_MATCH_IMAGES = {}; // Rempli dynamiquement via proxy Firebase
 
 // Cache images Wikipedia
 var MATCH_IMAGES = {};
 var wikiImageCache = {};
 
-function fetchWikiImage(p) { return Promise.resolve(null); }
+async function fetchTeamMatchImage(teamName) {
+  if (TEAM_MATCH_IMAGES[teamName]) return TEAM_MATCH_IMAGES[teamName];
+  try {
+    const res = await fetch('https://livescores-huouv7kgya-uc.a.run.app/teamimage?team=' + encodeURIComponent(teamName));
+    const data = await res.json();
+    if (data.url) { TEAM_MATCH_IMAGES[teamName] = data.url; return data.url; }
+  } catch(e) {}
+  return null;
+}
 
-function preloadMatchImages() {
-  let updated = false;
-  matches.forEach(function(m) {
+async function preloadMatchImages() {
+  const promises = matches.map(async function(m) {
     if (MATCH_IMAGES[m.id]) return;
-    const img = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away] || null;
-    if (img) { MATCH_IMAGES[m.id] = img; updated = true; }
+    let img = await fetchTeamMatchImage(m.home);
+    if (!img) img = await fetchTeamMatchImage(m.away);
+    if (img) { MATCH_IMAGES[m.id] = img; renderMatches(); }
   });
-  if (updated) renderMatches();
+  await Promise.all(promises);
 }
 
 // Images fanart des equipes nationales (Wikimedia Commons - libre de droits)
@@ -1869,30 +1856,31 @@ function buildCard(m) {
         <span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${timeStr}</span>
       </div>
       <!-- Equipes au milieu -->
-      <div style="position:absolute;bottom:62px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="position:absolute;bottom:65px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:5px">
           ${homeLogo ? `<img src="${homeLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
           <span style="color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,1)">${homeName}</span>
         </div>
-        <span style="color:rgba(255,255,255,0.6);font-size:10px;position:absolute;left:50%;transform:translateX(-50%)">vs</span>
+        <span style="color:rgba(255,255,255,0.7);font-size:10px;font-weight:600;position:absolute;left:0;right:0;text-align:center">vs</span>
         <div style="display:flex;align-items:center;gap:5px">
           <span style="color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,1)">${awayName}</span>
           ${awayLogo ? `<img src="${awayLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
         </div>
       </div>
-      <!-- Cotes en bas - toujours visibles avec couleurs -->
-      <div style="position:absolute;bottom:6px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
-        <div onclick="selectResult(${m.id},'win')" style="background:#fff;border:2px solid ${state.resultCls==='win'?'#16a34a':'#ddd'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
-          <div style="color:#888;font-size:7px;font-weight:600;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${homeName}</div>
-          <div style="color:${state.resultCls==='win'?'#16a34a':'#111'};font-size:17px;font-weight:700;font-family:Barlow Condensed,sans-serif;letter-spacing:0.5px">${m.odds[0].toFixed(2)}</div>
+
+      <!-- Cotes intégrées au bandeau - style blanc comme capture -->
+      <div style="position:absolute;bottom:8px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <div onclick="selectResult(${m.id},'win')" style="background:#fff;border:2px solid ${state.resultCls==='win'?'#16a34a':'rgba(255,255,255,0.6)'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="color:#888;font-size:8px;font-weight:500;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px">${homeName}</div>
+          <div style="color:${state.resultCls==='win'?'#16a34a':'#111'};font-size:16px;font-weight:700;font-family:Barlow Condensed,sans-serif">${m.odds[0].toFixed(2)}</div>
         </div>
-        <div onclick="selectResult(${m.id},'draw')" style="background:#fff;border:2px solid ${state.resultCls==='draw'?'#ca8a04':'#ddd'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
-          <div style="color:#888;font-size:7px;font-weight:600;margin-bottom:1px">Nul</div>
-          <div style="color:${state.resultCls==='draw'?'#ca8a04':'#111'};font-size:17px;font-weight:700;font-family:Barlow Condensed,sans-serif;letter-spacing:0.5px">${m.odds[1].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'draw')" style="background:#fff;border:2px solid ${state.resultCls==='draw'?'#ca8a04':'rgba(255,255,255,0.6)'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="color:#888;font-size:8px;font-weight:500;margin-bottom:1px">Nul</div>
+          <div style="color:${state.resultCls==='draw'?'#ca8a04':'#111'};font-size:16px;font-weight:700;font-family:Barlow Condensed,sans-serif">${m.odds[1].toFixed(2)}</div>
         </div>
-        <div onclick="selectResult(${m.id},'lose')" style="background:#fff;border:2px solid ${state.resultCls==='lose'?'#dc2626':'#ddd'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
-          <div style="color:#888;font-size:7px;font-weight:600;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${awayName}</div>
-          <div style="color:${state.resultCls==='lose'?'#dc2626':'#111'};font-size:17px;font-weight:700;font-family:Barlow Condensed,sans-serif;letter-spacing:0.5px">${m.odds[2].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'lose')" style="background:#fff;border:2px solid ${state.resultCls==='lose'?'#dc2626':'rgba(255,255,255,0.6)'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s">
+          <div style="color:#888;font-size:8px;font-weight:500;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px">${awayName}</div>
+          <div style="color:${state.resultCls==='lose'?'#dc2626':'#111'};font-size:16px;font-weight:700;font-family:Barlow Condensed,sans-serif">${m.odds[2].toFixed(2)}</div>
         </div>
       </div>
     </div>
