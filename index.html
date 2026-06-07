@@ -1882,17 +1882,17 @@ function buildCard(m) {
       </div>
       <!-- Cotes en bas - toujours visibles avec couleurs -->
       <div style="position:absolute;bottom:6px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
-        <div onclick="selectResult(${m.id},'win')" style="background:${state.resultCls==='win'?'#16a34a':'#e8e8e8'};border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.25)">
-          <div style="color:${state.resultCls==='win'?'rgba(255,255,255,0.85)':'#555'};font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${homeName}</div>
-          <div style="color:${state.resultCls==='win'?'#fff':'#111'};font-size:15px;font-weight:800">${m.odds[0].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'win')" style="background:#fff;border:2px solid ${state.resultCls==='win'?'#16a34a':'#ddd'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
+          <div style="color:#888;font-size:7px;font-weight:600;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${homeName}</div>
+          <div style="color:${state.resultCls==='win'?'#16a34a':'#111'};font-size:15px;font-weight:800">${m.odds[0].toFixed(2)}</div>
         </div>
-        <div onclick="selectResult(${m.id},'draw')" style="background:${state.resultCls==='draw'?'#16a34a':'#e8e8e8'};border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.25)">
-          <div style="color:${state.resultCls==='draw'?'rgba(255,255,255,0.85)':'#555'};font-size:7px;font-weight:600;margin-bottom:2px">Nul</div>
-          <div style="color:${state.resultCls==='draw'?'#fff':'#111'};font-size:15px;font-weight:800">${m.odds[1].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'draw')" style="background:#fff;border:2px solid ${state.resultCls==='draw'?'#ca8a04':'#ddd'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
+          <div style="color:#888;font-size:7px;font-weight:600;margin-bottom:1px">Nul</div>
+          <div style="color:${state.resultCls==='draw'?'#ca8a04':'#111'};font-size:15px;font-weight:800">${m.odds[1].toFixed(2)}</div>
         </div>
-        <div onclick="selectResult(${m.id},'lose')" style="background:${state.resultCls==='lose'?'#16a34a':'#e8e8e8'};border-radius:7px;padding:6px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.25)">
-          <div style="color:${state.resultCls==='lose'?'rgba(255,255,255,0.85)':'#555'};font-size:7px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px;line-height:1.2">${awayName}</div>
-          <div style="color:${state.resultCls==='lose'?'#fff':'#111'};font-size:15px;font-weight:800">${m.odds[2].toFixed(2)}</div>
+        <div onclick="selectResult(${m.id},'lose')" style="background:#fff;border:2px solid ${state.resultCls==='lose'?'#dc2626':'#ddd'};border-radius:8px;padding:5px 4px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,0.15)">
+          <div style="color:#888;font-size:7px;font-weight:600;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px">${awayName}</div>
+          <div style="color:${state.resultCls==='lose'?'#dc2626':'#111'};font-size:15px;font-weight:800">${m.odds[2].toFixed(2)}</div>
         </div>
       </div>
     </div>
