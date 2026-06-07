@@ -1767,7 +1767,7 @@ function buildCard(m) {
       const sel = betslip[key] ? 'selected' : '';
       return `<div class="score-pill ${pillCls} ${sel}" onclick="toggleScore(${m.id},${s.h},${s.a})">
         <span class="pill-score">${s.h}-${s.a}</span>
-        <span class="pill-odd">${s.odd.toFixed(1)}</span>
+        <span class="pill-odd">${s.odd.toFixed(1).replace(".", ",")}</span>
       </div>`;
     }).join('');
 
