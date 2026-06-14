@@ -1112,7 +1112,7 @@ window.switchLeagueTab = function(tab) {
 <script>
 // Verifie si un match a demarre selon l'heure locale
 // MODE TEST - simuler matchs en cours
-const TEST_MODE = true;
+const TEST_MODE = false;
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -1338,9 +1338,9 @@ async function preloadMatchImages() {
 const TEAM_BANNERS = {
   'Mexique':          'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/320px-Flag_of_Mexico.svg.png',
   'Afrique du Sud':   'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/320px-Flag_of_South_Africa.svg.png',
-  'Brésil':           'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/320px-Flag_of_Brazil.svg.png',
+  'Bresil':           'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/320px-Flag_of_Brazil.svg.png',
   'Maroc':            'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/320px-Flag_of_Morocco.svg.png',
-  'États-Unis':       'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/320px-Flag_of_the_United_States.svg.png',
+  'Etats-Unis':       'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/320px-Flag_of_the_United_States.svg.png',
   'Canada':           'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/320px-Flag_of_Canada_%28Pantone%29.svg.png',
   'Allemagne':        'https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png',
   'France':           'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/320px-Flag_of_France.svg.png',
@@ -1349,17 +1349,17 @@ const TEAM_BANNERS = {
   'Portugal':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Portugal.svg/320px-Flag_of_Portugal.svg.png',
   'Argentine':        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/320px-Flag_of_Argentina.svg.png',
   'Japon':            'https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/320px-Flag_of_Japan.svg.png',
-  'Corée du Sud':     'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Flag_of_South_Korea.svg/320px-Flag_of_South_Korea.svg.png',
+  'Coree du Sud':     'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Flag_of_South_Korea.svg/320px-Flag_of_South_Korea.svg.png',
   'Australie':        'https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/Flag_of_Australia.svg/320px-Flag_of_Australia.svg.png',
   'Turquie':          'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/320px-Flag_of_Turkey.svg.png',
   'Qatar':            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Qatar.svg/320px-Flag_of_Qatar.svg.png',
   'Suisse':           'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/240px-Flag_of_Switzerland.svg.png',
-  'Haïti':            'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Flag_of_Haiti.svg/320px-Flag_of_Haiti.svg.png',
-  'Écosse':           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Flag_of_Scotland.svg/320px-Flag_of_Scotland.svg.png',
-  'Bosnie-Herzég.':   'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Flag_of_Bosnia_and_Herzegovina.svg/320px-Flag_of_Bosnia_and_Herzegovina.svg.png',
-  'Curaçao':          'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Flag_of_Cura%C3%A7ao.svg/320px-Flag_of_Cura%C3%A7ao.svg.png',
+  'Haiti':            'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Flag_of_Haiti.svg/320px-Flag_of_Haiti.svg.png',
+  'Ecosse':           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Flag_of_Scotland.svg/320px-Flag_of_Scotland.svg.png',
+  'Bosnie-Herzeg.':   'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Flag_of_Bosnia_and_Herzegovina.svg/320px-Flag_of_Bosnia_and_Herzegovina.svg.png',
+  'Curacao':          'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Flag_of_Cura%C3%A7ao.svg/320px-Flag_of_Cura%C3%A7ao.svg.png',
   'Paraguay':         'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Flag_of_Paraguay.svg/320px-Flag_of_Paraguay.svg.png',
-  'Rép. Tchèque':     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/320px-Flag_of_the_Czech_Republic.svg.png',
+  'Rep. Tcheque':     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/320px-Flag_of_the_Czech_Republic.svg.png',
 };
 
 var teamImageCache = {};
@@ -1377,16 +1377,27 @@ const WC2026_SEASON = 2026;
 // IDs Sofascore des matchs (à mettre à jour chaque journée)
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
 const matches = [
-  {id:1,  comp:'worldcup', home:'Mexique',      away:'Afrique du Sud', date:'2026-06-11', time:'21:00', odds:[1.45,4.05,6.25], sofaId:null},
-  {id:2,  comp:'worldcup', home:'Corée du Sud', away:'Rép. Tchèque',   date:'2026-06-12', time:'04:00', odds:[2.62,3.07,2.62], sofaId:null},
-  {id:3,  comp:'worldcup', home:'Canada',       away:'Bosnie-Herzég.', date:'2026-06-12', time:'21:00', odds:[1.95,3.40,4.10], sofaId:null},
-  {id:4,  comp:'worldcup', home:'États-Unis',   away:'Paraguay',       date:'2026-06-13', time:'03:00', odds:[1.57,3.90,5.50], sofaId:null},
-  {id:5,  comp:'worldcup', home:'Qatar',        away:'Suisse',         date:'2026-06-13', time:'21:00', odds:[5.25,3.80,1.62], sofaId:null},
-  {id:6,  comp:'worldcup', home:'Brésil',       away:'Maroc',          date:'2026-06-14', time:'00:00', odds:[1.57,3.90,5.50], sofaId:null},
-  {id:7,  comp:'worldcup', home:'Haïti',        away:'Écosse',         date:'2026-06-14', time:'03:00', odds:[7.10,4.55,1.39], sofaId:null},
-  {id:8,  comp:'worldcup', home:'Australie',    away:'Turquie',        date:'2026-06-14', time:'06:00', odds:[2.75,3.10,2.62], sofaId:null},
-  {id:9,  comp:'worldcup', home:'Allemagne',    away:'Curaçao',        date:'2026-06-14', time:'19:00', odds:[1.14,7.50,17.0], sofaId:null},
-  {id:10, comp:'worldcup', home:'Pays-Bas',     away:'Japon',          date:'2026-06-14', time:'22:00', odds:[1.95,3.40,4.00], sofaId:null},
+  // Journee 1 - termines
+  {id:1, comp:'worldcup', home:'Mexique', away:'Afrique du Sud', date:'2026-06-11', time:'21:00', odds:[1.45,4.05,6.25], result:{h:2,a:0}},
+  {id:2, comp:'worldcup', home:'Coree du Sud', away:'Rep. Tcheque', date:'2026-06-12', time:'04:00', odds:[2.62,3.07,2.62], result:{h:2,a:1}},
+  {id:3, comp:'worldcup', home:'Canada', away:'Bosnie-Herzeg.', date:'2026-06-12', time:'21:00', odds:[1.95,3.40,4.10], result:{h:1,a:1}},
+  {id:4, comp:'worldcup', home:'Etats-Unis', away:'Paraguay', date:'2026-06-13', time:'03:00', odds:[1.57,3.90,5.50], result:{h:4,a:1}},
+  {id:5, comp:'worldcup', home:'Qatar', away:'Suisse', date:'2026-06-13', time:'21:00', odds:[5.25,3.80,1.62], result:{h:1,a:1}},
+  {id:6, comp:'worldcup', home:'Bresil', away:'Maroc', date:'2026-06-14', time:'00:00', odds:[1.57,3.90,5.50], result:{h:1,a:1}},
+  // Journee 1 - aujourd'hui
+  {id:7, comp:'worldcup', home:'Haiti', away:'Ecosse', date:'2026-06-14', time:'03:00', odds:[7.10,4.55,1.39]},
+  {id:8, comp:'worldcup', home:'Australie', away:'Turquie', date:'2026-06-14', time:'06:00', odds:[2.75,3.10,1.72]},
+  {id:9, comp:'worldcup', home:'Allemagne', away:'Curacao', date:'2026-06-14', time:'19:00', odds:[1.04,23.0,45.0]},
+  {id:10, comp:'worldcup', home:'Pays-Bas', away:'Japon', date:'2026-06-14', time:'22:00', odds:[1.95,3.40,4.00]},
+  // Journee 2 - a venir
+  {id:11, comp:'worldcup', home:'Afrique du Sud', away:'Coree du Sud', date:'2026-06-15', time:'21:00', odds:[3.50,3.10,2.05]},
+  {id:12, comp:'worldcup', home:'Rep. Tcheque', away:'Mexique', date:'2026-06-16', time:'00:00', odds:[3.20,3.20,2.20]},
+  {id:13, comp:'worldcup', home:'Bosnie-Herzeg.', away:'Qatar', date:'2026-06-16', time:'03:00', odds:[1.85,3.40,4.50]},
+  {id:14, comp:'worldcup', home:'Suisse', away:'Canada', date:'2026-06-16', time:'21:00', odds:[2.10,3.30,3.50]},
+  {id:15, comp:'worldcup', home:'France', away:'Senegal', date:'2026-06-16', time:'21:00', odds:[1.70,3.60,5.00]},
+  {id:16, comp:'worldcup', home:'Paraguay', away:'Australie', date:'2026-06-19', time:'20:00', odds:[2.16,3.25,3.70]},
+  {id:17, comp:'worldcup', home:'Ecosse', away:'Maroc', date:'2026-06-20', time:'02:30', odds:[3.80,3.40,1.95]},
+  {id:18, comp:'worldcup', home:'Bresil', away:'Haiti', date:'2026-06-20', time:'05:00', odds:[1.10,8.00,20.0]},
 ];
 
 // -- Ligue courante -----------------------------------------------
