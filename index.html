@@ -1953,9 +1953,26 @@ async function fetchLiveScores() {
     if (res.ok) {
       const data = await res.json();
       (data.response || []).forEach(function(f) {
+        // Traduction FR->EN pour le matching
+        const FR_TO_EN = {
+          'Mexique':'Mexico','Etats-Unis':'United States','Bresil':'Brazil',
+          'Allemagne':'Germany','Pays-Bas':'Netherlands','Espagne':'Spain',
+          'Coree du Sud':'Korea Republic','Rep. Tcheque':'Czech Republic',
+          'Bosnie-Herzeg.':'Bosnia','Haiti':'Haiti','Ecosse':'Scotland',
+          'Australie':'Australia','Curacao':'Curacao','Maroc':'Morocco',
+          'Afrique du Sud':'South Africa','Senegal':'Senegal','France':'France',
+          'Suisse':'Switzerland','Turquie':'Turkey','Japon':'Japan',
+          'Portugal':'Portugal','Argentine':'Argentina','Qatar':'Qatar',
+          'Canada':'Canada','Paraguay':'Paraguay','Italie':'Italy',
+        };
         const match = matches.find(function(m) {
-          return m.fixtureId === f.fixture.id ||
-            (f.teams.home.name.includes(m.home) || m.home.includes(f.teams.home.name.split(' ')[0]));
+          if (m.fixtureId === f.fixture.id) return true;
+          const homeEN = FR_TO_EN[m.home] || m.home;
+          const awayEN = FR_TO_EN[m.away] || m.away;
+          const apiHome = f.teams.home.name;
+          const apiAway = f.teams.away.name;
+          return (apiHome.includes(homeEN) || homeEN.includes(apiHome.split(' ')[0])) &&
+                 (apiAway.includes(awayEN) || awayEN.includes(apiAway.split(' ')[0]));
         });
         if (!match) return;
         const hs = f.goals.home ?? '?';
