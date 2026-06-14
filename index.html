@@ -1949,7 +1949,13 @@ async function fetchLiveScores() {
   const started = matches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id) && !m.result);
   if (!started.length) return;
   try {
-    const res = await fetch('https://livescores-huouv7kgya-uc.a.run.app/livescores');
+    // Appel direct API-Football - supporte CORS
+    const res = await fetch('https://v3.football.api-sports.io/fixtures?live=all&league=1&season=2026', {
+      headers: {
+        'x-apisports-key': APIFOOTBALL_KEY,
+        'x-rapidapi-host': 'v3.football.api-sports.io'
+      }
+    });
     if (res.ok) {
       const data = await res.json();
       (data.response || []).forEach(function(f) {
