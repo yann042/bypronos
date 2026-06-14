@@ -1906,16 +1906,24 @@ function buildCard(m) {
 let currentComp = 'all';
 
 function renderMatches() {
-  // Pré-remplir MATCH_IMAGES depuis TEAM_MATCH_IMAGES
+  // Pre-remplir MATCH_IMAGES depuis TEAM_MATCH_IMAGES
   matches.forEach(function(m) {
     if (!MATCH_IMAGES[m.id]) {
       const img = TEAM_MATCH_IMAGES[m.home] || TEAM_MATCH_IMAGES[m.away] || null;
       if (img) MATCH_IMAGES[m.id] = img;
     }
   });
-  const filtered = currentComp === 'all'
-    ? matches
-    : matches.filter(m => (m.comp || 'ligue1') === currentComp);
+  const players = loadPlayers();
+  const myBets = players[currentPlayer] && players[currentPlayer].validatedBets || {};
+  const filtered = matches.filter(function(m) {
+    // Masquer les matchs avec resultat final connu
+    if (m.result !== undefined) {
+      // Afficher quand meme si le joueur a un pari validé (pour voir son résultat)
+      return !!myBets[m.id] || !!betslip[m.id];
+    }
+    if (currentComp !== 'all' && (m.comp || 'ligue1') !== currentComp) return false;
+    return true;
+  });
   document.getElementById('matchList').innerHTML = filtered.map(buildCard).join('');
 }
 
@@ -1938,12 +1946,10 @@ if (typeof testGoalTriggered === 'undefined') {
 
 // -- Fetch scores live via Sofascore RapidAPI ----------------------
 async function fetchLiveScores() {
-  const started = matches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
+  const started = matches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id) && !m.result);
   if (!started.length) return;
   try {
-    const res = await fetch(APIFOOTBALL_HOST + '/fixtures?league=' + WC2026_LEAGUE_ID + '&season=' + WC2026_SEASON + '&live=all', {
-      headers: {'x-apisports-key': APIFOOTBALL_KEY}
-    });
+    const res = await fetch('https://livescores-huouv7kgya-uc.a.run.app/livescores');
     if (res.ok) {
       const data = await res.json();
       (data.response || []).forEach(function(f) {
