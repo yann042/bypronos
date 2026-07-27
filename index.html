@@ -1832,11 +1832,16 @@ function buildCard(m) {
   const compLabel = m.comp === 'worldcup' ? 'Coupe du Monde 2026' : m.comp === 'premier' ? 'Premier League' : m.comp === 'ligue2' ? 'Ligue 2' : 'Ligue 1';
   const compIcon = m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷';
   const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:800;color:#fff;background:#e03030;padding:1px 5px;border-radius:3px;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
-  const bannerImg = MATCH_IMAGES[m.id] || null;
+  const venueImg = m.venueId ? ('https://media.api-sports.io/football/venues/' + m.venueId + '.png') : '';
+  const bannerImg = MATCH_IMAGES[m.id] || venueImg || '';
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
-    <div style="position:relative;height:180px;border-radius:8px 8px 0 0;overflow:hidden;background:#0d2137">
+    <div style="position:relative;height:180px;border-radius:8px 8px 0 0;overflow:hidden;background:linear-gradient(135deg,#15324e 0%,#0d2137 55%,#0a1a2e 100%)">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:36px;opacity:0.20">
+        ${homeLogo ? `<img src="${homeLogo}" style="width:92px;height:92px;object-fit:contain" onerror="this.style.display='none'">` : ''}
+        ${awayLogo ? `<img src="${awayLogo}" style="width:92px;height:92px;object-fit:contain" onerror="this.style.display='none'">` : ''}
+      </div>
       ${bannerImg ? `<img src="${bannerImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.75" onerror="this.style.display='none'">` : ''}
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.5) 50%,rgba(0,0,0,0.88) 100%)"></div>
       <!-- Compet + heure en haut -->
@@ -2147,6 +2152,8 @@ function mapFixture(f) {
     date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()),
     time: pad(d.getHours()) + ':' + pad(d.getMinutes()),
     round: (f.league && f.league.round) || '',
+    venueId: (f.fixture.venue && f.fixture.venue.id) || null,
+    venue: (f.fixture.venue && f.fixture.venue.name) || '',
     ts: f.fixture.timestamp || Math.floor(d.getTime() / 1000),
     odds: [1.90, 3.40, 3.90] // PROVISOIRE : remplace par les vraies cotes via /odds
   };
@@ -2155,7 +2162,7 @@ function mapFixture(f) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v4').once('value');
+    const snap = await db.ref('fixturesCache_v5').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -2176,7 +2183,7 @@ async function loadFixtures() {
       renderMatches();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       try {
-        await db.ref('fixturesCache_v4').set({ updatedAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v5').set({ updatedAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
