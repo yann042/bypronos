@@ -1303,10 +1303,10 @@ function getLogo(name) {
 // -- Données matchs ----------------------------
 // ==============================================
 // -- Clé API RapidAPI / Sofascore ---------------------------------
-const RAPIDAPI_KEY  = 'fde0747feamshe1d1fb8cad56579p1093b0jsnc6e97e534915';
+const RAPIDAPI_KEY  = '';
 const RAPIDAPI_HOST = 'sofascore.p.rapidapi.com';
-const APIFOOTBALL_KEY = '14a6f459de446f20b5b3eb2dada38ba1';
-const BSD_KEY = 'c6af509a924514f2550dd1cf8da8c95c499d73a5';
+const APIFOOTBALL_KEY = ''; // Cle deplacee cote serveur (Cloud Function). NE JAMAIS remettre de cle ici.
+const BSD_KEY = '';
 // Images Pixabay par equipe (CDN fiable, sans CORS)
 const TEAM_MATCH_IMAGES = {}; // Rempli dynamiquement via proxy Firebase
 
@@ -1376,29 +1376,7 @@ const WC2026_SEASON = 2026;
 
 // IDs Sofascore des matchs (à mettre à jour chaque journée)
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
-const matches = [
-  // Journee 1 - termines
-  {id:1, comp:'worldcup', home:'Mexique', away:'Afrique du Sud', date:'2026-06-11', time:'21:00', odds:[1.45,4.05,6.25], result:{h:2,a:0}},
-  {id:2, comp:'worldcup', home:'Coree du Sud', away:'Rep. Tcheque', date:'2026-06-12', time:'04:00', odds:[2.62,3.07,2.62], result:{h:2,a:1}},
-  {id:3, comp:'worldcup', home:'Canada', away:'Bosnie-Herzeg.', date:'2026-06-12', time:'21:00', odds:[1.95,3.40,4.10], result:{h:1,a:1}},
-  {id:4, comp:'worldcup', home:'Etats-Unis', away:'Paraguay', date:'2026-06-13', time:'03:00', odds:[1.57,3.90,5.50], result:{h:4,a:1}},
-  {id:5, comp:'worldcup', home:'Qatar', away:'Suisse', date:'2026-06-13', time:'21:00', odds:[5.25,3.80,1.62], result:{h:1,a:1}},
-  {id:6, comp:'worldcup', home:'Bresil', away:'Maroc', date:'2026-06-14', time:'00:00', odds:[1.57,3.90,5.50], result:{h:1,a:1}},
-  // Journee 1 - aujourd'hui
-  {id:7, comp:'worldcup', home:'Haiti', away:'Ecosse', date:'2026-06-14', time:'03:00', odds:[7.10,4.55,1.39]},
-  {id:8, comp:'worldcup', home:'Australie', away:'Turquie', date:'2026-06-14', time:'06:00', odds:[2.75,3.10,1.72]},
-  {id:9, comp:'worldcup', home:'Allemagne', away:'Curacao', date:'2026-06-14', time:'19:00', odds:[1.04,23.0,45.0]},
-  {id:10, comp:'worldcup', home:'Pays-Bas', away:'Japon', date:'2026-06-14', time:'22:00', odds:[1.95,3.40,4.00]},
-  // Journee 2 - a venir
-  {id:11, comp:'worldcup', home:'Afrique du Sud', away:'Coree du Sud', date:'2026-06-15', time:'21:00', odds:[3.50,3.10,2.05]},
-  {id:12, comp:'worldcup', home:'Rep. Tcheque', away:'Mexique', date:'2026-06-16', time:'00:00', odds:[3.20,3.20,2.20]},
-  {id:13, comp:'worldcup', home:'Bosnie-Herzeg.', away:'Qatar', date:'2026-06-16', time:'03:00', odds:[1.85,3.40,4.50]},
-  {id:14, comp:'worldcup', home:'Suisse', away:'Canada', date:'2026-06-16', time:'21:00', odds:[2.10,3.30,3.50]},
-  {id:15, comp:'worldcup', home:'France', away:'Senegal', date:'2026-06-16', time:'21:00', odds:[1.70,3.60,5.00]},
-  {id:16, comp:'worldcup', home:'Paraguay', away:'Australie', date:'2026-06-19', time:'20:00', odds:[2.16,3.25,3.70]},
-  {id:17, comp:'worldcup', home:'Ecosse', away:'Maroc', date:'2026-06-20', time:'02:30', odds:[3.80,3.40,1.95]},
-  {id:18, comp:'worldcup', home:'Bresil', away:'Haiti', date:'2026-06-20', time:'05:00', odds:[1.10,8.00,20.0]},
-];
+let matches = []; // rempli dynamiquement via loadFixtures()
 
 // -- Ligue courante -----------------------------------------------
 let currentLeague = null; // { code, name, isAdmin }
@@ -1946,6 +1924,7 @@ if (typeof testGoalTriggered === 'undefined') {
 
 // -- Fetch scores live via Sofascore RapidAPI ----------------------
 async function fetchLiveScores() {
+  return; // Desactive : plus d'appel direct API (cle retiree). Live via la Function.
   const started = matches.filter(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id) && !m.result);
   if (!started.length) return;
   try {
@@ -1996,6 +1975,7 @@ async function fetchLiveScores() {
 
 // -- Chargement automatique des matchs + cotes via API-Football ----
 async function fetchUpcomingMatches() {
+  return; // Desactive : fixtures + cotes passent par la Cloud Function.
   // Verrou Firebase : 1 seule requête API par heure maximum
   try {
     const leagueCode = localStorage.getItem('bypronos_league') || 'global';
@@ -2064,6 +2044,7 @@ async function fetchUpcomingMatches() {
 
 // -- Récupération cotes 1X2 via BSD (illimité, gratuit) -----------
 async function fetchBSDOdds() {
+  return; // Desactive : cle BSD retiree du client.
   console.log('🔄 Chargement cotes 1X2 via BSD...');
   try {
     // Essayer d'abord l'endpoint v2 plus récent
@@ -2127,12 +2108,62 @@ setInterval(() => {
   }
 }, 60000);
 
-// Premier appel immédiat
-fetchLiveScores();
-// Charger les cotes scores exacts
-fetchUpcomingMatches();
-// Charger les cotes 1X2 via BSD
-fetchBSDOdds();
+// ============================================================
+// -- Chargement dynamique des matchs Ligue 1 / Ligue 2 -------
+//    Source : Cloud Function /fixtures  ->  cache RTDB partage
+// ============================================================
+const BP_FIXTURES_URL = 'https://livescores-huouv7kgya-uc.a.run.app/fixtures';
+const BP_FIXTURES_TTL = 6 * 60 * 60 * 1000; // 6 h
+
+function mapFixture(f) {
+  const d = new Date(f.fixture.date); // ISO UTC -> heure locale
+  const pad = n => String(n).padStart(2, '0');
+  return {
+    id: f.fixture.id,
+    comp: (f.league && f.league.id === 61) ? 'ligue1' : 'ligue2',
+    home: f.teams.home.name,
+    away: f.teams.away.name,
+    homeLogo: (f.teams.home && f.teams.home.logo) || '',
+    awayLogo: (f.teams.away && f.teams.away.logo) || '',
+    date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()),
+    time: pad(d.getHours()) + ':' + pad(d.getMinutes()),
+    round: (f.league && f.league.round) || '',
+    ts: f.fixture.timestamp || Math.floor(d.getTime() / 1000),
+    odds: [1.90, 3.40, 3.90] // PROVISOIRE : remplace par les vraies cotes via /odds
+  };
+}
+
+async function loadFixtures() {
+  // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
+  try {
+    const snap = await db.ref('fixturesCache').once('value');
+    const cache = snap.val();
+    if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
+        && Array.isArray(cache.matches) && cache.matches.length) {
+      matches = cache.matches;
+      renderMatches();
+      return;
+    }
+  } catch (e) { console.warn('Cache fixtures (lecture):', e); }
+
+  // 2) Cache absent/perime -> Cloud Function
+  try {
+    const res = await fetch(BP_FIXTURES_URL);
+    const data = await res.json();
+    const mapped = (data.response || []).map(mapFixture);
+    if (mapped.length) {
+      matches = mapped;
+      renderMatches();
+      try {
+        await db.ref('fixturesCache').set({ updatedAt: Date.now(), matches: mapped });
+      } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
+    } else {
+      console.warn('Aucun match renvoye par /fixtures');
+    }
+  } catch (e) { console.warn('Chargement fixtures:', e); }
+}
+
+loadFixtures();
 
 // ==============================================
 // -- Interactions paris ------------------------
@@ -2592,16 +2623,7 @@ async function fetchGlobalLive() {
   if (Date.now() - globalLiveLastFetch < 180000 && globalLiveData.length > 0) {
     return;
   }
-  try {
-    const res = await fetch(APIFOOTBALL_HOST + '/fixtures?live=all', {
-      headers: {'x-apisports-key': APIFOOTBALL_KEY}
-    });
-    if (res.ok) {
-      const data = await res.json();
-      globalLiveData = data.response || [];
-      globalLiveLastFetch = Date.now();
-    }
-  } catch(e) { console.warn('Live global error:', e); }
+  // (Repli direct API supprime : la cle ne vit plus cote client.)
   renderLiveView();
 }
 
