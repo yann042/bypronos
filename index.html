@@ -1704,8 +1704,8 @@ function buildCard(m) {
   const selWin  = displayCls === 'win'  ? 'sel-win'  : '';
   const selDraw = displayCls === 'draw' ? 'sel-draw' : '';
   const selLose = displayCls === 'lose' ? 'sel-lose' : '';
-  const homeLogo = getLogo(m.home);
-  const awayLogo = getLogo(m.away);
+  const homeLogo = getLogo(m.home) || m.homeLogo || '';
+  const awayLogo = getLogo(m.away) || m.awayLogo || '';
   const rbLogoImg = (url, name) => url
     ? `<img class="rb-logo" src="${url}" alt="${name}" onerror="this.style.display='none'">`
     : '';
@@ -2115,6 +2115,16 @@ setInterval(() => {
 const BP_FIXTURES_URL = 'https://livescores-huouv7kgya-uc.a.run.app/fixtures';
 const BP_FIXTURES_TTL = 6 * 60 * 60 * 1000; // 6 h
 
+// Ligue 2 : on ne propose QUE les matchs de ces equipes (ID API-Football).
+// Saint-Etienne = 1063, Dijon = 89. Ajoute / retire des ID ici pour changer.
+const BP_L2_TEAM_IDS = [1063, 89];
+function bpKeepFixture(f) {
+  if (!f.league || f.league.id !== 62) return true; // Ligue 1 : on garde tout
+  const h = f.teams && f.teams.home && f.teams.home.id;
+  const a = f.teams && f.teams.away && f.teams.away.id;
+  return BP_L2_TEAM_IDS.includes(h) || BP_L2_TEAM_IDS.includes(a);
+}
+
 function mapFixture(f) {
   const d = new Date(f.fixture.date); // ISO UTC -> heure locale
   const pad = n => String(n).padStart(2, '0');
@@ -2136,7 +2146,7 @@ function mapFixture(f) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache').once('value');
+    const snap = await db.ref('fixturesCache_v2').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -2150,12 +2160,12 @@ async function loadFixtures() {
   try {
     const res = await fetch(BP_FIXTURES_URL);
     const data = await res.json();
-    const mapped = (data.response || []).map(mapFixture);
+    const mapped = (data.response || []).filter(bpKeepFixture).map(mapFixture);
     if (mapped.length) {
       matches = mapped;
       renderMatches();
       try {
-        await db.ref('fixturesCache').set({ updatedAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v2').set({ updatedAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
