@@ -2125,14 +2125,23 @@ function bpKeepFixture(f) {
   return BP_L2_TEAM_IDS.includes(h) || BP_L2_TEAM_IDS.includes(a);
 }
 
+// Noms d'equipes raccourcis pour l'affichage (cle = nom API, valeur = nom voulu).
+const BP_TEAM_NAMES = {
+  'Stade Brestois 29': 'Brest',
+  'Paris Saint Germain': 'Paris SG',
+  'Estac Troyes': 'Troyes',
+  'PAU': 'Pau'
+};
+function bpName(n) { return BP_TEAM_NAMES[n] || n; }
+
 function mapFixture(f) {
   const d = new Date(f.fixture.date); // ISO UTC -> heure locale
   const pad = n => String(n).padStart(2, '0');
   return {
     id: f.fixture.id,
     comp: (f.league && f.league.id === 61) ? 'ligue1' : 'ligue2',
-    home: f.teams.home.name,
-    away: f.teams.away.name,
+    home: bpName(f.teams.home.name),
+    away: bpName(f.teams.away.name),
     homeLogo: (f.teams.home && f.teams.home.logo) || '',
     awayLogo: (f.teams.away && f.teams.away.logo) || '',
     date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()),
@@ -2146,12 +2155,13 @@ function mapFixture(f) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v2').once('value');
+    const snap = await db.ref('fixturesCache_v4').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
       matches = cache.matches;
       renderMatches();
+      preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       return;
     }
   } catch (e) { console.warn('Cache fixtures (lecture):', e); }
@@ -2164,8 +2174,9 @@ async function loadFixtures() {
     if (mapped.length) {
       matches = mapped;
       renderMatches();
+      preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       try {
-        await db.ref('fixturesCache_v2').set({ updatedAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v4').set({ updatedAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
