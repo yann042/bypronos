@@ -1713,7 +1713,9 @@ function buildCard(m) {
     ? `<img class="team-logo" src="${url}" alt="${name}" onerror="this.style.display='none'">`
     : '';
 
-  const resultRow = `<div class="result-row">
+  const oddsPending = !m.oddsReal;
+  const pendingBadge = oddsPending ? '<div style="text-align:center;font-size:10px;font-weight:800;color:#8a94a6;letter-spacing:0.6px;text-transform:uppercase;margin:4px 0 2px">\u23f3 Cotes \u00e0 venir</div>' : '';
+  const resultRow = `${pendingBadge}<div class="result-row" style="${oddsPending ? 'opacity:0.5;pointer-events:none' : ''}">
     <div class="result-btn ${selWin}" onclick="selectResult(${m.id},'win')">
       <span class="rb-label rb-full">${m.home}</span>
       <span class="rb-label rb-short" style="display:none">${m.home}</span>
@@ -1832,8 +1834,9 @@ function buildCard(m) {
   const compLabel = m.comp === 'worldcup' ? 'Coupe du Monde 2026' : m.comp === 'premier' ? 'Premier League' : m.comp === 'ligue2' ? 'Ligue 2' : 'Ligue 1';
   const compIcon = m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷';
   const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:800;color:#fff;background:#e03030;padding:1px 5px;border-radius:3px;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
+  const curatedImg = BP_TEAM_IMAGES[m.home] || BP_TEAM_IMAGES[m.away] || '';
   const venueImg = m.venueId ? ('https://media.api-sports.io/football/venues/' + m.venueId + '.png') : '';
-  const bannerImg = MATCH_IMAGES[m.id] || venueImg || '';
+  const bannerImg = curatedImg || MATCH_IMAGES[m.id] || venueImg || '';
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
@@ -2118,6 +2121,7 @@ setInterval(() => {
 //    Source : Cloud Function /fixtures  ->  cache RTDB partage
 // ============================================================
 const BP_FIXTURES_URL = 'https://livescores-huouv7kgya-uc.a.run.app/fixtures';
+const BP_ODDS_URL     = 'https://livescores-huouv7kgya-uc.a.run.app/odds';
 const BP_FIXTURES_TTL = 6 * 60 * 60 * 1000; // 6 h
 
 // Ligue 2 : on ne propose QUE les matchs de ces equipes (ID API-Football).
@@ -2139,6 +2143,14 @@ const BP_TEAM_NAMES = {
 };
 function bpName(n) { return BP_TEAM_NAMES[n] || n; }
 
+// Images choisies a la main (fichiers deposes dans le depot GitHub).
+// Cle = nom de l'equipe affiche ; valeur = chemin du fichier image.
+// Si l'une des 2 equipes du match a une image ici, elle est utilisee en priorite.
+const BP_TEAM_IMAGES = {
+  'Saint Etienne': 'img/saint-etienne.jpg',
+  'Dijon': 'img/dijon.jpg'
+};
+
 function mapFixture(f) {
   const d = new Date(f.fixture.date); // ISO UTC -> heure locale
   const pad = n => String(n).padStart(2, '0');
@@ -2159,10 +2171,32 @@ function mapFixture(f) {
   };
 }
 
+// Recupere les vraies cotes 1X2 (via /odds) et remplit m.odds = [1, N, 2].
+// Si les cotes ne sont pas encore publiees (pre-saison), on garde le placeholder.
+async function enrichOdds(list) {
+  let n = 0;
+  await Promise.all(list.map(async (m) => {
+    try {
+      const r = await fetch(BP_ODDS_URL + '?fixture=' + m.id);
+      const d = await r.json();
+      const bms = (d.response && d.response[0] && d.response[0].bookmakers) || [];
+      for (const b of bms) {
+        const mw = (b.bets || []).find(x => x.name === 'Match Winner' || x.id === 1);
+        if (mw && mw.values) {
+          const val = v => { const o = mw.values.find(x => x.value === v); return o ? parseFloat(o.odd) : null; };
+          const h = val('Home'), dr = val('Draw'), a = val('Away');
+          if (h && dr && a) { m.odds = [h, dr, a]; m.oddsReal = true; n++; break; }
+        }
+      }
+    } catch (e) {}
+  }));
+  console.log('[By Pronos] cotes reelles chargees : ' + n + ' / ' + list.length + ' matchs');
+}
+
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v5').once('value');
+    const snap = await db.ref('fixturesCache_v6').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -2182,8 +2216,10 @@ async function loadFixtures() {
       matches = mapped;
       renderMatches();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
+      await enrichOdds(mapped); // vraies cotes 1X2 via /odds
+      renderMatches();
       try {
-        await db.ref('fixturesCache_v5').set({ updatedAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v6').set({ updatedAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
