@@ -982,12 +982,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
   <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
-  <button class="comp-btn" id="compBtn1" onclick="selectComp('worldcup',this)">🌍 CdM 2026</button>
   <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 L1</button>
   <button class="comp-btn" id="compBtn4" onclick="selectComp('ligue2',this)">🇫🇷 L2</button>
   <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
 </div>
-<div class="section-title" id="sectionTitle">🌍 Coupe du Monde 2026</div>
+<div class="section-title" id="sectionTitle">⚽ Tous les matchs</div>
       <div id="matchList"></div>
     </div>
 
@@ -1413,9 +1412,7 @@ function loadPlayersFromLeague() {
 }
 
 // État live des matchs
-const liveData = {
-  1: { homeScore: 1, awayScore: 0, minute: 67, status: 'LIVE' }, // Mexique-Afrique du Sud en live test
-};
+const liveData = {};
 
 const SCORES = {
   win:  [{h:1,a:0},{h:2,a:0},{h:2,a:1},{h:3,a:0},{h:3,a:1},{h:3,a:2},{h:4,a:0},{h:4,a:1},{h:4,a:2},{h:4,a:3},{h:5,a:0},{h:5,a:1},{h:5,a:2},{h:5,a:3},{h:5,a:4}],
@@ -2105,7 +2102,7 @@ async function fetchBSDOdds() {
 setInterval(() => {
   renderMatches();
   const liveNow = matches.some(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
-  if (liveNow) fetchLiveScores();
+  fetchResults();
 }, 180000);
 
 // Rafraîchissement automatique onglet Live toutes les 60s
@@ -2127,11 +2124,15 @@ const BP_FIXTURES_TTL = 6 * 60 * 60 * 1000; // 6 h
 // Ligue 2 : on ne propose QUE les matchs de ces equipes (ID API-Football).
 // Saint-Etienne = 1063, Dijon = 89. Ajoute / retire des ID ici pour changer.
 const BP_L2_TEAM_IDS = [1063, 89];
+const BP_PL_TEAM_IDS = [42, 33]; // Arsenal, Manchester United
 function bpKeepFixture(f) {
-  if (!f.league || f.league.id !== 62) return true; // Ligue 1 : on garde tout
+  const lid = f.league && f.league.id;
   const h = f.teams && f.teams.home && f.teams.home.id;
   const a = f.teams && f.teams.away && f.teams.away.id;
-  return BP_L2_TEAM_IDS.includes(h) || BP_L2_TEAM_IDS.includes(a);
+  const names = ((f.teams && f.teams.home && f.teams.home.name) || '') + '|' + ((f.teams && f.teams.away && f.teams.away.name) || '');
+  if (lid === 62) return BP_L2_TEAM_IDS.includes(h) || BP_L2_TEAM_IDS.includes(a); // Ligue 2 : Saint-Etienne + Dijon
+  if (lid === 39) return BP_PL_TEAM_IDS.includes(h) || BP_PL_TEAM_IDS.includes(a) || /Arsenal|Manchester United/i.test(names); // PL : Arsenal + Man Utd
+  return true; // Ligue 1 : tous les matchs
 }
 
 // Noms d'equipes raccourcis pour l'affichage (cle = nom API, valeur = nom voulu).
@@ -2139,7 +2140,8 @@ const BP_TEAM_NAMES = {
   'Stade Brestois 29': 'Brest',
   'Paris Saint Germain': 'Paris SG',
   'Estac Troyes': 'Troyes',
-  'PAU': 'Pau'
+  'PAU': 'Pau',
+  'Manchester United': 'Man Utd'
 };
 function bpName(n) { return BP_TEAM_NAMES[n] || n; }
 
@@ -2156,7 +2158,7 @@ function mapFixture(f) {
   const pad = n => String(n).padStart(2, '0');
   return {
     id: f.fixture.id,
-    comp: (f.league && f.league.id === 61) ? 'ligue1' : 'ligue2',
+    comp: (f.league && f.league.id === 62) ? 'ligue2' : ((f.league && f.league.id === 39) ? 'premier' : 'ligue1'),
     home: bpName(f.teams.home.name),
     away: bpName(f.teams.away.name),
     homeLogo: (f.teams.home && f.teams.home.logo) || '',
@@ -2193,16 +2195,114 @@ async function enrichOdds(list) {
   console.log('[By Pronos] cotes reelles chargees : ' + n + ' / ' + list.length + ' matchs');
 }
 
+// ============================================================
+// -- RESULTATS & SCORING (points calcules sur les vrais scores)
+// ============================================================
+const BP_RESULTS_URL = 'https://livescores-huouv7kgya-uc.a.run.app/results';
+
+// IDs de tous les matchs a suivre : journee courante + tous les pronos valides
+function bpGatherFixtureIds() {
+  const ids = new Set();
+  (matches || []).forEach(m => { if (m && m.id) ids.add(parseInt(m.id)); });
+  try {
+    const players = loadPlayers();
+    Object.keys(players || {}).forEach(name => {
+      const vb = players[name] && players[name].validatedBets;
+      if (vb) Object.keys(vb).forEach(k => { const n = parseInt(k); if (n) ids.add(n); });
+    });
+  } catch (e) {}
+  return Array.from(ids);
+}
+
+// Recalcul IDEMPOTENT des totaux de chaque joueur depuis ses pronos + les vrais resultats.
+// (rejoue tout a chaque fois => aucun double-comptage possible)
+async function recomputeStandings() {
+  let players;
+  try { players = await loadPlayersFromLeague(); } catch (e) { players = loadPlayers(); }
+  if (!players || typeof players !== 'object') return;
+  Object.keys(players).forEach(name => {
+    const p = players[name];
+    if (!p) return;
+    if (!p.season) p.season = { ptsResult:0, ptsScore:0, bets:0, days:{} };
+    const days = {};
+    let sR = 0, sS = 0, sB = 0;
+    const vb = p.validatedBets || {};
+    Object.keys(vb).forEach(mid => {
+      const b = vb[mid];
+      if (!b) return;
+      const dayKey = b.round || 'Journée en cours';
+      if (!days[dayKey]) days[dayKey] = { ptsResult:0, ptsScore:0, bets:0 };
+      sB += 1; days[dayKey].bets += 1;
+      const live = liveData[parseInt(mid)] || liveData[mid];
+      if (live && live.finished) {
+        const lp = calcLivePts(b, live.homeScore, live.awayScore);
+        if (lp) {
+          let rPts = 0, scPts = 0;
+          if (lp.type === 'max')         { rPts = b.resultOdd; scPts = b.scoreOdd; }
+          else if (lp.type === 'bonus')  { rPts = b.resultOdd; scPts = 0.5; }
+          else if (lp.type === 'result') { rPts = b.resultOdd; scPts = 0; }
+          else                           { rPts = -1;          scPts = 0; } // mauvais resultat
+          sR += rPts; sS += scPts;
+          days[dayKey].ptsResult += rPts; days[dayKey].ptsScore += scPts;
+        }
+      }
+      // match non termine => 0 point pour l'instant
+    });
+    p.season.ptsResult = Math.round(sR * 100) / 100;
+    p.season.ptsScore  = Math.round(sS * 100) / 100;
+    p.season.bets      = sB;
+    p.season.days      = days;
+  });
+  savePlayers(players);
+}
+
+// Recupere les scores via /results, remplit liveData, et regle si necessaire.
+let bpResultsRunning = false;
+async function fetchResults() {
+  if (bpResultsRunning) return;
+  bpResultsRunning = true;
+  try {
+    const ids = bpGatherFixtureIds();
+    if (!ids.length) return;
+    let changed = false;
+    for (let i = 0; i < ids.length; i += 20) {
+      const chunk = ids.slice(i, i + 20).join('-');
+      try {
+        const r = await fetch(BP_RESULTS_URL + '?ids=' + chunk);
+        const d = await r.json();
+        (d.response || []).forEach(f => {
+          const st = (f.fixture && f.fixture.status && f.fixture.status.short) || 'NS';
+          const finished = ['FT','AET','PEN'].indexOf(st) !== -1;
+          const isLive   = ['1H','HT','2H','ET','BT','P','LIVE'].indexOf(st) !== -1;
+          if (finished || isLive) {
+            const prev = liveData[f.fixture.id];
+            const hs = (f.goals && f.goals.home != null) ? f.goals.home : 0;
+            const as = (f.goals && f.goals.away != null) ? f.goals.away : 0;
+            liveData[f.fixture.id] = {
+              homeScore: hs, awayScore: as,
+              minute: (f.fixture.status.elapsed != null ? f.fixture.status.elapsed : (finished ? 'FIN' : '?')),
+              finished: finished, status: st
+            };
+            if (!prev || prev.homeScore !== hs || prev.awayScore !== as || prev.finished !== finished) changed = true;
+          }
+        });
+      } catch (e) { console.warn('fetchResults chunk:', e); }
+    }
+    if (changed) { await recomputeStandings(); renderMatches(); }
+  } finally { bpResultsRunning = false; }
+}
+
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v6').once('value');
+    const snap = await db.ref('fixturesCache_v7').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
       matches = cache.matches;
       renderMatches();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
+      fetchResults(); // regler les pronos si des matchs sont termines
       return;
     }
   } catch (e) { console.warn('Cache fixtures (lecture):', e); }
@@ -2218,8 +2318,9 @@ async function loadFixtures() {
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       await enrichOdds(mapped); // vraies cotes 1X2 via /odds
       renderMatches();
+      fetchResults(); // regler les pronos si des matchs sont termines
       try {
-        await db.ref('fixturesCache_v6').set({ updatedAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v7').set({ updatedAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
@@ -2350,17 +2451,12 @@ function placeBetForMatch(matchId) {
 
   keys.forEach(k => {
     const b = betslip[k];
-    const pts = calcPoints(b);
-    p.season.ptsResult += pts.result;
-    p.season.ptsScore  += pts.score;
-    p.season.bets      += 1;
-    p.season.days[day].ptsResult += pts.result;
-    p.season.days[day].ptsScore  += pts.score;
-    p.season.days[day].bets      += 1;
+    // Points calcules d'apres les vrais resultats (recomputeStandings), pas a la validation.
     p.validatedBets[parseInt(b.matchId)] = {
       h:b.h, a:b.a,
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
-      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd
+      scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
+      round: (matches.find(x => x.id === parseInt(b.matchId)) || {}).round || 'Journée en cours'
     };
     delete betslip[k];
   });
@@ -2394,16 +2490,6 @@ function placeBets() {
   const p=players[currentPlayer];
   const day='Journée en cours';
   if(!p.season.days[day]) p.season.days[day]={ptsResult:0,ptsScore:0,bets:0};
-  keys.forEach(k=>{
-    const b=betslip[k];
-    const pts=calcPoints(b);
-    p.season.ptsResult+=pts.result;
-    p.season.ptsScore+=pts.score;
-    p.season.bets+=1;
-    p.season.days[day].ptsResult+=pts.result;
-    p.season.days[day].ptsScore+=pts.score;
-    p.season.days[day].bets+=1;
-  });
   p.current={};
   // Sauvegarder les paris validés pour le live
   if(!p.validatedBets) p.validatedBets={};
@@ -2415,7 +2501,8 @@ function placeBets() {
       resultCls:b.resultCls,
       resultShort:b.resultShort,
       scoreOdd:b.scoreOdd,
-      resultOdd:b.resultOdd
+      resultOdd:b.resultOdd,
+      round:(matches.find(x=>x.id===parseInt(b.matchId))||{}).round||'Journée en cours'
     };
   });
   savePlayers(players);
@@ -2436,7 +2523,6 @@ window.selectComp = function selectComp(comp, btn) {
   currentComp = comp;
   const titles = {
     all:      '⚽ Tous les matchs',
-    worldcup: '🌍 Coupe du Monde 2026',
     ligue1:   '🇫🇷 Ligue 1',
     ligue2:   '🇫🇷 Ligue 2',
     premier:  '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'
