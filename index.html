@@ -1111,7 +1111,7 @@ window.switchLeagueTab = function(tab) {
 <script>
 // Verifie si un match a demarre selon l'heure locale
 // MODE TEST - simuler matchs en cours
-const TEST_MODE = false;
+const TEST_MODE = true; // ⚠️ MODE LIVE DE TEST : scores simules. REMETTRE false pour la PRODUCTION !
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -1224,12 +1224,12 @@ function parseKickoff(dateStr, timeStr) {
   return d;
 }
 function isMatchStarted(timeStr, matchId) {
-  if (TEST_MODE) return matchId === 1;
+  if (TEST_MODE) return !!liveData[matchId];
   const match = matches.find(x => x.id === matchId);
   return new Date() >= parseKickoff(match?.date, timeStr);
 }
 function isMatchFinished(timeStr, matchId) {
-  if (TEST_MODE) return false;
+  if (TEST_MODE) return !!(liveData[matchId] && liveData[matchId].finished);
   const match = matches.find(x => x.id === matchId);
   const end = parseKickoff(match?.date, timeStr);
   end.setMinutes(end.getMinutes() + 135);
@@ -2259,6 +2259,7 @@ async function recomputeStandings() {
 // Recupere les scores via /results, remplit liveData, et regle si necessaire.
 let bpResultsRunning = false;
 async function fetchResults() {
+  if (TEST_MODE) return; // mode live de test : liveData est simule, on ne regle rien en base
   if (bpResultsRunning) return;
   bpResultsRunning = true;
   try {
@@ -2292,6 +2293,16 @@ async function fetchResults() {
   } finally { bpResultsRunning = false; }
 }
 
+// ⚠️ MODE LIVE DE TEST : injecte des scores simules sur les premiers matchs charges.
+function bpApplyTestLive() {
+  if (!TEST_MODE || !matches || !matches.length) return;
+  const m0 = matches[0], m1 = matches[1], m2 = matches[2];
+  if (m0) liveData[m0.id] = { homeScore: 2, awayScore: 1, minute: 63,    finished: false, status: '2H' };
+  if (m1) liveData[m1.id] = { homeScore: 1, awayScore: 0, minute: 'FIN', finished: true,  status: 'FT' };
+  if (m2) liveData[m2.id] = { homeScore: 0, awayScore: 0, minute: 27,    finished: false, status: '1H' };
+  renderMatches();
+}
+
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
@@ -2302,7 +2313,7 @@ async function loadFixtures() {
       matches = cache.matches;
       renderMatches();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
-      fetchResults(); // regler les pronos si des matchs sont termines
+      bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       return;
     }
   } catch (e) { console.warn('Cache fixtures (lecture):', e); }
@@ -2318,7 +2329,7 @@ async function loadFixtures() {
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       await enrichOdds(mapped); // vraies cotes 1X2 via /odds
       renderMatches();
-      fetchResults(); // regler les pronos si des matchs sont termines
+      bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
         await db.ref('fixturesCache_v7').set({ updatedAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
