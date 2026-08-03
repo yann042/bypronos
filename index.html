@@ -1111,7 +1111,7 @@ window.switchLeagueTab = function(tab) {
 <script>
 // Verifie si un match a demarre selon l'heure locale
 // MODE TEST - simuler matchs en cours
-const TEST_MODE = true; // ⚠️ MODE LIVE DE TEST : scores simules. REMETTRE false pour la PRODUCTION !
+const TEST_MODE = false; // Mode reel. (Le test de reglement se fait via la ligue TEST + bpSimulateResult.)
 function fmtPts(val) {
   if (val === undefined || val === null) return '0';
   return parseFloat(val).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -2303,6 +2303,33 @@ function bpApplyTestLive() {
   renderMatches();
 }
 
+// -- TEST DE BOUT EN BOUT (uniquement sur la ligue TEST) --------
+// Console : bpSimulateResult('Saint Etienne', 2, 1)  puis onglet Classement.
+window.bpSimulateResult = async function(teamName, h, a) {
+  if (!currentLeague || currentLeague.code !== 'TEST') {
+    alert('⛔ Ce test ne marche que sur la ligue TEST. Rejoins d\'abord la ligue TEST.');
+    console.warn('Ligue active :', currentLeague ? currentLeague.code : '(aucune)');
+    return;
+  }
+  const q = (teamName || '').toLowerCase();
+  const m = (matches || []).find(x => (x.home||'').toLowerCase().includes(q) || (x.away||'').toLowerCase().includes(q));
+  if (!m) { console.warn('Match introuvable pour :', teamName, '- equipes chargees :', (matches||[]).map(x=>x.home+' / '+x.away)); return; }
+  liveData[m.id] = { homeScore: h, awayScore: a, minute: 'FIN', finished: true, status: 'FT' };
+  console.log('⚽ Resultat simule :', m.home, h + '-' + a, m.away, '(id', m.id + ')');
+  await recomputeStandings();
+  renderMatches();
+  try { if (typeof renderRanking === 'function') renderRanking(); } catch(e){}
+  console.log('✅ Classement recalcule. Ouvre l\'onglet Classement.');
+};
+window.bpResetTest = async function() {
+  if (!currentLeague || currentLeague.code !== 'TEST') { alert('⛔ Uniquement sur la ligue TEST.'); return; }
+  Object.keys(liveData).forEach(k => delete liveData[k]);
+  await recomputeStandings();
+  renderMatches();
+  try { if (typeof renderRanking === 'function') renderRanking(); } catch(e){}
+  console.log('🔄 Ligue TEST reinitialisee (points remis a 0).');
+};
+
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
@@ -3371,7 +3398,8 @@ const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app'
 const BP_LEAGUES = [
   { code: 'POTES',        name: 'Ligue POTES' },
   { code: 'RESTALLIANCE', name: 'Ligue RESTALLIANCE' },
-  { code: 'CAPIO',        name: 'Ligue CAPIO' }
+  { code: 'CAPIO',        name: 'Ligue CAPIO' },
+  { code: 'TEST',         name: 'Ligue TEST (jetable)' }
 ];
 // Cree les ligues dans Firebase si elles n'existent pas encore (ne touche pas a celles deja creees).
 async function bpEnsureLeagues() {
@@ -3941,6 +3969,7 @@ window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages
         <button type="button" onclick="document.getElementById('leagueCodeInput').value='POTES'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">POTES</button>
         <button type="button" onclick="document.getElementById('leagueCodeInput').value='RESTALLIANCE'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">RESTALLIANCE</button>
         <button type="button" onclick="document.getElementById('leagueCodeInput').value='CAPIO'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">CAPIO</button>
+        <button type="button" onclick="document.getElementById('leagueCodeInput').value='TEST'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px dashed var(--bord);border-radius:8px;background:var(--bg);color:var(--txt2);cursor:pointer">TEST</button>
       </div>
       <!-- Sélection équipe (affiché si teamsMode) -->
       <div id="joinTeamSection" style="display:none;margin-bottom:10px">
