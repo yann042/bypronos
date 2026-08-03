@@ -3356,6 +3356,30 @@ renderMatches();
 // -- Fonctions Firebase sync --------------------------------------
 const FB_URL = 'https://bypronos-default-rtdb.europe-west1.firebasedatabase.app';
 
+// -- Ligues pre-creees (joignables via leur code) ---------------
+const BP_LEAGUES = [
+  { code: 'POTES',        name: 'Ligue POTES' },
+  { code: 'RESTALLIANCE', name: 'Ligue RESTALLIANCE' },
+  { code: 'CAPIO',        name: 'Ligue CAPIO' }
+];
+// Cree les ligues dans Firebase si elles n'existent pas encore (ne touche pas a celles deja creees).
+async function bpEnsureLeagues() {
+  for (const lg of BP_LEAGUES) {
+    try {
+      const cfg = await fetch(FB_URL + '/leagues/' + lg.code + '/config.json').then(r => r.json());
+      if (!cfg || !cfg.name) {
+        await fetch(FB_URL + '/leagues/' + lg.code + '/config.json', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: lg.name, admin: 'Yann', code: lg.code, createdAt: Date.now() })
+        });
+        console.log('[By Pronos] ligue creee :', lg.code);
+      }
+    } catch (e) { console.warn('bpEnsureLeagues', lg.code, e); }
+  }
+}
+bpEnsureLeagues();
+
 function loadPlayersFromFirebase() {
   let league = localStorage.getItem('bypronos_league') || 'global';
   try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
@@ -3901,7 +3925,12 @@ window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages
     </div>
     <div id="leaguePanelJoin">
       <label class="login-label" style="margin-top:12px">CODE DE LIGUE</label>
-      <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: AMIS2024" maxlength="12" style="text-transform:uppercase;margin-bottom:8px" oninput="this.value=this.value.toUpperCase()">
+      <input class="login-input" id="leagueCodeInput" type="text" placeholder="Ex: POTES" maxlength="12" style="text-transform:uppercase;margin-bottom:8px" oninput="this.value=this.value.toUpperCase()">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px">
+        <button type="button" onclick="document.getElementById('leagueCodeInput').value='POTES'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">POTES</button>
+        <button type="button" onclick="document.getElementById('leagueCodeInput').value='RESTALLIANCE'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">RESTALLIANCE</button>
+        <button type="button" onclick="document.getElementById('leagueCodeInput').value='CAPIO'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">CAPIO</button>
+      </div>
       <!-- Sélection équipe (affiché si teamsMode) -->
       <div id="joinTeamSection" style="display:none;margin-bottom:10px">
         <label class="login-label">CHOISIR UNE ÉQUIPE (optionnel)</label>
