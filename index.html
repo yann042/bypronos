@@ -3027,9 +3027,13 @@ function setHistoryFilter(btn, player) {
 }
 
 function renderRanking() {
+  // Delegue vers la version a jour (cible #rankingList, qui existe dans le HTML)
+  return renderRankingPanel();
+}
+function renderRanking_OLD_UNUSED() {
   const players=loadPlayers();
   const day='Journée en cours';
-  document.getElementById('rankDayLabel').textContent=day;
+  const _lbl=document.getElementById('rankDayLabel'); if(_lbl)_lbl.textContent=day;
   let rows=[];
   Object.entries(players).forEach(([name,data])=>{
     if(rankTab==='season'){
