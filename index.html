@@ -2181,8 +2181,8 @@ function mapFixture(f) {
 // Recupere les vraies cotes 1X2 (via /odds) et remplit m.odds = [1, N, 2].
 // Si les cotes ne sont pas encore publiees (pre-saison), on garde le placeholder.
 async function enrichOdds(list) {
-  let n = 0, ns = 0;
-  await Promise.all(list.map(async (m) => {
+  let n = 0, ns = 0, err = 0;
+  for (const m of list) {
     try {
       const r = await fetch(BP_ODDS_URL + '?fixture=' + m.id);
       const d = await r.json();
@@ -2212,9 +2212,10 @@ async function enrichOdds(list) {
         }
         if (gotMW && gotCS) break;
       }
-    } catch (e) {}
-  }));
-  console.log('[By Pronos] cotes chargees : 1X2 ' + n + '/' + list.length + ', score exact ' + ns + '/' + list.length);
+    } catch (e) { err++; }
+    await new Promise(res => setTimeout(res, 150)); // throttle anti rate-limit API
+  }
+  console.log('[By Pronos] cotes chargees : 1X2 ' + n + '/' + list.length + ', score exact ' + ns + '/' + list.length + (err ? ' (' + err + ' echecs)' : ''));
 }
 
 // ============================================================
@@ -2412,7 +2413,7 @@ window.bpResetManual = async function(name) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v9').once('value');
+    const snap = await db.ref('fixturesCache_v10').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -2424,7 +2425,7 @@ async function loadFixtures() {
       if (!cache.oddsAt || (Date.now() - cache.oddsAt) > 3600000) {
         await enrichOdds(matches);
         renderMatches();
-        try { await db.ref('fixturesCache_v9').update({ matches: matches, oddsAt: Date.now() }); } catch (e) {}
+        try { await db.ref('fixturesCache_v10').update({ matches: matches, oddsAt: Date.now() }); } catch (e) {}
       }
       return;
     }
@@ -2443,7 +2444,7 @@ async function loadFixtures() {
       renderMatches();
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
-        await db.ref('fixturesCache_v9').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v10').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
