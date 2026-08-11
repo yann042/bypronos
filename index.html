@@ -1388,13 +1388,13 @@ function getLeagueUrl() {
   const lc = localStorage.getItem('bypronos_league') || 'global';
   let leagueCode = lc;
   try { const p = JSON.parse(lc); if (p && p.code) leagueCode = p.code; } catch(e) {}
-  return FB_URL + '/leagues/' + leagueCode;
+  return FB_URL + '/leagues/' + leagueCode + '/standings';
 }
 
 function savePlayers_league(data) {
   const url = getLeagueUrl() + '.json';
   fetch(url, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
   })
@@ -3505,7 +3505,7 @@ bpEnsureLeagues();
 function loadPlayersFromFirebase() {
   let league = localStorage.getItem('bypronos_league') || 'global';
   try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
-  return db.ref('leagues/' + league + '/players').once('value')
+  return db.ref('leagues/' + league + '/standings').once('value')
     .then(function(snap) { return snap.val() || {}; })
     .catch(function(e) { console.warn('Firebase load error:', e); return {}; });
 }
@@ -3517,7 +3517,7 @@ async function syncFromFirebase() {
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
       const localPlayers = loadPlayers();
       const merged = Object.assign({}, localPlayers, fbPlayers);
-      localStorage.setItem('apexbet_players', JSON.stringify(merged));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
       renderMatches();
       renderBetslip();
       console.log('✅ Sync Firebase OK - ' + Object.keys(fbPlayers).length + ' joueur(s)');
@@ -3536,7 +3536,7 @@ function watchFirebase() {
         const current = JSON.stringify(localPlayers);
         const next = JSON.stringify(merged);
         if (current !== next) {
-          localStorage.setItem('apexbet_players', next);
+          localStorage.setItem(STORAGE_KEY, next);
           renderMatches();
           renderBetslip();
           console.log('🔄 Mise à jour Firebase détectée');
