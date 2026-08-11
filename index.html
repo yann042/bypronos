@@ -3536,6 +3536,25 @@ async function bpEnsureLeagues() {
 }
 bpEnsureLeagues();
 
+// -- Mot de passe de ligue (hash SHA-256, jamais en clair) -------
+async function bpHashPwd(pwd) {
+  const data = new TextEncoder().encode(String(pwd));
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+// Console (admin) : bpSetLeaguePassword('POTES', 'monMotDePasse')
+window.bpSetLeaguePassword = async function(code, pwd) {
+  code = String(code).toUpperCase();
+  const h = await bpHashPwd(pwd);
+  await fetch(FB_URL + '/leagues/' + code + '/config/pwd.json', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(h) });
+  console.log('✅ Mot de passe defini pour ' + code + ' (hash stocke ; le mot de passe n\'est jamais enregistre en clair).');
+};
+window.bpClearLeaguePassword = async function(code) {
+  code = String(code).toUpperCase();
+  await fetch(FB_URL + '/leagues/' + code + '/config/pwd.json', { method:'DELETE' });
+  console.log('🔓 Mot de passe retire de ' + code);
+};
+
 function loadPlayersFromFirebase() {
   let league = localStorage.getItem('bypronos_league') || 'global';
   try { const p = JSON.parse(league); if (p && p.code) league = p.code; } catch(e) {}
@@ -3696,6 +3715,17 @@ function switchLeagueModalTab(tab) {
 window.checkLeagueAndJoin = async function() {
   const code = document.getElementById('leagueCodeInput')?.value.trim().toUpperCase();
   if (!code) return alert('Entrez un code de ligue');
+  // Verification du mot de passe de la ligue (si defini)
+  try {
+    const cfgSnap = await db.ref('leagues/' + code + '/config').once('value');
+    const cfg = cfgSnap.val();
+    if (cfg && cfg.pwd) {
+      const pwd = (document.getElementById('leaguePwdInput') && document.getElementById('leaguePwdInput').value) || '';
+      if (!pwd) return alert('Cette ligue est protegee : entrez le mot de passe.');
+      const h = await bpHashPwd(pwd);
+      if (h !== cfg.pwd) return alert('Mot de passe incorrect pour cette ligue.');
+    }
+  } catch (e) { console.warn('Verif mot de passe:', e); }
   // Vérifier si la ligue a le mode équipes
   try {
     const snap = await db.ref('leagues/' + code + '/info').once('value');
@@ -4088,6 +4118,8 @@ window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages
         <button type="button" onclick="document.getElementById('leagueCodeInput').value='CAPIO'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px solid var(--bord);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer">CAPIO</button>
         <button type="button" onclick="document.getElementById('leagueCodeInput').value='TEST'" style="flex:1;min-width:78px;padding:6px 8px;font-size:11px;font-weight:700;border:1px dashed var(--bord);border-radius:8px;background:var(--bg);color:var(--txt2);cursor:pointer">TEST</button>
       </div>
+      <label class="login-label">MOT DE PASSE DE LA LIGUE</label>
+      <input class="login-input" id="leaguePwdInput" type="password" placeholder="Mot de passe de la ligue" maxlength="40" style="margin-bottom:8px">
       <!-- Sélection équipe (affiché si teamsMode) -->
       <div id="joinTeamSection" style="display:none;margin-bottom:10px">
         <label class="login-label">CHOISIR UNE ÉQUIPE (optionnel)</label>
