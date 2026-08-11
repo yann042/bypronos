@@ -2412,7 +2412,7 @@ window.bpResetManual = async function(name) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v8').once('value');
+    const snap = await db.ref('fixturesCache_v9').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -2420,6 +2420,12 @@ async function loadFixtures() {
       renderMatches();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
+      // Rafraichir les cotes si elles datent (>1h) - mutualise via le cache partage
+      if (!cache.oddsAt || (Date.now() - cache.oddsAt) > 3600000) {
+        await enrichOdds(matches);
+        renderMatches();
+        try { await db.ref('fixturesCache_v9').update({ matches: matches, oddsAt: Date.now() }); } catch (e) {}
+      }
       return;
     }
   } catch (e) { console.warn('Cache fixtures (lecture):', e); }
@@ -2437,7 +2443,7 @@ async function loadFixtures() {
       renderMatches();
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
-        await db.ref('fixturesCache_v8').set({ updatedAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v9').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: mapped });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
