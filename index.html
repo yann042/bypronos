@@ -1375,7 +1375,37 @@ const WC2026_SEASON = 2026;
 
 // IDs Sofascore des matchs (à mettre à jour chaque journée)
 // Pour trouver l'ID : https://api.sofascore.com/api/v1/sport/football/scheduled-events/YYYY-MM-DD
-let matches = []; // rempli dynamiquement via loadFixtures()
+let matches = []; // affiche = sous-ensemble filtre selon la ligue active
+let bpAllMatches = []; // sur-ensemble (toutes competitions/equipes), avant filtrage par ligue
+
+// Filtre les matchs selon la ligue By Pronos active (POTES / CAPIO / RESTALLIANCE)
+function bpLeagueFilter(list) {
+  const code = ((currentLeague && currentLeague.code) || '').toUpperCase();
+  const has = function(m, name){ return ((m.home||'').indexOf(name) !== -1) || ((m.away||'').indexOf(name) !== -1); };
+  return (list || []).filter(function(m) {
+    if (m.comp === 'ligue1') return true;                    // L1 : tous les matchs, toutes ligues
+    if (m.comp === 'ligue2') {
+      if (code === 'POTES') return has(m, 'Saint Etienne');  // POTES : seulement St Etienne
+      return has(m, 'Saint Etienne') || has(m, 'Dijon');     // CAPIO / RESTALLIANCE / defaut : St Etienne + Dijon
+    }
+    if (m.comp === 'premier') return code === 'POTES';        // PL : uniquement POTES (Arsenal + Man Utd)
+    return true;
+  });
+}
+function bpApplyLeagueFilter() {
+  // Masquer l'onglet PL pour les ligues sans Premier League (tout sauf POTES)
+  const code = ((currentLeague && currentLeague.code) || '').toUpperCase();
+  const showPL = (code === 'POTES');
+  const plBtn = document.getElementById('compBtn3');
+  if (plBtn) plBtn.style.display = showPL ? '' : 'none';
+  if (!showPL && currentComp === 'premier') {
+    currentComp = 'all';
+    document.querySelectorAll('.comp-btn').forEach(function(b){ b.classList.remove('active'); });
+    const allBtn = document.getElementById('compBtn0'); if (allBtn) allBtn.classList.add('active');
+  }
+  matches = bpLeagueFilter(bpAllMatches);
+  renderMatches();
+}
 
 // -- Ligue courante -----------------------------------------------
 let currentLeague = null; // { code, name, isAdmin }
@@ -1868,7 +1898,7 @@ function buildCard(m) {
       </div>
 
       <!-- Cotes intégrées au bandeau - style blanc comme capture -->
-      <div style="position:absolute;bottom:8px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+      <div style="position:absolute;bottom:8px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px${oddsPending ? ';opacity:0.28;pointer-events:none;filter:grayscale(1)' : ''}">
         <div onclick="selectResult(${m.id},'win')" style="background:${displayCls==='win'?'#f0fdf4':'#fff'};border:1.5px solid ${displayCls==='win'?'#16a34a':'#e0e0e0'};border-radius:6px;padding:2px 2px;text-align:center;cursor:pointer;transition:all .15s;flex:1">
           <div style="color:#888;font-size:10px;font-weight:600;font-family:Barlow Condensed,sans-serif;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px">${homeName}</div>
           <div style="color:${displayCls==='win'?'#16a34a':'#056b52'};font-size:17px;font-weight:700;font-family:Barlow Condensed,sans-serif;letter-spacing:0.3px;font-variant-numeric:tabular-nums">${m.odds[0].toFixed(2).replace(".", ",")}</div>
@@ -1882,6 +1912,7 @@ function buildCard(m) {
           <div style="color:${displayCls==='lose'?'#dc2626':'#056b52'};font-size:17px;font-weight:700;font-family:Barlow Condensed,sans-serif;letter-spacing:0.3px;font-variant-numeric:tabular-nums">${m.odds[2].toFixed(2).replace(".", ",")}</div>
         </div>
       </div>
+      ${oddsPending ? `<div style="position:absolute;bottom:8px;left:8px;right:8px;background:rgba(255,255,255,0.95);border:1.5px solid #e0a800;border-radius:6px;padding:7px 6px;text-align:center;color:#8a6d00;font-size:12px;font-weight:800;font-family:Barlow Condensed,sans-serif;letter-spacing:0.4px">&#9203; COTES NON PUBLI&Eacute;ES</div>` : ''}
     </div>
     <div class="match-body">
       <div class="teams" style="display:none"></div>
@@ -2417,15 +2448,15 @@ async function loadFixtures() {
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
-      matches = cache.matches;
-      renderMatches();
+      bpAllMatches = cache.matches;
+      bpApplyLeagueFilter();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       // Rafraichir les cotes si elles datent (>1h) - mutualise via le cache partage
       if (!cache.oddsAt || (Date.now() - cache.oddsAt) > 3600000) {
-        await enrichOdds(matches);
-        renderMatches();
-        try { await db.ref('fixturesCache_v10').update({ matches: matches, oddsAt: Date.now() }); } catch (e) {}
+        await enrichOdds(bpAllMatches);
+        bpApplyLeagueFilter();
+        try { await db.ref('fixturesCache_v10').update({ matches: bpAllMatches, oddsAt: Date.now() }); } catch (e) {}
       }
       return;
     }
@@ -2437,11 +2468,11 @@ async function loadFixtures() {
     const data = await res.json();
     const mapped = (data.response || []).filter(bpKeepFixture).map(mapFixture);
     if (mapped.length) {
-      matches = mapped;
-      renderMatches();
+      bpAllMatches = mapped;
+      bpApplyLeagueFilter();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       await enrichOdds(mapped); // vraies cotes 1X2 via /odds
-      renderMatches();
+      bpApplyLeagueFilter();
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
         await db.ref('fixturesCache_v10').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: mapped });
@@ -2459,6 +2490,7 @@ loadFixtures();
 // ==============================================
 function selectResult(matchId, cls) {
   if(!currentPlayer){ openLogin(); return; }
+  const _mm = matches.find(x => x.id === matchId); if (_mm && !_mm.oddsReal) { showNotif('\u23f3 Cotes non publiees pour ce match'); return; }
   if(cls.startsWith('other')) return; // géré par openOtherModal
   if(matchState[matchId] && matchState[matchId].resultCls===cls) {
     delete matchState[matchId];
@@ -3591,7 +3623,7 @@ async function bpAfterAuth() {
     localStorage.setItem('bypronos_league', code);
     const lb = document.getElementById('leagueBadge'); if (lb) lb.textContent = '· ' + currentLeague.name;
     try { const uid = (window._firebaseAuth||firebase.auth())?.currentUser?.uid; if (uid) await db.ref('leagues/'+code+'/players/'+uid).update({ name: currentPlayer, uid }); } catch(e){}
-    syncFromFirebase(); watchFirebase(); renderMatches();
+    syncFromFirebase(); watchFirebase(); renderMatches(); bpApplyLeagueFilter();
   } else {
     showLeagueModal();
   }
@@ -3716,6 +3748,7 @@ window.doJoinLeagueAuth = async function() {
     currentLeague = { code, name: (cfg && cfg.name) || code, isAdmin: !!(cfg && cfg.admin && currentPlayer && String(cfg.admin).toLowerCase() === String(currentPlayer).toLowerCase()) };
   } catch(e) { currentLeague = { code, name: code, isAdmin:false }; }
   const _lb = document.getElementById('leagueBadge'); if (_lb) _lb.textContent = '· ' + currentLeague.name;
+  bpApplyLeagueFilter();
   try { const _uid = (window._firebaseAuth||firebase.auth())?.currentUser?.uid; if (_uid) await db.ref('leagues/'+code+'/players/'+_uid).update({ name: currentPlayer, uid: _uid }); } catch(e){}
   document.getElementById('leagueModal').style.display = 'none';
   // Gérer le choix d'équipe
