@@ -1514,8 +1514,14 @@ function getAllPronosHtml(matchId, hs, as) {
     if (!rows.length) return '';
     const live = (hs !== '?' && hs !== undefined && as !== '?' && as !== undefined);
     rows.sort(function(x,y){ return (y.pts==null?-999:y.pts) - (x.pts==null?-999:x.pts); });
+    let _lastKey = null, _lastRank = 0;
+    rows.forEach(function(r, i){
+      const key = (r.pts==null ? -999 : Math.round(r.pts*100)/100);
+      if (i === 0 || key !== _lastKey) { r.rank = i+1; _lastRank = i+1; _lastKey = key; }
+      else { r.rank = _lastRank; }
+    });
     const items = rows.map(function(r, i){
-      const rank = i+1;
+      const rank = r.rank;
       const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':(rank+'.');
       const ptsHtml = (r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>';
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
