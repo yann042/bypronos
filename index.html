@@ -1947,7 +1947,6 @@ function buildCard(m) {
         </div>
       </div>
 
-      ${started ? getBannerScorersHtml(m.id) : ''}
       ${started && !finished ? `<div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;z-index:3">${getCashoutHtml(m.id, live?live.homeScore:'?', live?live.awayScore:'?')}</div>` : ''}
 
       <!-- Cotes intégrées au bandeau - style blanc comme capture -->
@@ -1967,6 +1966,7 @@ function buildCard(m) {
       </div>
       ${oddsPending && !started ? `<div style="position:absolute;bottom:8px;left:8px;right:8px;background:rgba(255,255,255,0.95);border:1.5px solid #e0a800;border-radius:6px;padding:7px 6px;text-align:center;color:#8a6d00;font-size:12px;font-weight:800;font-family:Barlow Condensed,sans-serif;letter-spacing:0.4px">&#9203; COTES NON PUBLI&Eacute;ES</div>` : ''}
     </div>
+    ${started ? getBannerScorersHtml(m.id) : ''}
     <div class="match-body">
       <div class="teams" style="display:none"></div>
       ${started ? liveBlock : scoreBlock}
@@ -2336,8 +2336,8 @@ function getBannerScorersHtml(matchId) {
   const other = sc.filter(function(g){ return g.teamId !== ld.homeTeamId && g.teamId !== ld.awayTeamId; }).map(fmt);
   home.push.apply(home, other);
   if (!home.length && !away.length) return '';
-  const side = function(arr, align){ return '<div style="flex:1;text-align:' + align + ';color:rgba(255,255,255,0.92);font-size:10px;line-height:1.55;text-shadow:0 1px 3px rgba(0,0,0,1);overflow:hidden">' + arr.map(function(g){ return '\u26bd ' + g; }).join('<br>') + '</div>'; };
-  return '<div style="position:absolute;bottom:34px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;pointer-events:none;z-index:2">' + side(home,'left') + side(away,'right') + '</div>';
+  const col = function(arr, align){ return '<div style="flex:1;min-width:0;text-align:' + align + '">' + arr.map(function(g){ return '<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">\u26bd ' + g + '</div>'; }).join('') + '</div>'; };
+  return '<div style="background:#0a1a2e;color:rgba(255,255,255,0.9);font-size:11px;line-height:1.5;padding:7px 12px;display:flex;justify-content:space-between;gap:16px">' + col(home,'left') + col(away,'right') + '</div>';
 }
 function getScorersHtml(matchId) {
   const sc = bpScorers[matchId];
