@@ -749,6 +749,16 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .prono-chip .chip-pts{font-size:10px;font-weight:700;border-radius:8px;padding:0 5px}
 .prono-chip .chip-pts.pos{background:#057a3a;color:#fff}
 .prono-chip .chip-pts.neg{background:#cc2200;color:#fff}
+.live-rank{margin:6px 10px 8px;border-top:1px solid var(--bord);padding-top:8px}
+.live-rank-title{font-size:9px;font-weight:800;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.lr-row{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:7px;margin-bottom:3px;background:var(--bg3)}
+.lr-row.is-me{background:rgba(5,107,82,.10);border:1px solid rgba(5,107,82,.35)}
+.lr-rank{font-size:12px;font-weight:700;min-width:22px;text-align:center;color:var(--txt2)}
+.lr-name{font-size:12px;font-weight:600;color:var(--txt);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt)}
+.lr-pts{font-size:11px;font-weight:700;border-radius:8px;padding:1px 7px;min-width:40px;text-align:center}
+.lr-pts.pos{background:#057a3a;color:#fff}
+.lr-pts.neg{background:#cc2200;color:#fff}
 
 /* -- Animation but -- */
 .goal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
@@ -1487,38 +1497,37 @@ function getAllPronosHtml(matchId, hs, as) {
   try {
     const mid = parseInt(matchId);
     const players = loadPlayers();
-    const chips = [];
-    Object.entries(players).forEach(([name, data]) => {
+    const rows = [];
+    Object.entries(players).forEach(function(entry){
+      const name = entry[0], data = entry[1];
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
-      if (name === currentPlayer) return; // exclure mon prono
-      const isMe = false;
       const pts = calcLivePts(vb, hs, as);
-      let ptsHtml = '';
-      if (pts) {
-        const sign = pts.pts > 0 ? '+' : '';
-        const cls  = pts.pts > 0 ? 'pos' : 'neg';
-        ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + fmtPts(pts.pts) + '</span>';
-      }
-      const meStyle = isMe ? 'border-color:#056b52;background:rgba(5,107,82,.08)' : '';
-      chips.push('<div class="prono-chip" style="' + meStyle + '">' +
-        '<span class="chip-name">' + (isMe ? '👤' : '') + name + '</span>' +
-        '<span class="chip-score">' + vb.h + '-' + vb.a + '</span>' +
-        ptsHtml +
-      '</div>');
+      rows.push({ name: name, h: vb.h, a: vb.a, pts: pts ? pts.pts : null, isMe: name === currentPlayer });
     });
     if (window.bpPreviewMode && Array.isArray(window.bpPreviewPronos)) {
       window.bpPreviewPronos.forEach(function(p){
-        const pts = calcLivePts({h:p.h,a:p.a,resultOdd:p.resultOdd||2,scoreOdd:p.scoreOdd||10,resultLabel:''}, hs, as);
-        let ptsHtml = '';
-        if (pts) { const sign = pts.pts > 0 ? '+' : ''; const cls = pts.pts > 0 ? 'pos' : 'neg'; ptsHtml = '<span class="chip-pts ' + cls + '">' + sign + fmtPts(pts.pts) + '</span>'; }
-        chips.push('<div class="prono-chip"><span class="chip-name">' + p.name + '</span><span class="chip-score">' + p.h + '-' + p.a + '</span>' + ptsHtml + '</div>');
+        const pts = calcLivePts({h:p.h,a:p.a,resultOdd:p.resultOdd||2,scoreOdd:p.scoreOdd||10}, hs, as);
+        rows.push({ name: p.name, h: p.h, a: p.a, pts: pts ? pts.pts : null, isMe: false });
       });
     }
-    if (!chips.length) return '';
-    return '<div class="all-pronos">' +
-      '<div class="all-pronos-title">Pronostics des joueurs</div>' +
-      '<div class="all-pronos-list">' + chips.join('') + '</div>' +
+    if (!rows.length) return '';
+    const live = (hs !== '?' && hs !== undefined && as !== '?' && as !== undefined);
+    rows.sort(function(x,y){ return (y.pts==null?-999:y.pts) - (x.pts==null?-999:x.pts); });
+    const items = rows.map(function(r, i){
+      const rank = i+1;
+      const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':(rank+'.');
+      const ptsHtml = (r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>';
+      return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
+        '<span class="lr-rank">' + medal + '</span>' +
+        '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + '</span>' +
+        '<span class="lr-score">' + r.h + '-' + r.a + '</span>' +
+        ptsHtml +
+      '</div>';
+    }).join('');
+    return '<div class="live-rank">' +
+      '<div class="live-rank-title">' + (live ? '⚡ Classement en direct' : 'Pronostics des joueurs') + '</div>' +
+      items +
     '</div>';
   } catch(e) { return ''; }
 }
@@ -2421,30 +2430,6 @@ window.bpPreviewStop = function() {
   console.log('⏹️ Apercu LIVE arrete.');
 };
 
-// -- APERCU LIVE (visuel uniquement, aucune ecriture Firebase) ---
-window.bpPreviewLive = function() {
-  if (!matches || !matches.length) { console.warn('Aucun match charge.'); return; }
-  window._bpPreviewLive = {};
-  const scen = [
-    { hs:2, as:0, minute:63,    finished:false, status:'2H' },
-    { hs:1, as:1, minute:78,    finished:false, status:'2H' },
-    { hs:0, as:1, minute:'FIN', finished:true,  status:'FT' }
-  ];
-  matches.slice(0,3).forEach(function(m, i){
-    const s = scen[i] || scen[0];
-    liveData[m.id] = { homeScore:s.hs, awayScore:s.as, minute:s.minute, finished:s.finished, status:s.status };
-    window._bpPreviewLive[m.id] = { finished:s.finished };
-    console.log('👁️ ' + m.home + ' ' + s.hs + '-' + s.as + ' ' + m.away + (s.finished ? ' (termine)' : " (" + s.minute + "')"));
-  });
-  renderMatches();
-  console.log('✅ Apercu live actif. Recharge la page (Ctrl+Maj+R) pour revenir a la normale. (Aucune donnee ecrite dans Firebase.)');
-};
-window.bpPreviewStop = function() {
-  window._bpPreviewLive = null;
-  Object.keys(liveData).forEach(function(k){ delete liveData[k]; });
-  renderMatches();
-  console.log('🔄 Apercu live arrete.');
-};
 
 // Seed 6 joueurs de test avec leurs pronos sur Sochaux - Saint Etienne (ligue TEST).
 window.bpSeedTestPlayers = async function() {
