@@ -2336,7 +2336,7 @@ function getBannerScorersHtml(matchId) {
   const other = sc.filter(function(g){ return g.teamId !== ld.homeTeamId && g.teamId !== ld.awayTeamId; }).map(fmt);
   home.push.apply(home, other);
   if (!home.length && !away.length) return '';
-  const side = function(arr, align){ return '<div style="flex:1;text-align:' + align + ';color:rgba(255,255,255,0.92);font-size:10px;line-height:1.45;text-shadow:0 1px 3px rgba(0,0,0,1);overflow:hidden">' + (arr.length ? '\u26bd ' + arr.join(', ') : '') + '</div>'; };
+  const side = function(arr, align){ return '<div style="flex:1;text-align:' + align + ';color:rgba(255,255,255,0.92);font-size:10px;line-height:1.55;text-shadow:0 1px 3px rgba(0,0,0,1);overflow:hidden">' + arr.map(function(g){ return '\u26bd ' + g; }).join('<br>') + '</div>'; };
   return '<div style="position:absolute;bottom:34px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;pointer-events:none;z-index:2">' + side(home,'left') + side(away,'right') + '</div>';
 }
 function getScorersHtml(matchId) {
