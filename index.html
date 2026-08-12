@@ -760,6 +760,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .lr-pts.pos{background:#057a3a;color:#fff}
 .lr-pts.neg{background:#cc2200;color:#fff}
 .lr-pts.pot{background:#eef7f2;color:#056b52;border:1px solid #bfe3d5}
+.lr-pts.cash{background:#1a6fd4;color:#fff}
 .scorers{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:2px 10px 4px;padding-top:4px;font-size:11px;color:var(--txt2)}
 .scorers .sc-side{flex:1;line-height:1.5;min-width:40%}
 .scorers .sc-side.away{text-align:right}
@@ -1507,8 +1508,10 @@ function getAllPronosHtml(matchId, hs, as) {
       const name = entry[0], data = entry[1];
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
-      const pts = calcLivePts(vb, hs, as);
-      rows.push({ name: name, h: vb.h, a: vb.a, pts: pts ? pts.pts : null, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, isMe: name === currentPlayer });
+      let ptsVal;
+      if (vb.cashedOut) { ptsVal = vb.cashoutValue; }
+      else { const lp = calcLivePts(vb, hs, as); ptsVal = lp ? lp.pts : null; }
+      rows.push({ name: name, h: vb.h, a: vb.a, pts: ptsVal, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, isMe: name === currentPlayer, cashedOut: !!vb.cashedOut });
     });
     if (window.bpPreviewMode && Array.isArray(window.bpPreviewPronos)) {
       window.bpPreviewPronos.forEach(function(p){
@@ -1530,7 +1533,7 @@ function getAllPronosHtml(matchId, hs, as) {
     const items = rows.map(function(r, i){
       const rank = r.rank;
       const rc = rank===1 ? '#e0a81c' : rank===2 ? '#9aa4ad' : rank===3 ? '#c17f43' : '#6b7280';
-      const ptsHtml = live ? ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>') : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>');
+      const ptsHtml = live ? (r.cashedOut ? '<span class="lr-pts cash">💸 ' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>');
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
         '<span class="lr-rank" style="background:' + rc + '">' + rank + '</span>' +
         '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + '</span>' +
@@ -2391,7 +2394,11 @@ async function recomputeStandings(playersArg) {
       if (!days[dayKey]) days[dayKey] = { ptsResult:0, ptsScore:0, bets:0 };
       sB += 1; days[dayKey].bets += 1;
       const live = liveData[parseInt(mid)] || liveData[mid];
-      if (live && live.finished) {
+      if (b.cashedOut) {
+        // Cashout encaisse : valeur verrouillee, independante du score final
+        const cv = b.cashoutValue || 0;
+        sR += cv; days[dayKey].ptsResult += cv;
+      } else if (live && live.finished) {
         const lp = calcLivePts(b, live.homeScore, live.awayScore);
         if (lp) {
           let rPts = 0, scPts = 0;
