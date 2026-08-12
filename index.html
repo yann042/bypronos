@@ -759,6 +759,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .lr-pts{font-size:11px;font-weight:700;border-radius:8px;padding:1px 7px;min-width:40px;text-align:center}
 .lr-pts.pos{background:#057a3a;color:#fff}
 .lr-pts.neg{background:#cc2200;color:#fff}
+.lr-pts.pot{background:#eef7f2;color:#056b52;border:1px solid #bfe3d5}
 
 /* -- Animation but -- */
 .goal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
@@ -1503,27 +1504,29 @@ function getAllPronosHtml(matchId, hs, as) {
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
       const pts = calcLivePts(vb, hs, as);
-      rows.push({ name: name, h: vb.h, a: vb.a, pts: pts ? pts.pts : null, isMe: name === currentPlayer });
+      rows.push({ name: name, h: vb.h, a: vb.a, pts: pts ? pts.pts : null, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, isMe: name === currentPlayer });
     });
     if (window.bpPreviewMode && Array.isArray(window.bpPreviewPronos)) {
       window.bpPreviewPronos.forEach(function(p){
         const pts = calcLivePts({h:p.h,a:p.a,resultOdd:p.resultOdd||2,scoreOdd:p.scoreOdd||10}, hs, as);
-        rows.push({ name: p.name, h: p.h, a: p.a, pts: pts ? pts.pts : null, isMe: false });
+        rows.push({ name: p.name, h: p.h, a: p.a, pts: pts ? pts.pts : null, potential: Math.round(((p.resultOdd||2)+(p.scoreOdd||10))*100)/100, isMe: false });
       });
     }
     if (!rows.length) return '';
     const live = (hs !== '?' && hs !== undefined && as !== '?' && as !== undefined);
-    rows.sort(function(x,y){ return (y.pts==null?-999:y.pts) - (x.pts==null?-999:x.pts); });
+    const finished = !!(liveData[mid] && liveData[mid].finished);
+    if (!live) return ''; // pre-match : ne pas devoiler les pronos des autres joueurs
+    rows.sort(function(x,y){ const vx=live?(x.pts==null?-999:x.pts):x.potential, vy=live?(y.pts==null?-999:y.pts):y.potential; return vy-vx; });
     let _lastKey = null, _lastRank = 0;
     rows.forEach(function(r, i){
-      const key = (r.pts==null ? -999 : Math.round(r.pts*100)/100);
+      const key = live ? (r.pts==null ? -999 : Math.round(r.pts*100)/100) : r.potential;
       if (i === 0 || key !== _lastKey) { r.rank = i+1; _lastRank = i+1; _lastKey = key; }
       else { r.rank = _lastRank; }
     });
     const items = rows.map(function(r, i){
       const rank = r.rank;
       const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':(rank+'.');
-      const ptsHtml = (r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>';
+      const ptsHtml = live ? ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>') : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>');
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
         '<span class="lr-rank">' + medal + '</span>' +
         '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + '</span>' +
@@ -1532,7 +1535,7 @@ function getAllPronosHtml(matchId, hs, as) {
       '</div>';
     }).join('');
     return '<div class="live-rank">' +
-      '<div class="live-rank-title">' + (live ? '⚡ Classement en direct' : 'Pronostics des joueurs') + '</div>' +
+      '<div class="live-rank-title">' + (finished ? '🏆 Classement final' : live ? '⚡ Classement en direct' : 'Pronostics · points à gagner') + '</div>' +
       items +
     '</div>';
   } catch(e) { return ''; }
@@ -1701,6 +1704,29 @@ function renderLiveProno(matchId, hs, as) {
     '</div>' +
     ptsBubbles +
   '</div>';
+}
+
+// Bouton cashout pour le bandeau live (juste sous le score)
+function getCashoutHtml(matchId, hs, as) {
+  try {
+    if (hs === '?' || as === '?' || hs === undefined || as === undefined) return '';
+    let b = null;
+    const betKey = Object.keys(betslip).find(function(k){ return k.startsWith(matchId + '_'); });
+    b = betKey ? betslip[betKey] : null;
+    if (!b && currentPlayer) {
+      const players = loadPlayers();
+      const p = players[currentPlayer];
+      const mid2 = parseInt(matchId);
+      if (p && p.validatedBets) b = p.validatedBets[mid2] || p.validatedBets[String(mid2)];
+    }
+    if (!b) return '';
+    if (b.cashedOut) {
+      return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(5,107,82,0.95);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px">✅ Cashout encaisse : ' + fmtPts(b.cashoutValue) + ' pts</span>';
+    }
+    const cashoutVal = calcCashoutValue(b, parseInt(hs), parseInt(as), 45);
+    if (!(cashoutVal > 0)) return '';
+    return '<span onclick="doCashout(' + matchId + ')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.96);color:#1a6fd4;font-size:12px;font-weight:800;padding:5px 14px;border-radius:20px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.35)">💸 Cashout <span style="color:#056b52">' + fmtPts(cashoutVal) + ' pts</span></span>';
+  } catch(e) { return ''; }
 }
 
 // Calcul des points actuels selon le score live
@@ -1877,7 +1903,6 @@ function buildCard(m) {
   const awayLogoHtml = awayLogo ? `<img src="${awayLogo}" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-left:6px" onerror="this.style.display='none'">` : '';
 
   liveBlock = `${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}
-    ${renderLiveProno(m.id, hs, as)}
     ${getAllPronosHtml(m.id, hs, as)}`;
   }
 
@@ -1914,6 +1939,8 @@ function buildCard(m) {
           ${awayLogo ? `<img src="${awayLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
         </div>
       </div>
+
+      ${started && !finished ? `<div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;z-index:3">${getCashoutHtml(m.id, live?live.homeScore:'?', live?live.awayScore:'?')}</div>` : ''}
 
       <!-- Cotes intégrées au bandeau - style blanc comme capture -->
       <div style="position:absolute;bottom:8px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px${started ? ';display:none' : (oddsPending ? ';opacity:0.28;pointer-events:none;filter:grayscale(1)' : '')}">
