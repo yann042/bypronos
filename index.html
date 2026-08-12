@@ -753,13 +753,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .live-rank-title{font-size:9px;font-weight:800;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .lr-row{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:7px;margin-bottom:3px;background:var(--bg3)}
 .lr-row.is-me{background:rgba(5,107,82,.10);border:1px solid rgba(5,107,82,.35)}
-.lr-rank{font-size:12px;font-weight:700;min-width:22px;text-align:center;color:var(--txt2)}
+.lr-rank{font-size:13px;font-weight:800;width:24px;height:24px;line-height:24px;text-align:center;color:#fff;border-radius:50%;flex-shrink:0}
 .lr-name{font-size:12px;font-weight:600;color:var(--txt);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lr-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt)}
 .lr-pts{font-size:11px;font-weight:700;border-radius:8px;padding:1px 7px;min-width:40px;text-align:center}
 .lr-pts.pos{background:#057a3a;color:#fff}
 .lr-pts.neg{background:#cc2200;color:#fff}
 .lr-pts.pot{background:#eef7f2;color:#056b52;border:1px solid #bfe3d5}
+.scorers{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:2px 10px 4px;padding-top:4px;font-size:11px;color:var(--txt2)}
+.scorers .sc-side{flex:1;line-height:1.5;min-width:40%}
+.scorers .sc-side.away{text-align:right}
+.scorers .sc-other{flex-basis:100%;text-align:center}
 
 /* -- Animation but -- */
 .goal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
@@ -1525,10 +1529,10 @@ function getAllPronosHtml(matchId, hs, as) {
     });
     const items = rows.map(function(r, i){
       const rank = r.rank;
-      const medal = rank + '.';
+      const rc = rank===1 ? '#e0a81c' : rank===2 ? '#9aa4ad' : rank===3 ? '#c17f43' : '#6b7280';
       const ptsHtml = live ? ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>') : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>');
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
-        '<span class="lr-rank">' + medal + '</span>' +
+        '<span class="lr-rank" style="background:' + rc + '">' + rank + '</span>' +
         '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + '</span>' +
         '<span class="lr-score">' + r.h + '-' + r.a + '</span>' +
         ptsHtml +
@@ -1903,6 +1907,7 @@ function buildCard(m) {
   const awayLogoHtml = awayLogo ? `<img src="${awayLogo}" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-left:6px" onerror="this.style.display='none'">` : '';
 
   liveBlock = `${finished ? '<div class="match-locked">✅ Match terminé</div>' : ''}
+    ${getScorersHtml(m.id)}
     ${getAllPronosHtml(m.id, hs, as)}`;
   }
 
@@ -2298,6 +2303,41 @@ async function enrichOdds(list) {
 // -- RESULTATS & SCORING (points calcules sur les vrais scores)
 // ============================================================
 const BP_RESULTS_URL = 'https://livescores-huouv7kgya-uc.a.run.app/results';
+const BP_EVENTS_URL  = 'https://livescores-huouv7kgya-uc.a.run.app/events';
+const bpScorers = {}; // matchId -> [{player, minute, teamId, detail}]
+async function fetchScorers(matchId) {
+  try {
+    const r = await fetch(BP_EVENTS_URL + '?fixture=' + matchId);
+    const d = await r.json();
+    if (!d || !Array.isArray(d.response)) return;
+    bpScorers[matchId] = d.response
+      .filter(function(e){ return e.type === 'Goal'; })
+      .map(function(e){ return {
+        player: (e.player && e.player.name) || '?',
+        minute: (e.time && e.time.elapsed != null) ? e.time.elapsed : '',
+        teamId: e.team && e.team.id,
+        detail: e.detail || ''
+      }; });
+  } catch(e) {}
+}
+function getScorersHtml(matchId) {
+  const sc = bpScorers[matchId];
+  if (!sc || !sc.length) return '';
+  const ld = liveData[matchId] || {};
+  const fmt = function(g){
+    const tag = g.detail === 'Penalty' ? ' (p)' : (g.detail === 'Own Goal' ? ' (csc)' : '');
+    return (g.minute!=='' ? g.minute + "' " : '') + g.player + tag;
+  };
+  const home = sc.filter(function(g){ return g.teamId === ld.homeTeamId; }).map(fmt);
+  const away = sc.filter(function(g){ return g.teamId === ld.awayTeamId; }).map(fmt);
+  const other = sc.filter(function(g){ return g.teamId !== ld.homeTeamId && g.teamId !== ld.awayTeamId; }).map(fmt);
+  if (!home.length && !away.length && !other.length) return '';
+  return '<div class="scorers">' +
+    '<div class="sc-side">' + (home.length ? '\u26bd ' + home.join(', ') : '') + '</div>' +
+    '<div class="sc-side away">' + (away.length ? away.join(', ') + ' \u26bd' : '') + '</div>' +
+    (other.length ? '<div class="sc-other">\u26bd ' + other.join(', ') + '</div>' : '') +
+  '</div>';
+}
 
 // IDs de tous les matchs a suivre : journee courante + tous les pronos valides
 function bpGatherFixtureIds() {
@@ -2368,6 +2408,7 @@ async function fetchResults() {
     const ids = bpGatherFixtureIds();
     if (!ids.length) return;
     let changed = false;
+    const bpScorerQueue = [];
     for (let i = 0; i < ids.length; i += 20) {
       const chunk = ids.slice(i, i + 20).join('-');
       try {
@@ -2381,17 +2422,23 @@ async function fetchResults() {
             const prev = liveData[f.fixture.id];
             const hs = (f.goals && f.goals.home != null) ? f.goals.home : 0;
             const as = (f.goals && f.goals.away != null) ? f.goals.away : 0;
+            const scoreChanged = !prev || prev.homeScore !== hs || prev.awayScore !== as;
             liveData[f.fixture.id] = {
               homeScore: hs, awayScore: as,
               minute: (f.fixture.status.elapsed != null ? f.fixture.status.elapsed : (finished ? 'FIN' : '?')),
-              finished: finished, status: st
+              finished: finished, status: st,
+              homeTeamId: (f.teams && f.teams.home && f.teams.home.id) || (prev && prev.homeTeamId),
+              awayTeamId: (f.teams && f.teams.away && f.teams.away.id) || (prev && prev.awayTeamId)
             };
             if (!prev || prev.homeScore !== hs || prev.awayScore !== as || prev.finished !== finished) changed = true;
+            if ((hs + as) > 0 && (scoreChanged || !bpScorers[f.fixture.id])) bpScorerQueue.push(f.fixture.id);
           }
         });
       } catch (e) { console.warn('fetchResults chunk:', e); }
     }
-    if (changed) { await recomputeStandings(); renderMatches(); }
+    for (let s = 0; s < bpScorerQueue.length; s++) { await fetchScorers(bpScorerQueue[s]); await new Promise(function(r){ setTimeout(r, 120); }); }
+    if (changed) await recomputeStandings();
+    if (changed || bpScorerQueue.length) renderMatches();
   } finally { bpResultsRunning = false; }
 }
 
@@ -2450,8 +2497,10 @@ window.bpPreviewLive = function() {
   ];
   sample.forEach(function(m, i){
     const s = scen[i % scen.length];
-    liveData[m.id] = { homeScore:s.hs, awayScore:s.as, minute:s.min, finished:s.fin, status:s.st };
+    liveData[m.id] = { homeScore:s.hs, awayScore:s.as, minute:s.min, finished:s.fin, status:s.st, homeTeamId: 1, awayTeamId: 2 };
   });
+  if (sample[0]) bpScorers[sample[0].id] = [{player:'Cardona',minute:23,teamId:1,detail:''},{player:'Stassin',minute:67,teamId:1,detail:'Penalty'}];
+  if (sample[1]) bpScorers[sample[1].id] = [{player:'Aubameyang',minute:12,teamId:1,detail:''},{player:'Le Fee',minute:80,teamId:2,detail:''}];
   renderMatches();
   console.log('▶️ Apercu LIVE sur ' + sample.length + ' match(s). Recharge (Ctrl+Maj+R) pour revenir a la normale. Aucune donnee ecrite dans Firebase.');
 };
