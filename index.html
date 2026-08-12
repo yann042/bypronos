@@ -1525,7 +1525,7 @@ function getAllPronosHtml(matchId, hs, as) {
     });
     const items = rows.map(function(r, i){
       const rank = r.rank;
-      const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':(rank+'.');
+      const medal = rank + '.';
       const ptsHtml = live ? ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>') : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>');
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
         '<span class="lr-rank">' + medal + '</span>' +
