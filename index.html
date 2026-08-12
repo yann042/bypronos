@@ -1224,12 +1224,14 @@ function parseKickoff(dateStr, timeStr) {
   return d;
 }
 function isMatchStarted(timeStr, matchId) {
-  if (TEST_MODE) return !!liveData[matchId];
+  if (window._bpPreviewLive && window._bpPreviewLive[matchId]) return true;
+  if (TEST_MODE || window.bpPreviewMode) return !!liveData[matchId];
   const match = matches.find(x => x.id === matchId);
   return new Date() >= parseKickoff(match?.date, timeStr);
 }
 function isMatchFinished(timeStr, matchId) {
-  if (TEST_MODE) return !!(liveData[matchId] && liveData[matchId].finished);
+  if (window._bpPreviewLive && window._bpPreviewLive[matchId]) return !!window._bpPreviewLive[matchId].finished;
+  if (TEST_MODE || window.bpPreviewMode) return !!(liveData[matchId] && liveData[matchId].finished);
   const match = matches.find(x => x.id === matchId);
   const end = parseKickoff(match?.date, timeStr);
   end.setMinutes(end.getMinutes() + 135);
@@ -2385,6 +2387,56 @@ window.bpResetTest = async function() {
   renderMatches();
   try { if (typeof renderRanking === 'function') renderRanking(); } catch(e){}
   console.log('🔄 Ligue TEST reinitialisee (points remis a 0).');
+};
+
+// -- Apercu LIVE (visuel uniquement, aucune ecriture Firebase) ----
+window.bpPreviewLive = function() {
+  window.bpPreviewMode = true;
+  const sample = (matches || []).slice(0, 4);
+  if (!sample.length) { console.warn('Aucun match a simuler.'); return; }
+  const scen = [
+    { hs:2, as:0, min:63,   fin:false, st:'2H' },
+    { hs:1, as:1, min:78,   fin:false, st:'2H' },
+    { hs:0, as:0, min:12,   fin:false, st:'1H' },
+    { hs:0, as:1, min:'FIN',fin:true,  st:'FT' }
+  ];
+  sample.forEach(function(m, i){
+    const s = scen[i % scen.length];
+    liveData[m.id] = { homeScore:s.hs, awayScore:s.as, minute:s.min, finished:s.fin, status:s.st };
+  });
+  renderMatches();
+  console.log('▶️ Apercu LIVE sur ' + sample.length + ' match(s). Recharge (Ctrl+Maj+R) pour revenir a la normale. Aucune donnee ecrite dans Firebase.');
+};
+window.bpPreviewStop = function() {
+  window.bpPreviewMode = false;
+  Object.keys(liveData).forEach(function(k){ delete liveData[k]; });
+  renderMatches();
+  console.log('⏹️ Apercu LIVE arrete.');
+};
+
+// -- APERCU LIVE (visuel uniquement, aucune ecriture Firebase) ---
+window.bpPreviewLive = function() {
+  if (!matches || !matches.length) { console.warn('Aucun match charge.'); return; }
+  window._bpPreviewLive = {};
+  const scen = [
+    { hs:2, as:0, minute:63,    finished:false, status:'2H' },
+    { hs:1, as:1, minute:78,    finished:false, status:'2H' },
+    { hs:0, as:1, minute:'FIN', finished:true,  status:'FT' }
+  ];
+  matches.slice(0,3).forEach(function(m, i){
+    const s = scen[i] || scen[0];
+    liveData[m.id] = { homeScore:s.hs, awayScore:s.as, minute:s.minute, finished:s.finished, status:s.status };
+    window._bpPreviewLive[m.id] = { finished:s.finished };
+    console.log('👁️ ' + m.home + ' ' + s.hs + '-' + s.as + ' ' + m.away + (s.finished ? ' (termine)' : " (" + s.minute + "')"));
+  });
+  renderMatches();
+  console.log('✅ Apercu live actif. Recharge la page (Ctrl+Maj+R) pour revenir a la normale. (Aucune donnee ecrite dans Firebase.)');
+};
+window.bpPreviewStop = function() {
+  window._bpPreviewLive = null;
+  Object.keys(liveData).forEach(function(k){ delete liveData[k]; });
+  renderMatches();
+  console.log('🔄 Apercu live arrete.');
 };
 
 // Seed 6 joueurs de test avec leurs pronos sur Sochaux - Saint Etienne (ligue TEST).
