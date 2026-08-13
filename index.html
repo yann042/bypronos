@@ -3253,6 +3253,7 @@ function renderHistoryPanel() {
     const m = matches.find(x => String(x.id) === String(mid));
     const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
     const live = liveData[parseInt(mid)];
+    const started = (m && isMatchStarted(m.time, m.id)) || !!live;
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
 
     // Trier les pronos par points décroissants
@@ -3280,7 +3281,7 @@ function renderHistoryPanel() {
           ptsBubble +
           '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
         '</div>' +
-        '<span style="font-size:11px;font-weight:700;color:#111;flex-shrink:0">' + bet.h + '-' + bet.a + '</span>' +
+        '<span style="font-size:11px;font-weight:700;color:#111;flex-shrink:0">' + ((started || isMe) ? (bet.h + '-' + bet.a) : '🔒') + '</span>' +
       '</div>';
     }).join('');
 
