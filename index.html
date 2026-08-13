@@ -1922,7 +1922,7 @@ function buildCard(m) {
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
-    <div style="position:relative;height:180px;border-radius:8px 8px 0 0;overflow:hidden;background:linear-gradient(135deg,#15324e 0%,#0d2137 55%,#0a1a2e 100%)">
+    <div style="position:relative;height:${started ? '120px' : '180px'};border-radius:8px 8px 0 0;overflow:hidden;background:linear-gradient(135deg,#15324e 0%,#0d2137 55%,#0a1a2e 100%)">
       <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:36px;opacity:0.20">
         ${homeLogo ? `<img src="${homeLogo}" style="width:92px;height:92px;object-fit:contain" onerror="this.style.display='none'">` : ''}
         ${awayLogo ? `<img src="${awayLogo}" style="width:92px;height:92px;object-fit:contain" onerror="this.style.display='none'">` : ''}
@@ -1935,7 +1935,7 @@ function buildCard(m) {
         <span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${timeStr}</span>
       </div>
       <!-- Equipes au milieu -->
-      <div style="position:absolute;bottom:${started ? '6px' : '58px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="position:absolute;bottom:${started ? '16px' : '58px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:5px">
           ${homeLogo ? `<img src="${homeLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
           <span style="color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,1)">${homeName}</span>
@@ -1947,7 +1947,7 @@ function buildCard(m) {
         </div>
       </div>
 
-      ${started && !finished ? `<div style="position:absolute;bottom:36px;left:0;right:0;text-align:center;z-index:3">${getCashoutHtml(m.id, live?live.homeScore:'?', live?live.awayScore:'?')}</div>` : ''}
+      ${started && !finished ? `<div style="position:absolute;bottom:48px;left:0;right:0;text-align:center;z-index:3">${getCashoutHtml(m.id, live?live.homeScore:'?', live?live.awayScore:'?')}</div>` : ''}
 
       <!-- Cotes intégrées au bandeau - style blanc comme capture -->
       <div style="position:absolute;bottom:8px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px${started ? ';display:none' : (oddsPending ? ';opacity:0.28;pointer-events:none;filter:grayscale(1)' : '')}">
