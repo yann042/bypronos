@@ -2860,14 +2860,27 @@ function scrollToMatch(id, el) {
 // -- Système joueurs ---------------------------
 // ==============================================
 const STORAGE_KEY='bypronos_players';
+const BP_RESERVED_KEYS = { config:1, players:1, standings:1, teams:1, info:1, bets:1, matchesLock:1, global:1 };
+function bpPlayersKey() {
+  let code = (currentLeague && currentLeague.code) ? currentLeague.code : (localStorage.getItem('bypronos_league') || '');
+  try { const p = JSON.parse(code); if (p && p.code) code = p.code; } catch(e){}
+  code = String(code).toUpperCase().replace(/[^A-Z0-9_]/g, '') || 'NONE';
+  return 'bypronos_players_' + code;
+}
+function bpFilterPlayers(obj) {
+  const out = {};
+  Object.keys(obj || {}).forEach(function(k){ if (!BP_RESERVED_KEYS[k] && obj[k] && typeof obj[k] === 'object') out[k] = obj[k]; });
+  return out;
+}
 
 function loadPlayers() {
-  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}; }
+  try{ return bpFilterPlayers(JSON.parse(localStorage.getItem(bpPlayersKey()))||{}); }
   catch(e){ return {}; }
 }
 function savePlayers(data) {
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
-  savePlayers_league(data);
+  const clean = bpFilterPlayers(data);
+  localStorage.setItem(bpPlayersKey(),JSON.stringify(clean));
+  savePlayers_league(clean);
 }
 function autosave() {
   if(!currentPlayer) return;
@@ -3692,6 +3705,23 @@ async function bpHashPwd(pwd) {
   return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
 }
 // Console (admin) : bpSetLeaguePassword('POTES', 'monMotDePasse')
+// Supprimer un joueur/nœud parasite d'une ligue : bpRemovePlayer('POTES','config')
+window.bpRemovePlayer = async function(code, name) {
+  code = String(code).toUpperCase();
+  await fetch(FB_URL + '/leagues/' + code + '/standings/' + encodeURIComponent(name) + '.json', { method: 'DELETE' });
+  console.log('\u2705 Supprime "' + name + '" de la ligue ' + code + '. Recharge (Ctrl+Maj+R) pour voir le classement a jour.');
+};
+// Nettoyer d'un coup les nœuds techniques d'une ligue : bpCleanLeague('POTES')
+window.bpCleanLeague = async function(code) {
+  code = String(code).toUpperCase();
+  const data = await fetch(FB_URL + '/leagues/' + code + '/standings.json').then(function(r){return r.json();}) || {};
+  const removed = [];
+  for (const k of Object.keys(data)) {
+    if (BP_RESERVED_KEYS[k]) { await fetch(FB_URL + '/leagues/' + code + '/standings/' + encodeURIComponent(k) + '.json', { method:'DELETE' }); removed.push(k); }
+  }
+  console.log('\u2705 Ligue ' + code + ' nettoyee (nœuds techniques) : ' + (removed.join(', ') || 'rien a nettoyer') + '. Recharge la page.');
+};
+
 window.bpSetLeaguePassword = async function(code, pwd) {
   code = String(code).toUpperCase();
   const h = await bpHashPwd(pwd);
@@ -3718,8 +3748,8 @@ async function syncFromFirebase() {
     const fbPlayers = currentLeague ? await loadPlayersFromLeague() : await loadPlayersFromFirebase();
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
       const localPlayers = loadPlayers();
-      const merged = Object.assign({}, localPlayers, fbPlayers);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      const merged = Object.assign({}, localPlayers, bpFilterPlayers(fbPlayers));
+      localStorage.setItem(bpPlayersKey(), JSON.stringify(merged));
       renderMatches();
       renderBetslip();
       console.log('✅ Sync Firebase OK - ' + Object.keys(fbPlayers).length + ' joueur(s)');
@@ -3734,11 +3764,11 @@ function watchFirebase() {
       const fbPlayers = await loadPlayersFromFirebase();
       if (fbPlayers && Object.keys(fbPlayers).length > 0) {
         const localPlayers = loadPlayers();
-        const merged = Object.assign({}, localPlayers, fbPlayers);
+        const merged = Object.assign({}, localPlayers, bpFilterPlayers(fbPlayers));
         const current = JSON.stringify(localPlayers);
         const next = JSON.stringify(merged);
         if (current !== next) {
-          localStorage.setItem(STORAGE_KEY, next);
+          localStorage.setItem(bpPlayersKey(), next);
           renderMatches();
           renderBetslip();
           console.log('🔄 Mise à jour Firebase détectée');
