@@ -1067,6 +1067,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         <div class="results-panel">
           <div class="results-panel-header">📋 Historique des paris</div>
           <div class="history-filters" id="historyFilters"></div>
+          <div class="history-filters" id="historyFiltersComp"></div>
+          <div class="history-filters" id="historyFiltersTeam"></div>
+          <div class="history-filters" id="historyFiltersRound"></div>
           <div class="results-panel-body" id="historyList"></div>
         </div>
       </div>
@@ -3033,6 +3036,14 @@ function switchRankTab(tab, btn) {
 }
 
 let historyFilterPlayer = 'all';
+let historyFilterComp = 'all';
+let historyFilterTeam = 'all';
+let historyFilterRound = 'all';
+function bpRoundLabel(round) {
+  if (!round) return '?';
+  var mm = String(round).match(/(\d+)/);
+  return mm ? ('J' + mm[1]) : String(round);
+}
 let historyFilterDay = 'all';
 let rankTab = 'saison';
 
@@ -3229,6 +3240,53 @@ function renderHistoryPanel() {
     filtersEl.innerHTML = btns;
   }
 
+  // Collecter championnats + equipes presents dans les paris (tous joueurs)
+  const compsPresent = {}, teamsPresent = {}, roundsPresent = {};
+  playerNames.forEach(function(n){
+    const vb = (players[n] && players[n].validatedBets) || {};
+    Object.keys(vb).forEach(function(mid){
+      const mm = matches.find(function(x){ return String(x.id) === String(mid); });
+      if (mm) { if (mm.comp) compsPresent[mm.comp]=1; if (mm.home) teamsPresent[mm.home]=1; if (mm.away) teamsPresent[mm.away]=1; if (mm.round) roundsPresent[mm.round]=1; }
+    });
+  });
+
+  // Filtre CHAMPIONNAT
+  const compEl = document.getElementById('historyFiltersComp');
+  if (compEl) {
+    const compLabels = { ligue1:'L1', ligue2:'L2', premier:'PL' };
+    var cbtns = '<button class="history-filter-btn' + (historyFilterComp==='all'?' active':'') + '" onclick="setHistoryFilterComp(this,\'all\')">Tous</button>';
+    ['ligue1','ligue2','premier'].forEach(function(cp){
+      if (compsPresent[cp]) cbtns += '<button class="history-filter-btn' + (historyFilterComp===cp?' active':'') + '" onclick="setHistoryFilterComp(this,\''+cp+'\')">' + compLabels[cp] + '</button>';
+    });
+    compEl.innerHTML = cbtns;
+  }
+
+  // Filtre EQUIPE
+  const teamEl = document.getElementById('historyFiltersTeam');
+  if (teamEl) {
+    var tbtns = '<button class="history-filter-btn' + (historyFilterTeam==='all'?' active':'') + '" onclick="setHistoryFilterTeam(this,\'all\')">Toutes</button>';
+    Object.keys(teamsPresent).sort().forEach(function(t){
+      var te = String(t).replace(/'/g, "");
+      tbtns += '<button class="history-filter-btn' + (historyFilterTeam===t?' active':'') + '" onclick="setHistoryFilterTeam(this,\''+te+'\')">' + t + '</button>';
+    });
+    teamEl.innerHTML = tbtns;
+  }
+
+  // Filtre JOURNEE
+  const roundEl = document.getElementById('historyFiltersRound');
+  if (roundEl) {
+    var rounds = Object.keys(roundsPresent).sort(function(a,b){
+      var na = (String(a).match(/(\d+)/)||[])[1], nb = (String(b).match(/(\d+)/)||[])[1];
+      return (parseInt(na)||0) - (parseInt(nb)||0);
+    });
+    var rbtns = '<button class="history-filter-btn' + (historyFilterRound==='all'?' active':'') + '" onclick="setHistoryFilterRound(this,\'all\')">Toutes</button>';
+    rounds.forEach(function(rd){
+      var re2 = String(rd).replace(/'/g,'');
+      rbtns += '<button class="history-filter-btn' + (historyFilterRound===rd?' active':'') + '" onclick="setHistoryFilterRound(this,\''+re2+'\')">' + bpRoundLabel(rd) + '</button>';
+    });
+    roundEl.innerHTML = rbtns;
+  }
+
   // Historique des paris
   const histEl = document.getElementById('historyList');
   if (!histEl) return;
@@ -3249,7 +3307,15 @@ function renderHistoryPanel() {
     return;
   }
 
-  histEl.innerHTML = Object.entries(matchPronosMap).map(([mid, pronos]) => {
+  const _entries = Object.entries(matchPronosMap).filter(function(e){
+    const mm = matches.find(function(x){ return String(x.id) === String(e[0]); });
+    if (historyFilterComp !== 'all' && (!mm || mm.comp !== historyFilterComp)) return false;
+    if (historyFilterTeam !== 'all' && (!mm || (mm.home !== historyFilterTeam && mm.away !== historyFilterTeam))) return false;
+    if (historyFilterRound !== 'all' && (!mm || mm.round !== historyFilterRound)) return false;
+    return true;
+  });
+  if (!_entries.length) { histEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun pari trouve</div>'; return; }
+  histEl.innerHTML = _entries.map(([mid, pronos]) => {
     const m = matches.find(x => String(x.id) === String(mid));
     const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
     const live = liveData[parseInt(mid)];
@@ -3295,6 +3361,9 @@ function renderHistoryPanel() {
   }).join('');
 }
 
+function setHistoryFilterComp(btn, comp) { historyFilterComp = comp; renderHistoryPanel(); }
+function setHistoryFilterTeam(btn, team) { historyFilterTeam = team; renderHistoryPanel(); }
+function setHistoryFilterRound(btn, round) { historyFilterRound = round; renderHistoryPanel(); }
 function setHistoryFilter(btn, player) {
   historyFilterPlayer = player;
   document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => b.classList.remove('active'));
