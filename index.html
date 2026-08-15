@@ -1113,7 +1113,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         <span style="font-size:26px">📅</span>
         <div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.5px;line-height:1">BY EVENTS</div>
-          <div style="font-size:11px;color:var(--txt2)" id="evSubtitle">Reunions &amp; rencontres entre collegues</div>
+          <div style="font-size:11px;color:var(--txt2)" id="evSubtitle">Réunions &amp; Rencontres</div>
         </div>
       </div>
 
@@ -1123,9 +1123,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
           <input id="evDate" type="date">
           <input id="evTime" type="time">
         </div>
-        <input id="evLoc" type="text" placeholder="Lieu (ex: Bar Le Central, salle de reunion...)" maxlength="80">
-        <textarea id="evNote" rows="2" placeholder="Details (facultatif)" maxlength="300"></textarea>
-        <button class="ev-propose-btn" onclick="bpProposeEvent()">Proposer l'evenement</button>
+        <input id="evLoc" type="text" placeholder="Lieu (ex: Bar Le Central, salle de réunion...)" maxlength="80">
+        <textarea id="evNote" rows="2" placeholder="Détails (facultatif)" maxlength="300"></textarea>
+        <button class="ev-propose-btn" onclick="bpProposeEvent()">Proposer l'événement</button>
       </div>
 
       <div id="eventsList"></div>
@@ -2987,7 +2987,7 @@ async function renderEventsView() {
   const listEl = document.getElementById('eventsList');
   if (!listEl) return;
   const sub = document.getElementById('evSubtitle');
-  if (sub) sub.textContent = (currentLeague ? 'Ligue ' + (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' \u00b7 reunions & rencontres';
+  if (sub) sub.textContent = (currentLeague ? (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' \u00b7 R\u00e9unions & Rencontres';
   if (bpLeagueCode() === 'NONE') { listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Rejoins une ligue pour voir ses evenements.</div>'; return; }
   listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
   let data = {};
@@ -3014,7 +3014,7 @@ window.bpProposeEvent = async function() {
   const g = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
   const title = g('evTitle').trim(), date = g('evDate'), time = g('evTime'), loc = g('evLoc').trim(), note = g('evNote').trim();
   if (!title || !date) { alert('Merci d\'indiquer au moins un titre et une date.'); return; }
-  if (!currentPlayer) { alert('Connecte-toi d\'abord pour proposer un evenement.'); return; }
+  if (!currentPlayer) { alert('Connecte-toi d\'abord pour proposer un événement.'); return; }
   const id = 'ev_' + Date.now();
   const ev = { title: title, date: date, time: time, location: loc, note: note, organizer: currentPlayer, createdAt: Date.now(), participants: {} };
   ev.participants[currentPlayer] = true;
@@ -3035,7 +3035,7 @@ window.bpToggleEventRSVP = async function(id) {
   } catch(e) {}
 };
 window.bpDeleteEvent = async function(id) {
-  if (!confirm('Supprimer cet evenement ?')) return;
+  if (!confirm('Supprimer cet \u00e9v\u00e9nement ?')) return;
   try { await fetch(FB_URL + bpEventsBase() + '/' + id + '.json', { method: 'DELETE' }); renderEventsView(); } catch(e) {}
 };
 
