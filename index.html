@@ -262,8 +262,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .events-fab{position:fixed;bottom:76px;right:24px;z-index:8000;width:44px;height:44px;border-radius:50%;background:#e0a81c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 12px rgba(224,168,28,.4);transition:all .2s}
 .events-fab:hover{transform:scale(1.08);background:#caa018}
 .fab-menu{position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:center;gap:10px}
-.fab-sub{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.28);transition:opacity .2s,transform .2s;opacity:0;transform:translateY(14px) scale(.6);pointer-events:none}
-.fab-menu.open .fab-sub{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.fab-sub{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.28);transition:opacity .2s;opacity:0;visibility:hidden;pointer-events:none}
+.fab-menu.open .fab-sub{opacity:1;visibility:visible;pointer-events:auto}
 .fab-events{background:#e0a81c}
 .fab-chat{background:var(--acc)}
 .fab-main{width:50px;height:50px;border-radius:50%;background:#1a1f2e;color:#fff;border:none;cursor:pointer;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.32);transition:transform .25s}
