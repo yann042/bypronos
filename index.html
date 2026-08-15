@@ -1413,6 +1413,26 @@ function bpLeagueFilter(list) {
     return true;
   });
 }
+let bpBackfilled = false;
+function bpBackfillBetInfo() {
+  if (bpBackfilled) return;
+  if (!currentLeague || !bpAllMatches || !bpAllMatches.length) return;
+  bpBackfilled = true;
+  try {
+    const players = loadPlayers();
+    let changed = false;
+    Object.keys(players).forEach(function(n){
+      const vb = players[n].validatedBets || {};
+      Object.keys(vb).forEach(function(mid){
+        const b = vb[mid];
+        if (b.home && b.away) return;
+        const mm = bpAllMatches.find(function(x){ return String(x.id) === String(mid); });
+        if (mm) { b.home = mm.home; b.away = mm.away; if (!b.comp) b.comp = mm.comp; if (!b.round) b.round = mm.round; changed = true; }
+      });
+    });
+    if (changed) savePlayers(players);
+  } catch(e) {}
+}
 function bpApplyLeagueFilter() {
   // Masquer l'onglet PL pour les ligues sans Premier League (tout sauf POTES)
   const code = ((currentLeague && currentLeague.code) || '').toUpperCase();
@@ -1425,6 +1445,7 @@ function bpApplyLeagueFilter() {
     const allBtn = document.getElementById('compBtn0'); if (allBtn) allBtn.classList.add('active');
   }
   matches = bpLeagueFilter(bpAllMatches);
+  bpBackfillBetInfo();
   renderMatches();
 }
 
@@ -2402,6 +2423,9 @@ async function recomputeStandings(playersArg) {
         const cv = b.cashoutValue || 0;
         sR += cv; days[dayKey].ptsResult += cv;
       } else if (live && live.finished) {
+        b.finalHome = live.homeScore; b.finalAway = live.awayScore;
+        const _mm = matches.find(function(x){ return x.id === parseInt(mid); });
+        if (_mm) { if (!b.home) b.home = _mm.home; if (!b.away) b.away = _mm.away; if (!b.comp) b.comp = _mm.comp; }
         const lp = calcLivePts(b, live.homeScore, live.awayScore);
         if (lp) {
           let rPts = 0, scPts = 0;
@@ -2620,14 +2644,21 @@ async function loadFixtures() {
     const data = await res.json();
     const mapped = (data.response || []).filter(bpKeepFixture).map(mapFixture);
     if (mapped.length) {
-      bpAllMatches = mapped;
+      // Filet de securite : conserver les matchs en direct / termines recemment que l'API aurait laches
+      const _nowS = Date.now() / 1000;
+      const _preserved = (bpAllMatches || []).filter(function(old){
+        if (mapped.some(function(n){ return n.id === old.id; })) return false; // deja present
+        if (!liveData[old.id]) return false;                                    // jamais demarre
+        return !liveData[old.id].finished || (_nowS - (old.ts || 0)) < 8 * 3600; // en cours, ou fini < 8h
+      });
+      bpAllMatches = mapped.concat(_preserved);
       bpApplyLeagueFilter();
       preloadMatchImages(); // visuels (stade/joueurs) via /teamimage
       await enrichOdds(mapped); // vraies cotes 1X2 via /odds
       bpApplyLeagueFilter();
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
-        await db.ref('fixturesCache_v10').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: mapped });
+        await db.ref('fixturesCache_v10').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: bpAllMatches });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
@@ -2762,6 +2793,8 @@ function placeBetForMatch(matchId) {
     // Points calcules d'apres les vrais resultats (recomputeStandings), pas a la validation.
     p.validatedBets[parseInt(b.matchId)] = {
       h:b.h, a:b.a,
+      home:b.home, away:b.away,
+      comp:(matches.find(x => x.id === parseInt(b.matchId)) || {}).comp||'',
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
       scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
       round: (matches.find(x => x.id === parseInt(b.matchId)) || {}).round || 'Journée en cours'
@@ -2805,6 +2838,8 @@ function placeBets() {
     const b=betslip[k];
     p.validatedBets[parseInt(b.matchId)]={
       h:b.h, a:b.a,
+      home:b.home, away:b.away,
+      comp:(matches.find(x=>x.id===parseInt(b.matchId))||{}).comp||'',
       resultLabel:b.resultLabel,
       resultCls:b.resultCls,
       resultShort:b.resultShort,
@@ -3246,7 +3281,9 @@ function renderHistoryPanel() {
     const vb = (players[n] && players[n].validatedBets) || {};
     Object.keys(vb).forEach(function(mid){
       const mm = matches.find(function(x){ return String(x.id) === String(mid); });
-      if (mm) { if (mm.comp) compsPresent[mm.comp]=1; if (mm.home) teamsPresent[mm.home]=1; if (mm.away) teamsPresent[mm.away]=1; if (mm.round) roundsPresent[mm.round]=1; }
+      const _bi = vb[mid] || {};
+      const _cp = (mm && mm.comp) || _bi.comp, _hm = (mm && mm.home) || _bi.home, _aw = (mm && mm.away) || _bi.away, _rd = (mm && mm.round) || _bi.round;
+      if (_cp) compsPresent[_cp]=1; if (_hm) teamsPresent[_hm]=1; if (_aw) teamsPresent[_aw]=1; if (_rd) roundsPresent[_rd]=1;
     });
   });
 
@@ -3309,18 +3346,21 @@ function renderHistoryPanel() {
 
   const _entries = Object.entries(matchPronosMap).filter(function(e){
     const mm = matches.find(function(x){ return String(x.id) === String(e[0]); });
-    if (historyFilterComp !== 'all' && (!mm || mm.comp !== historyFilterComp)) return false;
-    if (historyFilterTeam !== 'all' && (!mm || (mm.home !== historyFilterTeam && mm.away !== historyFilterTeam))) return false;
-    if (historyFilterRound !== 'all' && (!mm || mm.round !== historyFilterRound)) return false;
+    const _b = (e[1][0] && e[1][0].bet) || {};
+    const comp = (mm && mm.comp) || _b.comp, home = (mm && mm.home) || _b.home, away = (mm && mm.away) || _b.away, round = (mm && mm.round) || _b.round;
+    if (historyFilterComp !== 'all' && comp !== historyFilterComp) return false;
+    if (historyFilterTeam !== 'all' && home !== historyFilterTeam && away !== historyFilterTeam) return false;
+    if (historyFilterRound !== 'all' && round !== historyFilterRound) return false;
     return true;
   });
   if (!_entries.length) { histEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun pari trouve</div>'; return; }
   histEl.innerHTML = _entries.map(([mid, pronos]) => {
     const m = matches.find(x => String(x.id) === String(mid));
-    const matchName = m ? m.home + ' - ' + m.away : 'Match #' + mid;
+    const _b0 = (pronos[0] && pronos[0].bet) || {};
+    const matchName = m ? m.home + ' - ' + m.away : ((_b0.home && _b0.away) ? _b0.home + ' - ' + _b0.away : 'Match #' + mid);
     const live = liveData[parseInt(mid)];
-    const started = (m && isMatchStarted(m.time, m.id)) || !!live;
-    const scoreStr = live ? live.homeScore + '-' + live.awayScore : '?-?';
+    const started = (m && isMatchStarted(m.time, m.id)) || !!live || (_b0.finalHome != null);
+    const scoreStr = live ? live.homeScore + '-' + live.awayScore : (_b0.finalHome != null ? _b0.finalHome + '-' + _b0.finalAway : '?-?');
 
     // Trier les pronos par points décroissants
     const pronosWithPts = pronos.map(({ name, bet }) => {
