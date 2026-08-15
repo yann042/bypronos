@@ -259,6 +259,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 /* -- Tchat flottant -- */
 .chat-bubble{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .chat-toggle{width:52px;height:52px;border-radius:50%;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,212,170,.4);transition:all .2s}
+.events-fab{position:fixed;bottom:88px;right:24px;z-index:8000;width:52px;height:52px;border-radius:50%;background:#e0a81c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 20px rgba(224,168,28,.45);transition:all .2s}
+.events-fab:hover{transform:scale(1.08);background:#caa018}
+@media (max-width:768px){.events-fab{bottom:80px;right:16px}}
 .chat-toggle:hover{transform:scale(1.08);background:#00bfa5}
 .chat-unread{position:absolute;top:-4px;right:-4px;background:var(--acc3);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;display:none}
 .chat-window{width:300px;background:var(--bg2);border:1px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);display:none;flex-direction:column;animation:chatIn .2s ease}
@@ -994,7 +997,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <button class="nav-btn active" onclick="window.showView('sports',this)"><span class="prono-badge">1X2</span></button>
       <button class="nav-btn" id="navLive" onclick="window.showView('live',this)"><span class="live-badge">LIVE</span></button>
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
-      <button class="nav-btn" onclick="window.showView('events',this)" title="BY Events">📅</button>
     </nav>
     <div class="header-right">
 
@@ -1104,7 +1106,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         <span style="font-size:26px">📅</span>
         <div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.5px;line-height:1">BY EVENTS</div>
-          <div style="font-size:11px;color:var(--txt2)">Reunions &amp; rencontres entre collegues</div>
+          <div style="font-size:11px;color:var(--txt2)" id="evSubtitle">Reunions &amp; rencontres entre collegues</div>
         </div>
       </div>
 
@@ -2929,7 +2931,7 @@ window.showView = function showView(view, btn) {
   document.getElementById('view-'+view).style.display='block';
 
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   if(view==='ranking') renderRanking();
   if(view==='live') fetchGlobalLive();
   if(view==='events') renderEventsView();
@@ -2938,6 +2940,12 @@ window.showView = function showView(view, btn) {
 // ==============================================
 // -- BY EVENTS (agenda partage) ----------------
 // ==============================================
+function bpLeagueCode() {
+  let code = (currentLeague && currentLeague.code) ? currentLeague.code : (localStorage.getItem('bypronos_league') || '');
+  try { const p = JSON.parse(code); if (p && p.code) code = p.code; } catch(e){}
+  return String(code).toUpperCase().replace(/[^A-Z0-9_]/g, '') || 'NONE';
+}
+function bpEventsBase() { return '/byevents/' + bpLeagueCode(); }
 function bpEscape(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function bpEventCard(ev, isPast) {
   const parts = Object.keys(ev.participants || {});
@@ -2965,9 +2973,12 @@ function bpEventCard(ev, isPast) {
 async function renderEventsView() {
   const listEl = document.getElementById('eventsList');
   if (!listEl) return;
+  const sub = document.getElementById('evSubtitle');
+  if (sub) sub.textContent = (currentLeague ? 'Ligue ' + (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' \u00b7 reunions & rencontres';
+  if (bpLeagueCode() === 'NONE') { listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Rejoins une ligue pour voir ses evenements.</div>'; return; }
   listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
   let data = {};
-  try { data = (await fetch(FB_URL + '/byevents.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
+  try { data = (await fetch(FB_URL + bpEventsBase() + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
   const events = Object.keys(data || {}).map(function(id){ return Object.assign({ id: id }, data[id]); });
   events.sort(function(a, b){ return (a.date + ' ' + (a.time || '')).localeCompare(b.date + ' ' + (b.time || '')); });
   const cutoff = Date.now() - 6 * 3600000;
@@ -2995,14 +3006,14 @@ window.bpProposeEvent = async function() {
   const ev = { title: title, date: date, time: time, location: loc, note: note, organizer: currentPlayer, createdAt: Date.now(), participants: {} };
   ev.participants[currentPlayer] = true;
   try {
-    await fetch(FB_URL + '/byevents/' + id + '.json', { method: 'PUT', body: JSON.stringify(ev) });
+    await fetch(FB_URL + bpEventsBase() + '/' + id + '.json', { method: 'PUT', body: JSON.stringify(ev) });
     ['evTitle','evDate','evTime','evLoc','evNote'].forEach(function(i){ var el = document.getElementById(i); if (el) el.value = ''; });
     renderEventsView();
   } catch(e) { alert('Erreur lors de l\'enregistrement.'); }
 };
 window.bpToggleEventRSVP = async function(id) {
   if (!currentPlayer) { alert('Connecte-toi pour participer.'); return; }
-  const url = FB_URL + '/byevents/' + id + '/participants/' + encodeURIComponent(currentPlayer) + '.json';
+  const url = FB_URL + bpEventsBase() + '/' + id + '/participants/' + encodeURIComponent(currentPlayer) + '.json';
   try {
     const cur = await fetch(url).then(function(r){ return r.json(); });
     if (cur) await fetch(url, { method: 'DELETE' });
@@ -3012,7 +3023,7 @@ window.bpToggleEventRSVP = async function(id) {
 };
 window.bpDeleteEvent = async function(id) {
   if (!confirm('Supprimer cet evenement ?')) return;
-  try { await fetch(FB_URL + '/byevents/' + id + '.json', { method: 'DELETE' }); renderEventsView(); } catch(e) {}
+  try { await fetch(FB_URL + bpEventsBase() + '/' + id + '.json', { method: 'DELETE' }); renderEventsView(); } catch(e) {}
 };
 
 function scrollToMatch(id, el) {
@@ -4602,6 +4613,7 @@ window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages
 </div>
 
 <!-- -- Tchat flottant -- -->
+<button class="events-fab" onclick="window.showView('events')" title="BY Events">📅</button>
 <div class="chat-bubble" id="chatBubble">
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
