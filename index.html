@@ -761,6 +761,27 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .lr-pts.neg{background:#cc2200;color:#fff}
 .lr-pts.pot{background:#eef7f2;color:#056b52;border:1px solid #bfe3d5}
 .lr-pts.cash{background:#1a6fd4;color:#fff}
+.ev-form{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:12px;margin:12px 0}
+.ev-form input,.ev-form textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--bord);border-radius:7px;padding:8px 10px;font-size:13px;color:var(--txt);margin-bottom:8px;font-family:inherit}
+.ev-form .ev-row{display:flex;gap:8px}
+.ev-form .ev-row input{flex:1}
+.ev-propose-btn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:10px;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:.5px}
+.ev-card{display:flex;gap:12px;background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.ev-card.past{opacity:.55}
+.ev-date{flex-shrink:0;width:52px;text-align:center;background:var(--acc);color:#fff;border-radius:8px;padding:8px 4px;align-self:flex-start}
+.ev-day{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;line-height:1}
+.ev-mon{font-size:10px;text-transform:uppercase;font-weight:700}
+.ev-body{flex:1;min-width:0}
+.ev-title{font-weight:800;font-size:15px;margin-bottom:3px}
+.ev-meta{font-size:11px;color:var(--txt2);margin-bottom:4px}
+.ev-note{font-size:12px;color:var(--txt);margin-bottom:6px;white-space:pre-wrap}
+.ev-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.ev-org{font-size:10px;color:var(--txt2);font-style:italic}
+.ev-rsvp{background:var(--bg3);color:var(--acc);border:1.5px solid var(--acc);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.ev-rsvp.on{background:var(--acc);color:#fff}
+.ev-parts{font-size:11px;color:var(--txt2)}
+.ev-del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--txt2);font-size:22px;cursor:pointer;line-height:1}
+.ev-section-title{font-size:11px;font-weight:800;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin:16px 0 8px}
 .scorers{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:2px 10px 4px;padding-top:4px;font-size:11px;color:var(--txt2)}
 .scorers .sc-side{flex:1;line-height:1.5;min-width:40%}
 .scorers .sc-side.away{text-align:right}
@@ -973,6 +994,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       <button class="nav-btn active" onclick="window.showView('sports',this)"><span class="prono-badge">1X2</span></button>
       <button class="nav-btn" id="navLive" onclick="window.showView('live',this)"><span class="live-badge">LIVE</span></button>
       <button class="nav-btn" onclick="window.showView('ranking',this)">📊</button>
+      <button class="nav-btn" onclick="window.showView('events',this)" title="BY Events">📅</button>
     </nav>
     <div class="header-right">
 
@@ -1053,7 +1075,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
               <div style="display:flex;gap:4px">
                 <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
-                <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('journee',this)">Journée</button>
+                <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('semaine',this)">Semaine</button>
               </div>
               <div id="teamToggle" style="display:none;gap:4px">
                 <button class="history-filter-btn active" id="rankTabIndividuel" onclick="window.switchRankMode('individuel',this)">Individuel</button>
@@ -1075,6 +1097,31 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
       </div>
     </div>
   </div><!-- /view-ranking -->
+
+  <div id="view-events" class="view-panel" style="display:none">
+    <div style="max-width:640px;margin:0 auto;padding:16px 12px 40px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+        <span style="font-size:26px">📅</span>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.5px;line-height:1">BY EVENTS</div>
+          <div style="font-size:11px;color:var(--txt2)">Reunions &amp; rencontres entre collegues</div>
+        </div>
+      </div>
+
+      <div class="ev-form">
+        <input id="evTitle" type="text" placeholder="Titre (ex: Apero de fin de saison)" maxlength="80">
+        <div class="ev-row">
+          <input id="evDate" type="date">
+          <input id="evTime" type="time">
+        </div>
+        <input id="evLoc" type="text" placeholder="Lieu (ex: Bar Le Central, salle de reunion...)" maxlength="80">
+        <textarea id="evNote" rows="2" placeholder="Details (facultatif)" maxlength="300"></textarea>
+        <button class="ev-propose-btn" onclick="bpProposeEvent()">Proposer l'evenement</button>
+      </div>
+
+      <div id="eventsList"></div>
+    </div>
+  </div>
 
 <div class="notif" id="notif"></div>
 <div class="goal-overlay" id="goalOverlay">
@@ -1425,9 +1472,9 @@ function bpBackfillBetInfo() {
       const vb = players[n].validatedBets || {};
       Object.keys(vb).forEach(function(mid){
         const b = vb[mid];
-        if (b.home && b.away) return;
+        if (b.home && b.away && b.ts) return;
         const mm = bpAllMatches.find(function(x){ return String(x.id) === String(mid); });
-        if (mm) { b.home = mm.home; b.away = mm.away; if (!b.comp) b.comp = mm.comp; if (!b.round) b.round = mm.round; changed = true; }
+        if (mm) { if (!b.home) b.home = mm.home; if (!b.away) b.away = mm.away; if (!b.comp) b.comp = mm.comp; if (!b.round) b.round = mm.round; if (!b.ts) b.ts = mm.ts; changed = true; }
       });
     });
     if (changed) savePlayers(players);
@@ -2425,7 +2472,7 @@ async function recomputeStandings(playersArg) {
       } else if (live && live.finished) {
         b.finalHome = live.homeScore; b.finalAway = live.awayScore;
         const _mm = matches.find(function(x){ return x.id === parseInt(mid); });
-        if (_mm) { if (!b.home) b.home = _mm.home; if (!b.away) b.away = _mm.away; if (!b.comp) b.comp = _mm.comp; }
+        if (_mm) { if (!b.home) b.home = _mm.home; if (!b.away) b.away = _mm.away; if (!b.comp) b.comp = _mm.comp; if (!b.ts) b.ts = _mm.ts; }
         const lp = calcLivePts(b, live.homeScore, live.awayScore);
         if (lp) {
           let rPts = 0, scPts = 0;
@@ -2795,6 +2842,7 @@ function placeBetForMatch(matchId) {
       h:b.h, a:b.a,
       home:b.home, away:b.away,
       comp:(matches.find(x => x.id === parseInt(b.matchId)) || {}).comp||'',
+      ts:(matches.find(x => x.id === parseInt(b.matchId)) || {}).ts||0,
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
       scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
       round: (matches.find(x => x.id === parseInt(b.matchId)) || {}).round || 'Journée en cours'
@@ -2840,6 +2888,7 @@ function placeBets() {
       h:b.h, a:b.a,
       home:b.home, away:b.away,
       comp:(matches.find(x=>x.id===parseInt(b.matchId))||{}).comp||'',
+      ts:(matches.find(x=>x.id===parseInt(b.matchId))||{}).ts||0,
       resultLabel:b.resultLabel,
       resultCls:b.resultCls,
       resultShort:b.resultShort,
@@ -2883,7 +2932,88 @@ window.showView = function showView(view, btn) {
   btn.classList.add('active');
   if(view==='ranking') renderRanking();
   if(view==='live') fetchGlobalLive();
+  if(view==='events') renderEventsView();
 }
+
+// ==============================================
+// -- BY EVENTS (agenda partage) ----------------
+// ==============================================
+function bpEscape(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function bpEventCard(ev, isPast) {
+  const parts = Object.keys(ev.participants || {});
+  const going = currentPlayer && ev.participants && ev.participants[currentPlayer];
+  const d = new Date(ev.date + 'T' + (ev.time || '00:00'));
+  const dayNum = isNaN(d) ? '?' : d.getDate();
+  const mon = isNaN(d) ? '' : d.toLocaleDateString('fr-FR', { month: 'short' });
+  const full = isNaN(d) ? ev.date : d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const canDelete = currentPlayer && ev.organizer === currentPlayer;
+  return '<div class="ev-card' + (isPast ? ' past' : '') + '">' +
+    '<div class="ev-date"><div class="ev-day">' + dayNum + '</div><div class="ev-mon">' + mon + '</div></div>' +
+    '<div class="ev-body">' +
+      '<div class="ev-title">' + bpEscape(ev.title) + '</div>' +
+      '<div class="ev-meta">' + full + (ev.time ? ' \u00b7 ' + ev.time : '') + (ev.location ? ' \u00b7 \U0001F4CD ' + bpEscape(ev.location) : '') + '</div>' +
+      (ev.note ? '<div class="ev-note">' + bpEscape(ev.note) + '</div>' : '') +
+      '<div class="ev-foot">' +
+        '<span class="ev-org">propose par ' + bpEscape(ev.organizer) + '</span>' +
+        (!isPast ? '<button class="ev-rsvp' + (going ? ' on' : '') + '" onclick="bpToggleEventRSVP(\'' + ev.id + '\')">' + (going ? '\u2713 Je participe' : 'Je participe') + '</button>' : '') +
+      '</div>' +
+      '<div class="ev-parts">' + (parts.length ? '\U0001F465 ' + parts.map(bpEscape).join(', ') : 'Aucun participant pour le moment') + '</div>' +
+    '</div>' +
+    (canDelete ? '<button class="ev-del" onclick="bpDeleteEvent(\'' + ev.id + '\')" title="Supprimer">\u00d7</button>' : '') +
+  '</div>';
+}
+async function renderEventsView() {
+  const listEl = document.getElementById('eventsList');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
+  let data = {};
+  try { data = (await fetch(FB_URL + '/byevents.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
+  const events = Object.keys(data || {}).map(function(id){ return Object.assign({ id: id }, data[id]); });
+  events.sort(function(a, b){ return (a.date + ' ' + (a.time || '')).localeCompare(b.date + ' ' + (b.time || '')); });
+  const cutoff = Date.now() - 6 * 3600000;
+  const upcoming = [], past = [];
+  events.forEach(function(ev){
+    const t = new Date(ev.date + 'T' + (ev.time || '23:59')).getTime();
+    if (isNaN(t) || t >= cutoff) upcoming.push(ev); else past.push(ev);
+  });
+  past.reverse();
+  let html = '';
+  html += '<div class="ev-section-title">\U0001F4CC A venir</div>';
+  html += upcoming.length ? upcoming.map(function(ev){ return bpEventCard(ev, false); }).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun evenement a venir. Propose le premier !</div>';
+  if (past.length) {
+    html += '<div class="ev-section-title">Passes</div>';
+    html += past.map(function(ev){ return bpEventCard(ev, true); }).join('');
+  }
+  listEl.innerHTML = html;
+}
+window.bpProposeEvent = async function() {
+  const g = function(id){ var el = document.getElementById(id); return el ? el.value : ''; };
+  const title = g('evTitle').trim(), date = g('evDate'), time = g('evTime'), loc = g('evLoc').trim(), note = g('evNote').trim();
+  if (!title || !date) { alert('Merci d\'indiquer au moins un titre et une date.'); return; }
+  if (!currentPlayer) { alert('Connecte-toi d\'abord pour proposer un evenement.'); return; }
+  const id = 'ev_' + Date.now();
+  const ev = { title: title, date: date, time: time, location: loc, note: note, organizer: currentPlayer, createdAt: Date.now(), participants: {} };
+  ev.participants[currentPlayer] = true;
+  try {
+    await fetch(FB_URL + '/byevents/' + id + '.json', { method: 'PUT', body: JSON.stringify(ev) });
+    ['evTitle','evDate','evTime','evLoc','evNote'].forEach(function(i){ var el = document.getElementById(i); if (el) el.value = ''; });
+    renderEventsView();
+  } catch(e) { alert('Erreur lors de l\'enregistrement.'); }
+};
+window.bpToggleEventRSVP = async function(id) {
+  if (!currentPlayer) { alert('Connecte-toi pour participer.'); return; }
+  const url = FB_URL + '/byevents/' + id + '/participants/' + encodeURIComponent(currentPlayer) + '.json';
+  try {
+    const cur = await fetch(url).then(function(r){ return r.json(); });
+    if (cur) await fetch(url, { method: 'DELETE' });
+    else await fetch(url, { method: 'PUT', body: 'true' });
+    renderEventsView();
+  } catch(e) {}
+};
+window.bpDeleteEvent = async function(id) {
+  if (!confirm('Supprimer cet evenement ?')) return;
+  try { await fetch(FB_URL + '/byevents/' + id + '.json', { method: 'DELETE' }); renderEventsView(); } catch(e) {}
+};
 
 function scrollToMatch(id, el) {
   document.querySelectorAll('.sport-item[onclick]').forEach(e=>e.classList.remove('active'));
@@ -3220,7 +3350,7 @@ function renderLiveView() {
 window.switchRankTab = function switchRankTab(tab) {
   rankTab = tab;
   document.getElementById('rankTabSaison').classList.toggle('active', tab === 'saison');
-  document.getElementById('rankTabJournee').classList.toggle('active', tab === 'journee');
+  document.getElementById('rankTabJournee').classList.toggle('active', tab === 'semaine');
   renderResultsView();
 }
 
@@ -3229,6 +3359,26 @@ function renderResultsView() {
   renderHistoryPanel();
 }
 
+function bpWeekPoints(data) {
+  try {
+    const vb = (data && data.validatedBets) || {};
+    const now = new Date();
+    const dow = (now.getDay() + 6) % 7; // 0 = lundi
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow, 0, 0, 0, 0);
+    const startTs = Math.floor(monday.getTime() / 1000);
+    let total = 0;
+    Object.keys(vb).forEach(function(mid){
+      const b = vb[mid];
+      if (!b.ts || b.ts < startTs) return;
+      if (b.cashedOut) { total += (b.cashoutValue || 0); return; }
+      const live = liveData[parseInt(mid)];
+      const fh = live ? live.homeScore : b.finalHome;
+      const fa = live ? live.awayScore : b.finalAway;
+      if (fh != null && fa != null) { const lp = calcLivePts(b, fh, fa); if (lp) total += lp.pts; }
+    });
+    return Math.round(total * 100) / 100;
+  } catch(e) { return 0; }
+}
 function renderRankingPanel() {
   const players = loadPlayers();
   const day = 'Journée en cours';
@@ -3236,7 +3386,7 @@ function renderRankingPanel() {
     .map(([name, data]) => {
       const pts = rankTab === 'saison'
         ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
-        : (data.season?.days?.[day] ? (data.season.days[day].ptsResult || 0) + (data.season.days[day].ptsScore || 0) : 0);
+        : bpWeekPoints(data);
       return { name, pts };
     })
     .sort((a, b) => b.pts - a.pts);
