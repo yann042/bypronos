@@ -3261,19 +3261,15 @@ function renderRankingPanel() {
 
 function bpPtsDetail(bet, pts) {
   if (!pts) return '';
-  if (pts.type === 'cash') return '💸 Cashout encaisse = ' + fmtPts(pts.pts) + ' pts';
-  if (pts.type === 'zero') return 'Mauvais resultat = -1 pt';
+  const sep = '<span style="color:#c9c9c9">\u00b7</span>';
+  if (pts.type === 'cash') return '<span style="font-size:10px;color:#1a6fd4;font-weight:700">💸 Cashout ' + fmtPts(pts.pts) + ' pts</span>';
+  if (pts.type === 'zero') return '<span style="font-size:10px;color:#cc2200;font-weight:700">❌ Mauvais resultat -1</span>';
   var parts = [];
-  if (pts.type === 'max') {
-    parts.push('Resultat +' + fmtPts(bet.resultOdd));
-    parts.push('Score exact +' + fmtPts(bet.scoreOdd));
-  } else if (pts.type === 'bonus') {
-    parts.push('Resultat +' + fmtPts(bet.resultOdd));
-    parts.push('Bonus ecart +0,5');
-  } else {
-    parts.push('Resultat +' + fmtPts(bet.resultOdd));
-  }
-  return parts.join(' \u00b7 ') + ' = ' + fmtPts(pts.pts) + ' pts';
+  parts.push('<span style="color:#056b52;font-weight:700">✅ +' + fmtPts(bet.resultOdd) + '</span>');
+  if (pts.type === 'bonus') parts.push('<span style="color:#b5820a;font-weight:700">📏 +0,5</span>');
+  if (pts.type === 'max') parts.push('<span style="color:#c05621;font-weight:700">🎯 +' + fmtPts(bet.scoreOdd) + '</span>');
+  parts.push('<span style="color:#111;font-weight:800">= ' + fmtPts(pts.pts) + ' pts</span>');
+  return '<span style="display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:10px">' + parts.join(sep) + '</span>';
 }
 function renderHistoryPanel() {
   const players = loadPlayers();
@@ -3411,7 +3407,7 @@ function renderHistoryPanel() {
         '</div>' +
         '<span style="font-size:11px;font-weight:700;color:#111;flex-shrink:0">' + ((started || isMe) ? (bet.h + '-' + bet.a) : '🔒') + '</span>' +
         '</div>' +
-        (_detail ? '<div style="padding:0 8px 5px 34px;font-size:9px;color:var(--txt2);line-height:1.3">' + _detail + '</div>' : '') +
+        (_detail ? '<div style="padding:0 8px 5px 34px;line-height:1.3">' + _detail + '</div>' : '') +
       '</div>';
     }).join('');
 
