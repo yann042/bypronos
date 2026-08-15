@@ -257,10 +257,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .live-fallback-sub a:hover{text-decoration:underline}
 
 /* -- Tchat flottant -- */
-.chat-bubble{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.chat-bubble{position:fixed;bottom:84px;right:20px;z-index:7999;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .chat-toggle{width:44px;height:44px;border-radius:50%;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 12px rgba(0,212,170,.35);transition:all .2s}
 .events-fab{position:fixed;bottom:76px;right:24px;z-index:8000;width:44px;height:44px;border-radius:50%;background:#e0a81c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 12px rgba(224,168,28,.4);transition:all .2s}
 .events-fab:hover{transform:scale(1.08);background:#caa018}
+.fab-menu{position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:center;gap:10px}
+.fab-sub{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.28);transition:opacity .2s,transform .2s;opacity:0;transform:translateY(14px) scale(.6);pointer-events:none}
+.fab-menu.open .fab-sub{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.fab-events{background:#e0a81c}
+.fab-chat{background:var(--acc)}
+.fab-main{width:50px;height:50px;border-radius:50%;background:#1a1f2e;color:#fff;border:none;cursor:pointer;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.32);transition:transform .25s}
+.fab-menu.open .fab-main{transform:rotate(135deg)}
 @media (max-width:768px){.events-fab{bottom:68px;right:16px}}
 .chat-toggle:hover{transform:scale(1.08);background:#00bfa5}
 .chat-unread{position:absolute;top:-4px;right:-4px;background:var(--acc3);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;display:none}
@@ -391,7 +398,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .login-box{width:90vw;padding:28px 20px}
 
   /* Tchat */
-  .chat-bubble{bottom:16px;right:16px}
+  .chat-bubble{bottom:76px;right:16px}
   .chat-window{width:calc(100vw - 32px)}
 
   /* Ranking view */
@@ -2936,6 +2943,12 @@ window.showView = function showView(view, btn) {
   if(view==='live') fetchGlobalLive();
   if(view==='events') renderEventsView();
 }
+window.bpToggleFab = function(){ const m = document.getElementById('fabMenu'); if (m) m.classList.toggle('open'); };
+window.bpFabAction = function(what){
+  const m = document.getElementById('fabMenu'); if (m) m.classList.remove('open');
+  if (what === 'chat') toggleChat();
+  else if (what === 'events') window.showView('events');
+};
 
 // ==============================================
 // -- BY EVENTS (agenda partage) ----------------
@@ -4613,7 +4626,14 @@ window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages
 </div>
 
 <!-- -- Tchat flottant -- -->
-<button class="events-fab" onclick="window.showView('events')" title="BY Events">📅</button>
+<div class="fab-menu" id="fabMenu">
+  <button class="fab-sub fab-events" onclick="bpFabAction('events')" title="BY Events">📅</button>
+  <div style="position:relative">
+    <button class="fab-sub fab-chat" onclick="bpFabAction('chat')" title="Tchat">💬</button>
+    <div class="chat-unread" id="chatUnread">0</div>
+  </div>
+  <button class="fab-main" id="fabMain" onclick="bpToggleFab()" title="Menu">+</button>
+</div>
 <div class="chat-bubble" id="chatBubble">
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
@@ -4630,10 +4650,6 @@ window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages
       <input class="chat-input" id="chatInput" type="text" placeholder="Écrivez un message…" maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
       <button class="chat-send" onclick="sendChat()">➤</button>
     </div>
-  </div>
-  <div style="position:relative">
-    <button class="chat-toggle" onclick="toggleChat()" title="Ouvrir le tchat">💬</button>
-    <div class="chat-unread" id="chatUnread">0</div>
   </div>
 </div>
 
