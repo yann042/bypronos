@@ -943,8 +943,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .rank-name{flex:1;font-weight:700;font-size:13px}
 
 /* Historique */
-.history-filters{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--bord);flex-shrink:0}
-.history-filter-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s}
+.history-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:6px 8px;border-bottom:1px solid var(--bord);flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.history-filters::-webkit-scrollbar{display:none}
+.hf-label{position:sticky;left:0;z-index:1;background:var(--bg2);display:flex;align-items:center;font-size:9px;font-weight:800;color:var(--txt2);letter-spacing:.5px;text-transform:uppercase;padding-right:6px;flex-shrink:0}
+.history-filter-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;flex-shrink:0;white-space:nowrap}
 .history-filter-btn.active{background:#056b52;color:#fff;border-color:#056b52}
 .history-match{border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;overflow:hidden}
 .history-match-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg3);font-size:11px;font-weight:700}
@@ -3476,7 +3478,7 @@ function renderHistoryPanel() {
     wks.forEach(function(wk){
       wbtns += '<button class="history-filter-btn' + (historyFilterWeek===wk?' active':'') + '" onclick="setHistoryFilterWeek(this,\''+wk+'\')">' + bpWeekLabel(wk) + '</button>';
     });
-    weekEl.innerHTML = wbtns;
+    weekEl.innerHTML = '<span class="hf-label">Semaine</span>' + wbtns;
   }
 
   // Filtre JOUEUR
@@ -3488,7 +3490,7 @@ function renderHistoryPanel() {
       var isActive = historyFilterPlayer === n ? ' active' : '';
       btns += '<button class="history-filter-btn' + isActive + '" onclick="setHistoryFilter(this,\'' + n + '\')">' + (n === currentPlayer ? '👤 ' : '') + n + '</button>';
     });
-    filtersEl.innerHTML = btns;
+    filtersEl.innerHTML = '<span class="hf-label">Joueur</span>' + btns;
   }
 
   // Filtre MATCH
@@ -3499,7 +3501,7 @@ function renderHistoryPanel() {
     mids.forEach(function(mid){
       mbtns += '<button class="history-filter-btn' + (historyFilterMatch===String(mid)?' active':'') + '" onclick="setHistoryFilterMatch(this,\''+mid+'\')">' + matchesPresent[mid] + '</button>';
     });
-    matchEl.innerHTML = mbtns;
+    matchEl.innerHTML = '<span class="hf-label">Match</span>' + mbtns;
   }
 
   // Historique des paris
