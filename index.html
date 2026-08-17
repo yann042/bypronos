@@ -1097,10 +1097,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         <!-- Historique -->
         <div class="results-panel">
           <div class="results-panel-header">📋 Historique des paris</div>
+          <div class="history-filters" id="historyFiltersWeek"></div>
           <div class="history-filters" id="historyFilters"></div>
-          <div class="history-filters" id="historyFiltersComp"></div>
-          <div class="history-filters" id="historyFiltersTeam"></div>
-          <div class="history-filters" id="historyFiltersRound"></div>
+          <div class="history-filters" id="historyFiltersMatch"></div>
           <div class="results-panel-body" id="historyList"></div>
         </div>
       </div>
@@ -3225,9 +3224,16 @@ function switchRankTab(tab, btn) {
 }
 
 let historyFilterPlayer = 'all';
-let historyFilterComp = 'all';
-let historyFilterTeam = 'all';
-let historyFilterRound = 'all';
+let historyFilterWeek = 'all';
+let historyFilterMatch = 'all';
+function bpWeekKey(ts) {
+  if (!ts) return '';
+  const d = new Date(ts * 1000);
+  const dow = (d.getDay() + 6) % 7;
+  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dow);
+  return monday.getFullYear() + '-' + ('0'+(monday.getMonth()+1)).slice(-2) + '-' + ('0'+monday.getDate()).slice(-2);
+}
+function bpWeekLabel(key) { if (!key) return '?'; const p = key.split('-'); return 'Sem. ' + p[2] + '/' + p[1]; }
 function bpRoundLabel(round) {
   if (!round) return '?';
   var mm = String(round).match(/(\d+)/);
@@ -3449,7 +3455,31 @@ function renderHistoryPanel() {
   const players = loadPlayers();
   const playerNames = Object.keys(players);
 
-  // Filtres joueurs
+  // Collecter semaines + matchs presents dans les paris (tous joueurs)
+  const weeksPresent = {}, matchesPresent = {};
+  playerNames.forEach(function(n){
+    const vb = (players[n] && players[n].validatedBets) || {};
+    Object.keys(vb).forEach(function(mid){
+      const b = vb[mid] || {};
+      const wk = bpWeekKey(b.ts); if (wk) weeksPresent[wk] = 1;
+      const mm = matches.find(function(x){ return String(x.id) === String(mid); });
+      const home = (mm && mm.home) || b.home, away = (mm && mm.away) || b.away;
+      matchesPresent[mid] = (home && away) ? (home + ' - ' + away) : ('Match #' + mid);
+    });
+  });
+
+  // Filtre SEMAINE
+  const weekEl = document.getElementById('historyFiltersWeek');
+  if (weekEl) {
+    var wks = Object.keys(weeksPresent).sort().reverse();
+    var wbtns = '<button class="history-filter-btn' + (historyFilterWeek==='all'?' active':'') + '" onclick="setHistoryFilterWeek(this,\'all\')">Toutes</button>';
+    wks.forEach(function(wk){
+      wbtns += '<button class="history-filter-btn' + (historyFilterWeek===wk?' active':'') + '" onclick="setHistoryFilterWeek(this,\''+wk+'\')">' + bpWeekLabel(wk) + '</button>';
+    });
+    weekEl.innerHTML = wbtns;
+  }
+
+  // Filtre JOUEUR
   const filtersEl = document.getElementById('historyFilters');
   if (filtersEl) {
     var allActive = historyFilterPlayer === 'all' ? ' active' : '';
@@ -3461,53 +3491,15 @@ function renderHistoryPanel() {
     filtersEl.innerHTML = btns;
   }
 
-  // Collecter championnats + equipes presents dans les paris (tous joueurs)
-  const compsPresent = {}, teamsPresent = {}, roundsPresent = {};
-  playerNames.forEach(function(n){
-    const vb = (players[n] && players[n].validatedBets) || {};
-    Object.keys(vb).forEach(function(mid){
-      const mm = matches.find(function(x){ return String(x.id) === String(mid); });
-      const _bi = vb[mid] || {};
-      const _cp = (mm && mm.comp) || _bi.comp, _hm = (mm && mm.home) || _bi.home, _aw = (mm && mm.away) || _bi.away, _rd = (mm && mm.round) || _bi.round;
-      if (_cp) compsPresent[_cp]=1; if (_hm) teamsPresent[_hm]=1; if (_aw) teamsPresent[_aw]=1; if (_rd) roundsPresent[_rd]=1;
+  // Filtre MATCH
+  const matchEl = document.getElementById('historyFiltersMatch');
+  if (matchEl) {
+    var mids = Object.keys(matchesPresent);
+    var mbtns = '<button class="history-filter-btn' + (historyFilterMatch==='all'?' active':'') + '" onclick="setHistoryFilterMatch(this,\'all\')">Tous</button>';
+    mids.forEach(function(mid){
+      mbtns += '<button class="history-filter-btn' + (historyFilterMatch===String(mid)?' active':'') + '" onclick="setHistoryFilterMatch(this,\''+mid+'\')">' + matchesPresent[mid] + '</button>';
     });
-  });
-
-  // Filtre CHAMPIONNAT
-  const compEl = document.getElementById('historyFiltersComp');
-  if (compEl) {
-    const compLabels = { ligue1:'L1', ligue2:'L2', premier:'PL' };
-    var cbtns = '<button class="history-filter-btn' + (historyFilterComp==='all'?' active':'') + '" onclick="setHistoryFilterComp(this,\'all\')">Tous</button>';
-    ['ligue1','ligue2','premier'].forEach(function(cp){
-      if (compsPresent[cp]) cbtns += '<button class="history-filter-btn' + (historyFilterComp===cp?' active':'') + '" onclick="setHistoryFilterComp(this,\''+cp+'\')">' + compLabels[cp] + '</button>';
-    });
-    compEl.innerHTML = cbtns;
-  }
-
-  // Filtre EQUIPE
-  const teamEl = document.getElementById('historyFiltersTeam');
-  if (teamEl) {
-    var tbtns = '<button class="history-filter-btn' + (historyFilterTeam==='all'?' active':'') + '" onclick="setHistoryFilterTeam(this,\'all\')">Toutes</button>';
-    Object.keys(teamsPresent).sort().forEach(function(t){
-      var te = String(t).replace(/'/g, "");
-      tbtns += '<button class="history-filter-btn' + (historyFilterTeam===t?' active':'') + '" onclick="setHistoryFilterTeam(this,\''+te+'\')">' + t + '</button>';
-    });
-    teamEl.innerHTML = tbtns;
-  }
-
-  // Filtre JOURNEE
-  const roundEl = document.getElementById('historyFiltersRound');
-  if (roundEl) {
-    var rounds = Object.keys(roundsPresent).sort(function(a,b){
-      var na = (String(a).match(/(\d+)/)||[])[1], nb = (String(b).match(/(\d+)/)||[])[1];
-      return (parseInt(na)||0) - (parseInt(nb)||0);
-    });
-    var rbtns = '<button class="history-filter-btn' + (historyFilterRound==='all'?' active':'') + '" onclick="setHistoryFilterRound(this,\'all\')">Toutes</button>';
-    rounds.forEach(function(rd){
-      var re2 = String(rd).replace(/'/g,'');
-      rbtns += '<button class="history-filter-btn' + (historyFilterRound===rd?' active':'') + '" onclick="setHistoryFilterRound(this,\''+re2+'\')">' + bpRoundLabel(rd) + '</button>';
-    });
-    roundEl.innerHTML = rbtns;
+    matchEl.innerHTML = mbtns;
   }
 
   // Historique des paris
@@ -3531,14 +3523,12 @@ function renderHistoryPanel() {
   }
 
   const _entries = Object.entries(matchPronosMap).filter(function(e){
-    const mm = matches.find(function(x){ return String(x.id) === String(e[0]); });
     const _b = (e[1][0] && e[1][0].bet) || {};
-    const comp = (mm && mm.comp) || _b.comp, home = (mm && mm.home) || _b.home, away = (mm && mm.away) || _b.away, round = (mm && mm.round) || _b.round;
-    if (historyFilterComp !== 'all' && comp !== historyFilterComp) return false;
-    if (historyFilterTeam !== 'all' && home !== historyFilterTeam && away !== historyFilterTeam) return false;
-    if (historyFilterRound !== 'all' && round !== historyFilterRound) return false;
+    if (historyFilterMatch !== 'all' && String(e[0]) !== String(historyFilterMatch)) return false;
+    if (historyFilterWeek !== 'all' && bpWeekKey(_b.ts) !== historyFilterWeek) return false;
     return true;
   });
+  _entries.sort(function(a,b){ const ta=(a[1][0]&&a[1][0].bet&&a[1][0].bet.ts)||0, tb=(b[1][0]&&b[1][0].bet&&b[1][0].bet.ts)||0; return tb - ta; });
   if (!_entries.length) { histEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Aucun pari trouve</div>'; return; }
   histEl.innerHTML = _entries.map(([mid, pronos]) => {
     const m = matches.find(x => String(x.id) === String(mid));
@@ -3595,9 +3585,8 @@ function renderHistoryPanel() {
   }).join('');
 }
 
-function setHistoryFilterComp(btn, comp) { historyFilterComp = comp; renderHistoryPanel(); }
-function setHistoryFilterTeam(btn, team) { historyFilterTeam = team; renderHistoryPanel(); }
-function setHistoryFilterRound(btn, round) { historyFilterRound = round; renderHistoryPanel(); }
+function setHistoryFilterWeek(btn, wk) { historyFilterWeek = wk; renderHistoryPanel(); }
+function setHistoryFilterMatch(btn, mid) { historyFilterMatch = mid; renderHistoryPanel(); }
 function setHistoryFilter(btn, player) {
   historyFilterPlayer = player;
   document.querySelectorAll('#historyFilters .history-filter-btn').forEach(b => b.classList.remove('active'));
