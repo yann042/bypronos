@@ -3160,6 +3160,7 @@ window.doCreateLeague = async function() {
 
   currentLeague = { code, name, isAdmin: true };
   localStorage.setItem('bypronos_league', JSON.stringify(currentLeague));
+  localStorage.setItem('bypronos_league_chosen', '1');
 
   document.getElementById('loginOverlay').style.display = 'none';
   showNotif('✅ Ligue créée ! Code : ' + code);
@@ -3186,6 +3187,7 @@ window.doJoinLeague = async function() {
 
   currentLeague = { code, name: res.name, isAdmin: res.admin === name };
   localStorage.setItem('bypronos_league', JSON.stringify(currentLeague));
+  localStorage.setItem('bypronos_league_chosen', '1');
 
   document.getElementById('loginOverlay').style.display = 'none';
   showNotif('✅ Bienvenue dans "' + res.name + '" !');
@@ -3194,6 +3196,8 @@ window.doJoinLeague = async function() {
 
 window.doLoginName = function doLoginName(name) {
   currentPlayer=name;
+  localStorage.setItem('bypronos_player', name);
+  localStorage.setItem('bypronos_league_chosen', '1');
   document.getElementById('loginOverlay').style.display='none';
   document.getElementById('playerName').textContent=name;
   // Afficher le nom de la ligue
