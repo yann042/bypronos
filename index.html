@@ -1194,48 +1194,79 @@ function fmtPts(val) {
 }
 
 // -- Cashout ----------------------------------------------------
-function calcCashoutValue(bet, liveHome, liveAway, elapsed) {
+// Proba de marquer exactement k buts dans le temps restant (Poisson)
+function poissonP(k, mu) { if (k < 0) return 0; let t = Math.exp(-mu); for (let i = 1; i <= k; i++) t *= mu / i; return t; }
+const bpRedCards = {}; // matchId -> { teamId: nb rouges }
+function bpRedFor(matchId) {
+  const reds = bpRedCards[matchId] || bpRedCards[parseInt(matchId)] || {};
+  const ld = liveData[matchId] || liveData[parseInt(matchId)] || {};
+  return { redHome: reds[ld.homeTeamId] || 0, redAway: reds[ld.awayTeamId] || 0 };
+}
+const bpLastGoalTs = {}; // matchId -> ts du dernier but détecté (gel temporaire du cashout)
+const BP_ENDGAME_MIN = 85;   // gel du cashout à partir de la 85' (5 dernières minutes)
+const BP_GOAL_FREEZE = 45000; // gel 45s après un but détecté
+function bpCashoutFrozen(matchId, elapsed) {
+  if ((parseInt(elapsed) || 0) >= BP_ENDGAME_MIN) return 'fin';
+  if (matchId != null && (Date.now() - (bpLastGoalTs[matchId] || bpLastGoalTs[parseInt(matchId)] || 0)) < BP_GOAL_FREEZE) return 'but';
+  return null;
+}
+// Cashout — formule réglée au simulateur (aléa 2,8 buts/90', générosité 95%, cartons rouges)
+function calcCashoutValue(bet, liveHome, liveAway, elapsed, matchId) {
   if (!bet || liveHome === null || liveAway === null) return 0;
+  const RATE = 2.8 / 90, GEN = 0.95;
+  const reds = (matchId != null) ? bpRedFor(matchId) : { redHome: 0, redAway: 0 };
+  const redHome = reds.redHome, redAway = reds.redAway;
 
-  const potentialResult = bet.resultOdd || 0; // Pts pour le bon résultat seul
-  const potentialScore = bet.scoreOdd || 0;   // Pts bonus score exact
+  const potentialResult = bet.resultOdd || 0;
+  const potentialScore = bet.scoreOdd || 0;
   const potentialPts = potentialResult + potentialScore;
   if (!potentialPts) return 0;
+  // Gel : 5 dernières minutes + fenêtre de sécurité après un but détecté
+  if (bpCashoutFrozen(matchId, elapsed)) return 0;
 
-  // Facteur de temps (plus le match avance, plus c'est certain)
-  const timeFactor = Math.min(elapsed || 0, 90) / 90;
-
-  // Résultat actuel vs résultat pronostiqué
   const currentResult = liveHome > liveAway ? 'W' : liveHome < liveAway ? 'L' : 'D';
   const pronoResult = bet.h > bet.a ? 'W' : bet.h < bet.a ? 'L' : 'D';
   const resultMatch = currentResult === pronoResult;
-
-  // Score exact impossible si le score live dépasse le score pronostiqué
   const scoreImpossible = liveHome > bet.h || liveAway > bet.a;
-
-  // Proximité du score exact
-  const scoreDiff = Math.abs(bet.h - liveHome) + Math.abs(bet.a - liveAway);
   const exactMatch = bet.h === liveHome && bet.a === liveAway;
 
-  // Score factor : résultat en route + proximité score
+  // Temps restant + taux de but par équipe (ajustés par cartons rouges)
+  const remaining = Math.max(0, 92 - Math.min(elapsed || 0, 92));
+  let rH = RATE / 2, rA = RATE / 2;
+  rH *= Math.pow(0.50, redHome); rA *= Math.pow(1.60, redHome);
+  rA *= Math.pow(0.50, redAway); rH *= Math.pow(1.60, redAway);
+  const muH = rH * remaining, muA = rA * remaining;
+  const pNoGoal = Math.exp(-(muH + muA));
+  const muThreat = pronoResult === 'W' ? muA : (pronoResult === 'L' ? muH : (muH + muA));
+  const pResult = Math.max(pNoGoal, Math.exp(-muThreat * 0.85));
+
   let cashout;
   if (!scoreImpossible && exactMatch) {
-    // Score exact toujours possible → cashout sur totalité
-    const factor = 0.85 + (0.10 * timeFactor);
-    cashout = potentialPts * factor * 0.90;
+    cashout = potentialPts * pNoGoal + potentialResult * (pResult - pNoGoal);
   } else if (!scoreImpossible && resultMatch) {
-    // Bon résultat + score encore possible → cashout sur totalité
-    const factor = scoreDiff <= 1 ? (0.55 + 0.20 * timeFactor) : (0.35 + 0.15 * timeFactor);
-    cashout = potentialPts * factor * 0.75;
+    const needH = bet.h - liveHome, needA = bet.a - liveAway;
+    const pExact = poissonP(needH, muH) * poissonP(needA, muA);
+    cashout = potentialResult * pResult + potentialScore * pExact;
   } else if (resultMatch) {
-    // Score exact impossible MAIS résultat encore possible → cashout sur pts résultat uniquement
-    const factor = Math.max(0.10, 0.50 - (0.35 * timeFactor));
-    cashout = potentialResult * factor * 0.75;
+    cashout = potentialResult * pResult;
   } else {
-    // Mauvais résultat → cashout très faible sur pts résultat
-    const factor = Math.max(0.02, 0.15 - (0.12 * timeFactor));
-    cashout = potentialResult * factor * 0.65;
+    // Résultat perdant : cashout réduit seulement si récupérable, sinon 0
+    let deficit;
+    if (pronoResult === 'W') deficit = liveAway - liveHome;
+    else if (pronoResult === 'L') deficit = liveHome - liveAway;
+    else deficit = Math.abs(liveHome - liveAway);
+    const needed = deficit + (pronoResult === 'D' ? 0 : 1);
+    let muMine;
+    if (pronoResult === 'W') muMine = muH;
+    else if (pronoResult === 'L') muMine = muA;
+    else muMine = (liveHome > liveAway) ? muA : muH;
+    let cdf = 0, term = Math.exp(-muMine);
+    for (let k = 0; k < needed; k++) { cdf += term; term *= muMine / (k + 1); }
+    const pRecover = Math.max(0, 1 - cdf);
+    cashout = potentialResult * pRecover * 0.5;
+    if (cashout < 0.20) return 0;
   }
+  cashout *= GEN;
   return Math.max(0, parseFloat(cashout.toFixed(2)));
 }
 
@@ -1259,13 +1290,24 @@ async function doCashout(matchId) {
   }
   if (!bet) return alert('Aucun pari à encaisser sur ce match');
 
-  const cashoutVal = calcCashoutValue(bet, live ? parseInt(live.homeScore) : null, live ? parseInt(live.awayScore) : null, live ? (live.minute || 45) : 45);
-  if (cashoutVal <= 0) return alert('Cashout non disponible pour ce pari');
+  // Valeur telle qu'affichée (avant revérification)
+  const _lb = liveData[matchId];
+  const valBefore = calcCashoutValue(bet, _lb ? parseInt(_lb.homeScore) : null, _lb ? parseInt(_lb.awayScore) : null, _lb ? (_lb.minute || 45) : 45, matchId);
 
+  // ANTI-TRICHE : on revérifie le score EN DIRECT juste avant de verrouiller la valeur
+  showNotif('\u23f3 Vérification du score en direct…');
+  await bpFetchLiveOne(matchId);
+  const liveNow = liveData[matchId];
+  renderMatches();
+  const cashoutVal = calcCashoutValue(bet, liveNow ? parseInt(liveNow.homeScore) : null, liveNow ? parseInt(liveNow.awayScore) : null, liveNow ? (liveNow.minute || 45) : 45, matchId);
+  if (cashoutVal <= 0) return alert('Cashout indisponible : la situation a évolué (score ' + (liveNow ? liveNow.homeScore + '-' + liveNow.awayScore : '?') + ').');
+
+  const _changed = Math.abs(cashoutVal - valBefore) > 0.009;
   const confirm = window.confirm(
     'CASHOUT - ' + m.home + ' vs ' + m.away + '\n' +
-    'Score actuel : ' + (live ? live.homeScore + '-' + live.awayScore : '?') + ' (' + (live ? live.minute + "'" : '?') + ')\n' +
+    'Score actuel : ' + (liveNow ? liveNow.homeScore + '-' + liveNow.awayScore : '?') + ' (' + (liveNow ? liveNow.minute + "'" : '?') + ')\n' +
     'Votre prono : ' + bet.h + '-' + bet.a + '\n\n' +
+    (_changed ? '\u26a0\ufe0f La situation a évolué depuis l\'affichage — valeur réactualisée.\n\n' : '') +
     'Valeur cashout : ' + fmtPts(cashoutVal) + ' pts\n\n' +
     'Confirmer le cashout ?'
   );
@@ -1279,8 +1321,8 @@ async function doCashout(matchId) {
       cashedOut: true,
       cashoutValue: cashoutVal,
       cashoutTime: Date.now(),
-      cashoutScore: (live ? live.homeScore + '-' + live.awayScore : '?'),
-      cashoutMinute: live ? live.minute : 0
+      cashoutScore: (liveNow ? liveNow.homeScore + '-' + liveNow.awayScore : '?'),
+      cashoutMinute: liveNow ? liveNow.minute : 0
     });
     betslip[matchId].cashedOut = true;
     betslip[matchId].cashoutValue = cashoutVal;
@@ -1635,7 +1677,7 @@ function ptsChip(vb, matchId) {
   const pts = calcLivePts(vb, live.homeScore, live.awayScore);
   if (!pts) return '';
   // Masquer si cashout disponible (évite doublon)
-  const cashoutVal = calcCashoutValue(vb, parseInt(live.homeScore), parseInt(live.awayScore), live.minute || 45);
+  const cashoutVal = calcCashoutValue(vb, parseInt(live.homeScore), parseInt(live.awayScore), live.minute || 45, matchId);
   const mid2 = parseInt(matchId);
   const isCashedOut = vb.cashedOut || (betslip[mid2] && betslip[mid2].cashedOut);
   if (cashoutVal > 0 && !isCashedOut) return '';
@@ -1707,7 +1749,7 @@ function getPronoHeader(matchId) {
         const bg  = isPos ? '#057a3a' : '#cc2200';
         // Masquer si cashout disponible
         const live2 = liveData[parseInt(matchId)];
-        const cashoutAvail = live2 ? calcCashoutValue(vb, parseInt(live2.homeScore), parseInt(live2.awayScore), live2.minute || 45) : 0;
+        const cashoutAvail = live2 ? calcCashoutValue(vb, parseInt(live2.homeScore), parseInt(live2.awayScore), live2.minute || 45, matchId) : 0;
         if (!cashoutAvail) {
           ptsHtml = '<span style="background:' + bg + ';color:#fff;font-weight:700;border-radius:10px;padding:1px 7px;font-size:11px;white-space:nowrap">' + sign + fmtPts(pts.pts) + ' pts</span>';
         }
@@ -1811,8 +1853,14 @@ function getCashoutHtml(matchId, hs, as) {
     if (b.cashedOut) {
       return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(5,107,82,0.95);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px">✅ Cashout encaisse : ' + fmtPts(b.cashoutValue) + ' pts</span>';
     }
-    const cashoutVal = calcCashoutValue(b, parseInt(hs), parseInt(as), 45);
-    if (!(cashoutVal > 0)) return '';
+    const ld = liveData[parseInt(matchId)] || liveData[matchId] || {};
+    const elapsed = (ld.minute != null && ld.minute !== '?' && ld.minute !== 'FIN') ? (parseInt(ld.minute) || 45) : 45;
+    const cashoutVal = calcCashoutValue(b, parseInt(hs), parseInt(as), elapsed, mid2);
+    if (!(cashoutVal > 0)) {
+      const fz = bpCashoutFrozen(mid2, elapsed);
+      if (fz) return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(110,110,110,0.92);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px">\uD83D\uDD12 Cashout suspendu (' + (fz === 'fin' ? 'fin de match' : 'but récent') + ')</span>';
+      return '';
+    }
     return '<span onclick="doCashout(' + matchId + ')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.96);color:#1a6fd4;font-size:12px;font-weight:800;padding:5px 14px;border-radius:20px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.35)">💸 Cashout <span style="color:#056b52">' + fmtPts(cashoutVal) + ' pts</span></span>';
   } catch(e) { return ''; }
 }
@@ -2269,11 +2317,14 @@ async function fetchBSDOdds() {
   } catch(e) { console.warn('BSD fetch error:', e); }
 }
 
+let _bpPollTick = 0;
 setInterval(() => {
   renderMatches();
   const liveNow = matches.some(m => isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id));
-  fetchResults();
-}, 180000);
+  _bpPollTick++;
+  // En direct : rafraîchissement 10s (cache partagé -> coût API constant). Sinon : toutes les ~3 min.
+  if (liveNow || _bpPollTick % 18 === 0) fetchResults();
+}, 10000);
 
 // Rafraîchissement automatique onglet Live toutes les 60s
 setInterval(() => {
@@ -2387,6 +2438,31 @@ async function enrichOdds(list) {
 // -- RESULTATS & SCORING (points calcules sur les vrais scores)
 // ============================================================
 const BP_RESULTS_URL = 'https://livescores-huouv7kgya-uc.a.run.app/results';
+// Rafraîchit le score EN DIRECT d'un seul match (anti-triche cashout) + buteurs/cartons
+async function bpFetchLiveOne(matchId) {
+  try {
+    const r = await fetch(BP_RESULTS_URL + '?ids=' + matchId);
+    const d = await r.json();
+    const f = (d.response || [])[0];
+    if (!f || !f.fixture) return null;
+    const st = (f.fixture.status && f.fixture.status.short) || 'NS';
+    const finished = ['FT','AET','PEN'].indexOf(st) !== -1;
+    const isLive = ['1H','HT','2H','ET','BT','P','LIVE'].indexOf(st) !== -1;
+    const prev = liveData[matchId];
+    const hs = (f.goals && f.goals.home != null) ? f.goals.home : 0;
+    const as = (f.goals && f.goals.away != null) ? f.goals.away : 0;
+    if (prev && (hs + as) > (prev.homeScore + prev.awayScore)) bpLastGoalTs[matchId] = Date.now();
+    liveData[matchId] = {
+      homeScore: hs, awayScore: as,
+      minute: (f.fixture.status.elapsed != null ? f.fixture.status.elapsed : (finished ? 'FIN' : '?')),
+      finished: finished, status: st,
+      homeTeamId: (f.teams && f.teams.home && f.teams.home.id) || (prev && prev.homeTeamId),
+      awayTeamId: (f.teams && f.teams.away && f.teams.away.id) || (prev && prev.awayTeamId)
+    };
+    try { await fetchScorers(matchId); } catch(e) {}
+    return { hs: hs, as: as, minute: liveData[matchId].minute, finished: finished, isLive: isLive };
+  } catch(e) { return null; }
+}
 const BP_EVENTS_URL  = 'https://livescores-huouv7kgya-uc.a.run.app/events';
 const bpScorers = {}; // matchId -> [{player, minute, teamId, detail}]
 async function fetchScorers(matchId) {
@@ -2402,6 +2478,10 @@ async function fetchScorers(matchId) {
         teamId: e.team && e.team.id,
         detail: e.detail || ''
       }; });
+    // Cartons rouges par équipe (pour le cashout)
+    bpRedCards[matchId] = {};
+    d.response.filter(function(e){ return e.type === 'Card' && /red/i.test(e.detail || ''); })
+      .forEach(function(e){ var t = e.team && e.team.id; if (t != null) bpRedCards[matchId][t] = (bpRedCards[matchId][t] || 0) + 1; });
   } catch(e) {}
 }
 function getBannerScorersHtml(matchId) {
@@ -2514,6 +2594,21 @@ async function fetchResults() {
   try {
     const ids = bpGatherFixtureIds();
     if (!ids.length) return;
+    // CACHE LIVE PARTAGÉ : si un client a rafraîchi il y a < 8s, on lit le cache (0 appel API)
+    try {
+      const _cacheSnap = await db.ref('liveCache').once('value');
+      const _cache = _cacheSnap.val();
+      if (_cache && _cache.ts && (Date.now() - _cache.ts) < 8000 && _cache.r) {
+        let _ch = false;
+        Object.keys(_cache.r).forEach(function(fid){
+          const v = _cache.r[fid]; const prev = liveData[fid];
+          if (!prev || prev.homeScore !== v.h || prev.awayScore !== v.a || prev.finished !== v.f) _ch = true;
+          liveData[fid] = { homeScore: v.h, awayScore: v.a, minute: v.m, finished: v.f, status: v.s, homeTeamId: v.ht, awayTeamId: v.at };
+        });
+        if (_ch) { await recomputeStandings(); renderMatches(); }
+        return; // cache frais -> pas d'appel API
+      }
+    } catch(e) {}
     let changed = false;
     const bpScorerQueue = [];
     for (let i = 0; i < ids.length; i += 20) {
@@ -2530,6 +2625,7 @@ async function fetchResults() {
             const hs = (f.goals && f.goals.home != null) ? f.goals.home : 0;
             const as = (f.goals && f.goals.away != null) ? f.goals.away : 0;
             const scoreChanged = !prev || prev.homeScore !== hs || prev.awayScore !== as;
+            if (prev && (hs + as) > (prev.homeScore + prev.awayScore)) bpLastGoalTs[f.fixture.id] = Date.now();
             liveData[f.fixture.id] = {
               homeScore: hs, awayScore: as,
               minute: (f.fixture.status.elapsed != null ? f.fixture.status.elapsed : (finished ? 'FIN' : '?')),
@@ -2543,6 +2639,12 @@ async function fetchResults() {
         });
       } catch (e) { console.warn('fetchResults chunk:', e); }
     }
+    // Écrire le cache partagé pour les autres clients (évite N appels API simultanés)
+    try {
+      const _compact = {};
+      ids.forEach(function(fid){ const v = liveData[fid]; if (v) _compact[fid] = { h:v.homeScore, a:v.awayScore, m:v.minute, f:v.finished, s:v.status, ht:v.homeTeamId, at:v.awayTeamId }; });
+      db.ref('liveCache').set({ ts: Date.now(), r: _compact });
+    } catch(e) {}
     for (let s = 0; s < bpScorerQueue.length; s++) { await fetchScorers(bpScorerQueue[s]); await new Promise(function(r){ setTimeout(r, 120); }); }
     if (changed) await recomputeStandings();
     if (changed || bpScorerQueue.length) renderMatches();
