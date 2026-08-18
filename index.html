@@ -4564,13 +4564,14 @@ function doLogout() {
   currentPlayer = null;
   localStorage.removeItem('bypronos_player');
   localStorage.removeItem('bypronos_league');
+  localStorage.removeItem('bypronos_league_chosen');
   document.getElementById('playerAvatar').textContent = '?';
   document.getElementById('playerName').textContent = 'Connexion';
   document.getElementById('playerMenu').style.display = 'none';
   openLogin();
 }
 
-window.addEventListener('load', ()=>{ openLogin(); setTimeout(preloadMatchImages, 1000); });
+window.addEventListener('load', ()=>{ if (!bpRestoreSession()) openLogin(); setTimeout(preloadMatchImages, 1000); });
 </script>
 
 <!-- -- Login overlay --------------------------- -->
