@@ -2507,25 +2507,25 @@ function bpH2HHtml(m) {
   if (!sorted.length) return '';
   const pill = function(hg, ag){
     const col = hg > ag ? '#16a34a' : (hg < ag ? '#e5544d' : '#8a94a6');
-    return '<span style="font-size:10px;font-weight:800;color:#fff;background:' + col + ';border-radius:4px;padding:1px 5px;font-variant-numeric:tabular-nums">' + hg + '-' + ag + '</span>';
+    return '<span style="font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums">' + hg + '-' + ag + '</span>';
   };
-  const lbl = function(t){ return '<div style="font-size:8px;color:rgba(255,255,255,0.72);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;text-shadow:0 1px 2px rgba(0,0,0,1)">' + t + '</div>'; };
-  const row = function(pills){ return '<div style="display:inline-flex;gap:3px;background:rgba(0,0,0,0.4);padding:3px 6px;border-radius:8px">' + pills + '</div>'; };
-
-  // Ligne 1 : 5 derniers duels (toutes configs), orientés côté équipe à domicile actuelle
+  const rowInline = function(label, pills){
+    return '<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.42);padding:2px 7px;border-radius:7px">' +
+      '<span style="font-size:7px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:.5px;font-weight:700;white-space:nowrap">' + label + '</span>' +
+      '<span style="display:inline-flex;gap:2px">' + pills + '</span>' +
+    '</div>';
+  };
   const l1 = sorted.slice(0, 5).map(function(g){
     const hg = (g.homeId === cur) ? g.homeGoals : g.awayGoals;
     const ag = (g.homeId === cur) ? g.awayGoals : g.homeGoals;
     return pill(hg, ag);
   }).join('');
-
-  // Ligne 2 : 5 derniers avec la MÊME affiche (home actuel reçoit away actuel)
   const l2 = sorted.filter(function(g){ return g.homeId === cur && g.awayId === curA; })
     .slice(0, 5).map(function(g){ return pill(g.homeGoals, g.awayGoals); }).join('');
 
-  let html = '<div style="position:absolute;top:30px;left:0;right:0;text-align:center;z-index:2">';
-  html += lbl('Face \u00e0 face') + row(l1);
-  if (l2) html += '<div style="height:5px"></div>' + lbl('M\u00eame affiche \u00b7 domicile') + row(l2);
+  let html = '<div style="position:absolute;top:46px;left:0;right:0;text-align:center;z-index:2;line-height:1.1">';
+  html += '<div>' + rowInline('Duels', l1) + '</div>';
+  if (l2) html += '<div style="margin-top:3px">' + rowInline('Domicile', l2) + '</div>';
   html += '</div>';
   return html;
 }
