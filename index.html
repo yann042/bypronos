@@ -2474,6 +2474,8 @@ const BP_EVENTS_URL  = 'https://livescores-huouv7kgya-uc.a.run.app/events';
 const BP_STANDINGS_URL = 'https://livescores-huouv7kgya-uc.a.run.app/standings';
 const BP_H2H_URL = 'https://livescores-huouv7kgya-uc.a.run.app/h2h';
 const bpH2H = {}; // matchId -> [games] | 'loading'
+let bpH2HExpanded = {}; // matchId -> bool (ligne domicile dépliée)
+window.bpToggleH2H = function(mid){ bpH2HExpanded[mid] = !bpH2HExpanded[mid]; try { renderMatches(); } catch(e){} };
 let _bpH2HTimer = null;
 function _bpH2HRender() { if (_bpH2HTimer) return; _bpH2HTimer = setTimeout(function(){ _bpH2HTimer = null; try { renderMatches(); } catch(e){} }, 350); }
 async function bpEnsureH2H(m) {
@@ -2509,12 +2511,6 @@ function bpH2HHtml(m) {
     const col = hg > ag ? '#16a34a' : (hg < ag ? '#e5544d' : '#8a94a6');
     return '<span style="font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums">' + hg + '-' + ag + '</span>';
   };
-  const rowInline = function(label, pills){
-    return '<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.42);padding:2px 7px;border-radius:7px">' +
-      '<span style="font-size:7px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:.5px;font-weight:700;white-space:nowrap">' + label + '</span>' +
-      '<span style="display:inline-flex;gap:2px">' + pills + '</span>' +
-    '</div>';
-  };
   const l1 = sorted.slice(0, 5).map(function(g){
     const hg = (g.homeId === cur) ? g.homeGoals : g.awayGoals;
     const ag = (g.homeId === cur) ? g.awayGoals : g.homeGoals;
@@ -2522,10 +2518,21 @@ function bpH2HHtml(m) {
   }).join('');
   const l2 = sorted.filter(function(g){ return g.homeId === cur && g.awayId === curA; })
     .slice(0, 5).map(function(g){ return pill(g.homeGoals, g.awayGoals); }).join('');
+  const expanded = !!bpH2HExpanded[m.id];
+  const box = 'display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.42);padding:2px 8px;border-radius:7px';
 
-  let html = '<div style="position:absolute;top:46px;left:0;right:0;text-align:center;z-index:2;line-height:1.1">';
-  html += '<div>' + rowInline('Duels', l1) + '</div>';
-  if (l2) html += '<div style="margin-top:3px">' + rowInline('Domicile', l2) + '</div>';
+  let html = '<div onclick="event.stopPropagation(); bpToggleH2H(' + m.id + ')" style="position:absolute;top:50px;left:0;right:0;text-align:center;z-index:3;cursor:pointer">';
+  html += '<div style="' + box + '">' +
+    '<span style="font-size:9px">\u2694\ufe0f</span>' +
+    '<span style="display:inline-flex;gap:2px">' + l1 + '</span>' +
+    (l2 && !expanded ? '<span style="font-size:8px;color:rgba(255,255,255,0.55);margin-left:1px">\U0001F3E0\u25be</span>' : '') +
+  '</div>';
+  if (expanded && l2) {
+    html += '<div style="' + box + ';margin-top:3px">' +
+      '<span style="font-size:9px">\U0001F3E0</span>' +
+      '<span style="display:inline-flex;gap:2px">' + l2 + '</span>' +
+    '</div>';
+  }
   html += '</div>';
   return html;
 }
