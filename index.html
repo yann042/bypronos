@@ -2478,7 +2478,7 @@ async function bpEnsureTeamForm(teamId) {
   if (bpTeamForm[teamId] !== undefined) return;
   bpTeamForm[teamId] = 'loading';
   try {
-    const snap = await db.ref('teamFormCache/' + teamId).once('value');
+    const snap = await db.ref('teamFormCache_v2/' + teamId).once('value');
     const cache = snap.val();
     if (cache && cache.ts && (Date.now() - cache.ts) < 12 * 3600000 && Array.isArray(cache.f)) {
       bpTeamForm[teamId] = cache.f; _bpH2HRender(); return;
@@ -2487,7 +2487,7 @@ async function bpEnsureTeamForm(teamId) {
     const d = await r.json();
     if (d && Array.isArray(d.form)) {
       bpTeamForm[teamId] = d.form;
-      db.ref('teamFormCache/' + teamId).set({ ts: Date.now(), f: d.form });
+      db.ref('teamFormCache_v2/' + teamId).set({ ts: Date.now(), f: d.form });
       _bpH2HRender();
     } else { bpTeamForm[teamId] = undefined; }
   } catch(e) { bpTeamForm[teamId] = undefined; }
@@ -2566,11 +2566,11 @@ function bpFormeContent(m) {
     else pills = f.slice(0, 5).map(function(g, i){
       const col = g.gf > g.ga ? '#16a34a' : (g.gf < g.ga ? '#e5544d' : '#8a94a6');
       const active = tip && tip.teamId === teamId && tip.idx === i;
-      return '<span onclick="event.stopPropagation(); bpShowFormTip(' + m.id + ', ' + teamId + ', ' + i + ')" style="cursor:pointer;font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums;box-shadow:' + (active ? '0 0 0 1.5px #fff' : 'none') + '">' + g.gf + '-' + g.ga + '</span>';
+      return '<span onclick="event.stopPropagation(); bpShowFormTip(' + m.id + ', ' + teamId + ', ' + i + ')" style="cursor:pointer;font-size:8px;font-weight:800;color:#fff;background:' + col + ';border-radius:2px;padding:0 3px;font-variant-numeric:tabular-nums;box-shadow:' + (active ? '0 0 0 1.5px #fff' : 'none') + '">' + g.gf + '-' + g.ga + '</span>';
     }).join('');
-    return '<div style="display:inline-flex;gap:5px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 8px;border-radius:7px">' +
-      '<span style="font-size:8px;color:#fff;font-weight:700;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
-      '<span style="display:inline-flex;gap:2px">' + pills + '</span>' +
+    return '<div style="display:inline-flex;gap:3px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 5px;border-radius:6px">' +
+      '<span style="font-size:7px;color:#fff;font-weight:700;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
+      '<span style="display:inline-flex;gap:1px">' + pills + '</span>' +
     '</div>';
   };
   let tipHtml = '';
@@ -2579,16 +2579,15 @@ function bpFormeContent(m) {
     if (Array.isArray(arr) && arr[tip.idx]) {
       const g = arr[tip.idx];
       const venue = g.home ? '🏠 dom.' : '✈️ ext.';
-      tipHtml = '<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.95);color:#0d2137;font-size:8px;font-weight:700;padding:3px 9px;border-radius:8px;max-width:96%">' +
-        '<span style="font-weight:900">' + g.gf + '-' + g.ga + '</span>' +
-        '<span>vs ' + bpEscape(g.opp || '?') + '</span>' +
-        (g.comp ? '<span style="color:#5c7386">· ' + bpEscape(g.comp) + '</span>' : '') +
-        '<span style="color:#5c7386">· ' + venue + '</span>' +
+      tipHtml = '<div style="display:inline-block;max-width:90%;white-space:normal;line-height:1.35;background:rgba(255,255,255,0.96);color:#0d2137;font-size:8px;font-weight:700;padding:3px 8px;border-radius:8px">' +
+        '<b>' + g.gf + '-' + g.ga + '</b> vs ' + bpEscape(g.opp || '?') +
+        (g.comp ? ' <span style="color:#5c7386">· ' + bpEscape(g.comp) + '</span>' : '') +
+        ' <span style="color:#5c7386">· ' + venue + '</span>' +
       '</div>';
     }
   }
   return (tipHtml ? '<div style="margin-bottom:4px">' + tipHtml + '</div>' : '') +
-    '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + teamRow(m.home, m.homeId) + teamRow(m.away, m.awayId) + '</div>';
+    '<div style="display:inline-flex;gap:5px;flex-wrap:nowrap;justify-content:center;max-width:100%">' + teamRow(m.home, m.homeId) + teamRow(m.away, m.awayId) + '</div>';
 }
 function bpClassementContent(m) {
   const one = function(name, st){
