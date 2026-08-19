@@ -2525,11 +2525,11 @@ function bpH2HHtml(m) {
   html += '<div style="' + box + '">' +
     '<span style="font-size:9px">\u2694\ufe0f</span>' +
     '<span style="display:inline-flex;gap:2px">' + l1 + '</span>' +
-    (l2 && !expanded ? '<span style="font-size:8px;color:rgba(255,255,255,0.55);margin-left:1px">\U0001F3E0\u25be</span>' : '') +
+    (l2 && !expanded ? '<span style="font-size:8px;color:rgba(255,255,255,0.55);margin-left:1px">🏠\u25be</span>' : '') +
   '</div>';
   if (expanded && l2) {
     html += '<div style="' + box + ';margin-top:3px">' +
-      '<span style="font-size:9px">\U0001F3E0</span>' +
+      '<span style="font-size:9px">🏠</span>' +
       '<span style="display:inline-flex;gap:2px">' + l2 + '</span>' +
     '</div>';
   }
@@ -3200,13 +3200,13 @@ function bpEventCard(ev, isPast) {
     '<div class="ev-date"><div class="ev-day">' + dayNum + '</div><div class="ev-mon">' + mon + '</div></div>' +
     '<div class="ev-body">' +
       '<div class="ev-title">' + bpEscape(ev.title) + '</div>' +
-      '<div class="ev-meta">' + full + (ev.time ? ' \u00b7 ' + ev.time : '') + (ev.location ? ' \u00b7 \U0001F4CD ' + bpEscape(ev.location) : '') + '</div>' +
+      '<div class="ev-meta">' + full + (ev.time ? ' \u00b7 ' + ev.time : '') + (ev.location ? ' \u00b7 📍 ' + bpEscape(ev.location) : '') + '</div>' +
       (ev.note ? '<div class="ev-note">' + bpEscape(ev.note) + '</div>' : '') +
       '<div class="ev-foot">' +
         '<span class="ev-org">propose par ' + bpEscape(ev.organizer) + '</span>' +
         (!isPast ? '<button class="ev-rsvp' + (going ? ' on' : '') + '" onclick="bpToggleEventRSVP(\'' + ev.id + '\')">' + (going ? '\u2713 Je participe' : 'Je participe') + '</button>' : '') +
       '</div>' +
-      '<div class="ev-parts">' + (parts.length ? '\U0001F465 ' + parts.map(bpEscape).join(', ') : 'Aucun participant pour le moment') + '</div>' +
+      '<div class="ev-parts">' + (parts.length ? '👥 ' + parts.map(bpEscape).join(', ') : 'Aucun participant pour le moment') + '</div>' +
     '</div>' +
     (canDelete ? '<button class="ev-del" onclick="bpDeleteEvent(\'' + ev.id + '\')" title="Supprimer">\u00d7</button>' : '') +
   '</div>';
@@ -3230,7 +3230,7 @@ async function renderEventsView() {
   });
   past.reverse();
   let html = '';
-  html += '<div class="ev-section-title">\U0001F4CC A venir</div>';
+  html += '<div class="ev-section-title">📌 A venir</div>';
   html += upcoming.length ? upcoming.map(function(ev){ return bpEventCard(ev, false); }).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun evenement a venir. Propose le premier !</div>';
   if (past.length) {
     html += '<div class="ev-section-title">Passes</div>';
