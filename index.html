@@ -2481,35 +2481,53 @@ async function bpEnsureH2H(m) {
   if (bpH2H[m.id] !== undefined) return;
   bpH2H[m.id] = 'loading';
   try {
-    const snap = await db.ref('h2hCache/' + m.id).once('value');
+    const snap = await db.ref('h2hCache_v2/' + m.id).once('value');
     const cache = snap.val();
     if (cache && cache.ts && (Date.now() - cache.ts) < 7 * 86400000 && Array.isArray(cache.g)) {
       bpH2H[m.id] = cache.g; _bpH2HRender(); return;
     }
     const r = await fetch(BP_H2H_URL + '?h2h=' + m.homeId + '-' + m.awayId);
     const d = await r.json();
-    const games = (d && d.h2h) || [];
-    bpH2H[m.id] = games;
-    db.ref('h2hCache/' + m.id).set({ ts: Date.now(), g: games });
-    _bpH2HRender();
-  } catch(e) { bpH2H[m.id] = []; }
+    if (d && Array.isArray(d.h2h)) {
+      bpH2H[m.id] = d.h2h;
+      db.ref('h2hCache_v2/' + m.id).set({ ts: Date.now(), g: d.h2h }); // on ne cache QUE les réponses valides
+      _bpH2HRender();
+    } else {
+      bpH2H[m.id] = undefined; // route indisponible -> on réessaiera (pas de cache vide)
+    }
+  } catch(e) { bpH2H[m.id] = undefined; }
 }
 function bpH2HHtml(m) {
   const games = bpH2H[m.id];
   if (!Array.isArray(games) || !games.length) return '';
-  const cur = m.homeId;
-  const pills = games.slice(0, 5).map(function(g){
-    if (g.homeGoals == null || g.awayGoals == null) return '';
-    const hg = (g.homeId === cur) ? g.homeGoals : g.awayGoals;
-    const ag = (g.homeId === cur) ? g.awayGoals : g.homeGoals;
+  const cur = m.homeId, curA = m.awayId;
+  const sorted = games.slice()
+    .filter(function(g){ return g.homeGoals != null && g.awayGoals != null; })
+    .sort(function(a, b){ return (b.date || '').localeCompare(a.date || ''); });
+  if (!sorted.length) return '';
+  const pill = function(hg, ag){
     const col = hg > ag ? '#16a34a' : (hg < ag ? '#e5544d' : '#8a94a6');
     return '<span style="font-size:10px;font-weight:800;color:#fff;background:' + col + ';border-radius:4px;padding:1px 5px;font-variant-numeric:tabular-nums">' + hg + '-' + ag + '</span>';
+  };
+  const lbl = function(t){ return '<div style="font-size:8px;color:rgba(255,255,255,0.72);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;text-shadow:0 1px 2px rgba(0,0,0,1)">' + t + '</div>'; };
+  const row = function(pills){ return '<div style="display:inline-flex;gap:3px;background:rgba(0,0,0,0.4);padding:3px 6px;border-radius:8px">' + pills + '</div>'; };
+
+  // Ligne 1 : 5 derniers duels (toutes configs), orientés côté équipe à domicile actuelle
+  const l1 = sorted.slice(0, 5).map(function(g){
+    const hg = (g.homeId === cur) ? g.homeGoals : g.awayGoals;
+    const ag = (g.homeId === cur) ? g.awayGoals : g.homeGoals;
+    return pill(hg, ag);
   }).join('');
-  if (!pills) return '';
-  return '<div style="position:absolute;top:40px;left:0;right:0;text-align:center;z-index:2">' +
-    '<div style="font-size:8px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;text-shadow:0 1px 2px rgba(0,0,0,1)">Face \u00e0 face</div>' +
-    '<div style="display:inline-flex;gap:3px;background:rgba(0,0,0,0.4);padding:3px 6px;border-radius:8px">' + pills + '</div>' +
-  '</div>';
+
+  // Ligne 2 : 5 derniers avec la MÊME affiche (home actuel reçoit away actuel)
+  const l2 = sorted.filter(function(g){ return g.homeId === cur && g.awayId === curA; })
+    .slice(0, 5).map(function(g){ return pill(g.homeGoals, g.awayGoals); }).join('');
+
+  let html = '<div style="position:absolute;top:30px;left:0;right:0;text-align:center;z-index:2">';
+  html += lbl('Face \u00e0 face') + row(l1);
+  if (l2) html += '<div style="height:5px"></div>' + lbl('M\u00eame affiche \u00b7 domicile') + row(l2);
+  html += '</div>';
+  return html;
 }
 let bpStandings = {}; // teamId -> { rank, form, points }
 async function fetchStandings() {
