@@ -2512,7 +2512,11 @@ function bpH2HHtml(m) {
     return '<span style="font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums">' + hg + '-' + ag + '</span>';
   };
   const lbl = function(t){ return '<div style="font-size:8px;color:rgba(255,255,255,0.72);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;text-shadow:0 1px 2px rgba(0,0,0,1)">' + t + '</div>'; };
-  const row = function(pills, extra){ return '<div style="display:inline-flex;gap:2px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 7px;border-radius:7px">' + pills + (extra || '') + '</div>'; };
+  const group = function(label, pills, extra){
+    return '<div style="display:inline-block;vertical-align:top">' + lbl(label) +
+      '<div style="display:inline-flex;gap:2px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 7px;border-radius:7px">' + pills + (extra || '') + '</div>' +
+    '</div>';
+  };
   const l1 = sorted.slice(0, 5).map(function(g){
     const hg = (g.homeId === cur) ? g.homeGoals : g.awayGoals;
     const ag = (g.homeId === cur) ? g.awayGoals : g.homeGoals;
@@ -2521,15 +2525,18 @@ function bpH2HHtml(m) {
   const l2 = sorted.filter(function(g){ return g.homeId === cur && g.awayId === curA; })
     .slice(0, 5).map(function(g){ return pill(g.homeGoals, g.awayGoals); }).join('');
   const expanded = !!bpH2HExpanded[m.id];
-  const hint = (l2 && !expanded) ? '<span style="font-size:8px;color:rgba(255,255,255,0.55);margin-left:3px">▾</span>' : '';
 
-  let html = '<div onclick="event.stopPropagation(); bpToggleH2H(' + m.id + ')" style="position:absolute;top:22px;left:0;right:0;text-align:center;z-index:3;cursor:pointer">';
-  html += lbl('Face à face') + row(l1, hint);
+  let inner;
   if (expanded && l2) {
-    html += '<div style="height:5px"></div>' + lbl('À domicile') + row(l2);
+    inner = '<div style="display:inline-flex;gap:12px;align-items:flex-start">' +
+      group('Face à face', l1, '') +
+      group('À domicile', l2, '') +
+    '</div>';
+  } else {
+    const hint = l2 ? '<span style="font-size:8px;color:rgba(255,255,255,0.55);margin-left:3px">▾</span>' : '';
+    inner = group('Face à face', l1, hint);
   }
-  html += '</div>';
-  return html;
+  return '<div onclick="event.stopPropagation(); bpToggleH2H(' + m.id + ')" style="position:absolute;top:22px;left:0;right:0;text-align:center;z-index:3;cursor:pointer">' + inner + '</div>';
 }
 let bpStandings = {}; // teamId -> { rank, form, points }
 async function fetchStandings() {
