@@ -2495,6 +2495,8 @@ async function bpEnsureTeamForm(teamId) {
 const bpH2H = {}; // matchId -> [games] | 'loading'
 let bpBannerTab = {}; // matchId -> 'forme' | 'h2h' | 'h2hdom' | null
 window.bpSetBannerTab = function(mid, tab){ bpBannerTab[mid] = (bpBannerTab[mid] === tab) ? null : tab; try { renderMatches(); } catch(e){} };
+let bpStatsOpen = {};
+window.bpToggleStats = function(mid){ bpStatsOpen[mid] = !bpStatsOpen[mid]; if (!bpStatsOpen[mid]) bpBannerTab[mid] = null; try { renderMatches(); } catch(e){} };
 let _bpH2HTimer = null;
 function _bpH2HRender() { if (_bpH2HTimer) return; _bpH2HTimer = setTimeout(function(){ _bpH2HTimer = null; try { renderMatches(); } catch(e){} }, 350); }
 async function bpEnsureH2H(m) {
@@ -2520,25 +2522,26 @@ async function bpEnsureH2H(m) {
 }
 function bpBannerStatsHtml(m) {
   bpEnsureH2H(m);
+  const wrap = function(inner){ return '<div style="position:absolute;bottom:78px;left:0;right:0;text-align:center;z-index:3">' + inner + '</div>'; };
+  if (!bpStatsOpen[m.id]) {
+    const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 12px;border-radius:11px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Statistiques</span>';
+    return wrap(btn);
+  }
   const tab = bpBannerTab[m.id] || null;
   const tagBtn = function(id, label){
     const active = (tab === id);
     return '<span onclick="event.stopPropagation(); bpSetBannerTab(' + m.id + ', \'' + id + '\')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:2px 9px;border-radius:11px;white-space:nowrap;background:' + (active ? 'rgba(255,255,255,0.94)' : 'rgba(0,0,0,0.42)') + ';color:' + (active ? '#0d2137' : 'rgba(255,255,255,0.82)') + '">' + label + '</span>';
   };
-  const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center">' +
-    tagBtn('classement', 'Classement') +
-    tagBtn('forme', 'Forme') +
-    tagBtn('h2h', 'Face à face') +
-    tagBtn('h2hdom', 'Dom/Ext') +
+  const closeChip = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:9px;font-weight:800;padding:2px 7px;border-radius:11px;background:rgba(0,0,0,0.42);color:rgba(255,255,255,0.7)">✕</span>';
+  const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:center">' +
+    tagBtn('classement', 'Classement') + tagBtn('forme', 'Forme') + tagBtn('h2h', 'Face à face') + tagBtn('h2hdom', 'Dom/Ext') + closeChip +
   '</div>';
   let content = '';
   if (tab === 'forme') content = bpFormeContent(m);
   else if (tab === 'classement') content = bpClassementContent(m);
   else if (tab === 'h2h') content = bpH2HContent(m, false);
   else if (tab === 'h2hdom') content = bpH2HContent(m, true);
-  return '<div style="position:absolute;bottom:78px;left:0;right:0;text-align:center;z-index:3">' +
-    (content ? '<div style="margin-bottom:4px">' + content + '</div>' : '') + tags +
-  '</div>';
+  return wrap((content ? '<div style="margin-bottom:4px">' + content + '</div>' : '') + tags);
 }
 function bpH2HPill(hg, ag){
   const col = hg > ag ? '#16a34a' : (hg < ag ? '#e5544d' : '#8a94a6');
