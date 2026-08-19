@@ -2526,8 +2526,8 @@ function bpBannerStatsHtml(m) {
     return '<span onclick="event.stopPropagation(); bpSetBannerTab(' + m.id + ', \'' + id + '\')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:2px 9px;border-radius:11px;white-space:nowrap;background:' + (active ? 'rgba(255,255,255,0.94)' : 'rgba(0,0,0,0.42)') + ';color:' + (active ? '#0d2137' : 'rgba(255,255,255,0.82)') + '">' + label + '</span>';
   };
   const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center">' +
-    tagBtn('forme', 'Forme') +
     tagBtn('classement', 'Classement') +
+    tagBtn('forme', 'Forme') +
     tagBtn('h2h', 'Face à face') +
     tagBtn('h2hdom', 'Dom/Ext') +
   '</div>';
