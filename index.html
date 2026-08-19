@@ -2471,6 +2471,27 @@ async function bpFetchLiveOne(matchId) {
 const BP_EVENTS_URL  = 'https://livescores-huouv7kgya-uc.a.run.app/events';
 const BP_STANDINGS_URL = 'https://livescores-huouv7kgya-uc.a.run.app/standings';
 const BP_H2H_URL = 'https://livescores-huouv7kgya-uc.a.run.app/h2h';
+const BP_TEAMFORM_URL = 'https://livescores-huouv7kgya-uc.a.run.app/teamform';
+const bpTeamForm = {}; // teamId -> [ {gf, ga, date} ] | 'loading'
+async function bpEnsureTeamForm(teamId) {
+  if (!teamId) return;
+  if (bpTeamForm[teamId] !== undefined) return;
+  bpTeamForm[teamId] = 'loading';
+  try {
+    const snap = await db.ref('teamFormCache/' + teamId).once('value');
+    const cache = snap.val();
+    if (cache && cache.ts && (Date.now() - cache.ts) < 12 * 3600000 && Array.isArray(cache.f)) {
+      bpTeamForm[teamId] = cache.f; _bpH2HRender(); return;
+    }
+    const r = await fetch(BP_TEAMFORM_URL + '?team=' + teamId);
+    const d = await r.json();
+    if (d && Array.isArray(d.form)) {
+      bpTeamForm[teamId] = d.form;
+      db.ref('teamFormCache/' + teamId).set({ ts: Date.now(), f: d.form });
+      _bpH2HRender();
+    } else { bpTeamForm[teamId] = undefined; }
+  } catch(e) { bpTeamForm[teamId] = undefined; }
+}
 const bpH2H = {}; // matchId -> [games] | 'loading'
 let bpBannerTab = {}; // matchId -> 'forme' | 'h2h' | 'h2hdom' | null
 window.bpSetBannerTab = function(mid, tab){ bpBannerTab[mid] = (bpBannerTab[mid] === tab) ? null : tab; try { renderMatches(); } catch(e){} };
@@ -2506,11 +2527,13 @@ function bpBannerStatsHtml(m) {
   };
   const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center">' +
     tagBtn('forme', 'Forme') +
+    tagBtn('classement', 'Classement') +
     tagBtn('h2h', 'Face à face') +
     tagBtn('h2hdom', 'Dom/Ext') +
   '</div>';
   let content = '';
   if (tab === 'forme') content = bpFormeContent(m);
+  else if (tab === 'classement') content = bpClassementContent(m);
   else if (tab === 'h2h') content = bpH2HContent(m, false);
   else if (tab === 'h2hdom') content = bpH2HContent(m, true);
   return '<div style="position:absolute;top:20px;left:0;right:0;text-align:center;z-index:3">' +
@@ -2528,19 +2551,36 @@ function bpStandFor(teamId, name){
 }
 function bpMuted(t){ return '<div style="font-size:8px;color:rgba(255,255,255,0.55);text-shadow:0 1px 2px rgba(0,0,0,1)">' + t + '</div>'; }
 function bpFormeContent(m) {
-  const box = function(name, st){
-    const rank = st && (st.rank != null ? st.rank : st.rang);
-    const form = st && (st.form != null ? st.form : st.forme);
-    const rankTxt = (rank != null) ? (rank + (rank === 1 ? 'er' : 'e')) : '';
-    const dots = bpFormDots(form);
+  bpEnsureTeamForm(m.homeId); bpEnsureTeamForm(m.awayId);
+  const teamRow = function(name, teamId){
+    const f = bpTeamForm[teamId];
+    let pills;
+    if (f === 'loading' || f === undefined) pills = '<span style="font-size:8px;color:rgba(255,255,255,0.55)">…</span>';
+    else if (!Array.isArray(f) || !f.length) pills = '<span style="font-size:8px;color:rgba(255,255,255,0.55)">—</span>';
+    else pills = f.slice(0, 5).map(function(g){
+      const col = g.gf > g.ga ? '#16a34a' : (g.gf < g.ga ? '#e5544d' : '#8a94a6');
+      return '<span style="font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums">' + g.gf + '-' + g.ga + '</span>';
+    }).join('');
     return '<div style="display:inline-flex;gap:5px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 8px;border-radius:7px">' +
-      '<span style="font-size:8px;color:#fff;font-weight:700;max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + (rankTxt ? ' <span style="color:rgba(255,255,255,0.6)">' + rankTxt + '</span>' : '') + '</span>' +
-      (dots ? '<span style="display:inline-flex;gap:2px">' + dots + '</span>' : '') +
+      '<span style="font-size:8px;color:#fff;font-weight:700;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
+      '<span style="display:inline-flex;gap:2px">' + pills + '</span>' +
+    '</div>';
+  };
+  return '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + teamRow(m.home, m.homeId) + teamRow(m.away, m.awayId) + '</div>';
+}
+function bpClassementContent(m) {
+  const one = function(name, st){
+    const rank = st && (st.rank != null ? st.rank : st.rang);
+    const pts = st && st.points;
+    const txt = (rank != null) ? (rank + (rank === 1 ? 'er' : 'e') + (pts != null ? ' · ' + pts + ' pts' : '')) : '—';
+    return '<div style="display:inline-flex;gap:5px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 8px;border-radius:7px">' +
+      '<span style="font-size:8px;color:#fff;font-weight:700;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
+      '<span style="font-size:9px;font-weight:800;color:#ffd66b">' + txt + '</span>' +
     '</div>';
   };
   const sh = bpStandFor(m.homeId, m.home), sa = bpStandFor(m.awayId, m.away);
   if (!sh && !sa) return bpMuted('Classement indisponible');
-  return '<div style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center">' + box(m.home, sh) + box(m.away, sa) + '</div>';
+  return '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + one(m.home, sh) + one(m.away, sa) + '</div>';
 }
 function bpH2HContent(m, domOnly) {
   const games = bpH2H[m.id];
