@@ -2536,7 +2536,7 @@ function bpBannerStatsHtml(m) {
   else if (tab === 'classement') content = bpClassementContent(m);
   else if (tab === 'h2h') content = bpH2HContent(m, false);
   else if (tab === 'h2hdom') content = bpH2HContent(m, true);
-  return '<div style="position:absolute;top:20px;left:0;right:0;text-align:center;z-index:3">' +
+  return '<div style="position:absolute;top:40px;left:0;right:0;text-align:center;z-index:3">' +
     tags + (content ? '<div style="margin-top:4px">' + content + '</div>' : '') +
   '</div>';
 }
