@@ -2480,7 +2480,7 @@ async function fetchStandings() {
   try {
     const snap = await db.ref('standingsCache').once('value');
     const cache = snap.val();
-    if (cache && cache.ts && (Date.now() - cache.ts) < 6 * 3600000 && cache.s) {
+    if (cache && cache.ts && (Date.now() - cache.ts) < 6 * 3600000 && cache.s && Object.keys(cache.s).length) {
       bpStandings = cache.s; bpBuildStandingsByName(); try { renderMatches(); } catch(e){} return;
     }
     const r = await fetch(BP_STANDINGS_URL);
@@ -4289,6 +4289,7 @@ window.addEventListener('firebaseReady', () => {
   syncFromFirebase();
   watchFirebase();
   preloadMatchImages();
+  fetchStandings();
 });
 if (window.firebaseReady) {
   syncFromFirebase();
