@@ -1203,7 +1203,7 @@ function bpRedFor(matchId) {
   return { redHome: reds[ld.homeTeamId] || 0, redAway: reds[ld.awayTeamId] || 0 };
 }
 const bpLastGoalTs = {}; // matchId -> ts du dernier but détecté (gel temporaire du cashout)
-const BP_ENDGAME_MIN = 85;   // gel du cashout à partir de la 85' (5 dernières minutes)
+const BP_ENDGAME_MIN = 90;   // gel du cashout pendant les arrêts de jeu (à partir de la 90')
 const BP_GOAL_FREEZE = 45000; // gel 45s après un but détecté
 function bpCashoutFrozen(matchId, elapsed) {
   if ((parseInt(elapsed) || 0) >= BP_ENDGAME_MIN) return 'fin';
@@ -1858,7 +1858,7 @@ function getCashoutHtml(matchId, hs, as) {
     const cashoutVal = calcCashoutValue(b, parseInt(hs), parseInt(as), elapsed, mid2);
     if (!(cashoutVal > 0)) {
       const fz = bpCashoutFrozen(mid2, elapsed);
-      if (fz) return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(110,110,110,0.92);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px">\uD83D\uDD12 Cashout suspendu (' + (fz === 'fin' ? 'fin de match' : 'but récent') + ')</span>';
+      if (fz) return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(110,110,110,0.92);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px">\uD83D\uDD12 Cashout suspendu (' + (fz === 'fin' ? 'arrêts de jeu' : 'but récent') + ')</span>';
       return '';
     }
     return '<span onclick="doCashout(' + matchId + ')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.96);color:#1a6fd4;font-size:12px;font-weight:800;padding:5px 14px;border-radius:20px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.35)">💸 Cashout <span style="color:#056b52">' + fmtPts(cashoutVal) + ' pts</span></span>';
