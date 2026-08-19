@@ -2065,7 +2065,7 @@ function buildCard(m) {
       </div>
       ${!started ? bpBannerStatsHtml(m) : ''}
       <!-- Equipes au milieu -->
-      <div style="position:absolute;bottom:${started ? '16px' : '54px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="position:absolute;bottom:${started ? '16px' : '62px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:5px">
           ${homeLogo ? `<img src="${homeLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
           <span style="color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,1)">${homeName}</span>
@@ -2497,6 +2497,8 @@ let bpBannerTab = {}; // matchId -> 'forme' | 'h2h' | 'h2hdom' | null
 window.bpSetBannerTab = function(mid, tab){ bpBannerTab[mid] = (bpBannerTab[mid] === tab) ? null : tab; try { renderMatches(); } catch(e){} };
 let bpStatsOpen = {};
 window.bpToggleStats = function(mid){ bpStatsOpen[mid] = !bpStatsOpen[mid]; if (!bpStatsOpen[mid]) bpBannerTab[mid] = null; try { renderMatches(); } catch(e){} };
+let bpFormTip = {};
+window.bpShowFormTip = function(mid, teamId, idx){ const cur = bpFormTip[mid]; bpFormTip[mid] = (cur && cur.teamId === teamId && cur.idx === idx) ? null : { teamId: teamId, idx: idx }; try { renderMatches(); } catch(e){} };
 let _bpH2HTimer = null;
 function _bpH2HRender() { if (_bpH2HTimer) return; _bpH2HTimer = setTimeout(function(){ _bpH2HTimer = null; try { renderMatches(); } catch(e){} }, 350); }
 async function bpEnsureH2H(m) {
@@ -2522,7 +2524,7 @@ async function bpEnsureH2H(m) {
 }
 function bpBannerStatsHtml(m) {
   bpEnsureH2H(m);
-  const wrap = function(inner){ return '<div style="position:absolute;bottom:78px;left:0;right:0;text-align:center;z-index:3">' + inner + '</div>'; };
+  const wrap = function(inner){ return '<div style="position:absolute;bottom:88px;left:0;right:0;text-align:center;z-index:3">' + inner + '</div>'; };
   if (!bpStatsOpen[m.id]) {
     const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 12px;border-radius:11px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Statistiques</span>';
     return wrap(btn);
@@ -2555,21 +2557,38 @@ function bpStandFor(teamId, name){
 function bpMuted(t){ return '<div style="font-size:8px;color:rgba(255,255,255,0.55);text-shadow:0 1px 2px rgba(0,0,0,1)">' + t + '</div>'; }
 function bpFormeContent(m) {
   bpEnsureTeamForm(m.homeId); bpEnsureTeamForm(m.awayId);
+  const tip = bpFormTip[m.id];
   const teamRow = function(name, teamId){
     const f = bpTeamForm[teamId];
     let pills;
     if (f === 'loading' || f === undefined) pills = '<span style="font-size:8px;color:rgba(255,255,255,0.55)">…</span>';
     else if (!Array.isArray(f) || !f.length) pills = '<span style="font-size:8px;color:rgba(255,255,255,0.55)">—</span>';
-    else pills = f.slice(0, 5).map(function(g){
+    else pills = f.slice(0, 5).map(function(g, i){
       const col = g.gf > g.ga ? '#16a34a' : (g.gf < g.ga ? '#e5544d' : '#8a94a6');
-      return '<span style="font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums">' + g.gf + '-' + g.ga + '</span>';
+      const active = tip && tip.teamId === teamId && tip.idx === i;
+      return '<span onclick="event.stopPropagation(); bpShowFormTip(' + m.id + ', ' + teamId + ', ' + i + ')" style="cursor:pointer;font-size:9px;font-weight:800;color:#fff;background:' + col + ';border-radius:3px;padding:0 4px;font-variant-numeric:tabular-nums;box-shadow:' + (active ? '0 0 0 1.5px #fff' : 'none') + '">' + g.gf + '-' + g.ga + '</span>';
     }).join('');
     return '<div style="display:inline-flex;gap:5px;align-items:center;background:rgba(0,0,0,0.42);padding:2px 8px;border-radius:7px">' +
       '<span style="font-size:8px;color:#fff;font-weight:700;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
       '<span style="display:inline-flex;gap:2px">' + pills + '</span>' +
     '</div>';
   };
-  return '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + teamRow(m.home, m.homeId) + teamRow(m.away, m.awayId) + '</div>';
+  let tipHtml = '';
+  if (tip) {
+    const arr = bpTeamForm[tip.teamId];
+    if (Array.isArray(arr) && arr[tip.idx]) {
+      const g = arr[tip.idx];
+      const venue = g.home ? '🏠 dom.' : '✈️ ext.';
+      tipHtml = '<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.95);color:#0d2137;font-size:8px;font-weight:700;padding:3px 9px;border-radius:8px;max-width:96%">' +
+        '<span style="font-weight:900">' + g.gf + '-' + g.ga + '</span>' +
+        '<span>vs ' + bpEscape(g.opp || '?') + '</span>' +
+        (g.comp ? '<span style="color:#5c7386">· ' + bpEscape(g.comp) + '</span>' : '') +
+        '<span style="color:#5c7386">· ' + venue + '</span>' +
+      '</div>';
+    }
+  }
+  return (tipHtml ? '<div style="margin-bottom:4px">' + tipHtml + '</div>' : '') +
+    '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + teamRow(m.home, m.homeId) + teamRow(m.away, m.awayId) + '</div>';
 }
 function bpClassementContent(m) {
   const one = function(name, st){
