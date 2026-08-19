@@ -2051,7 +2051,7 @@ function buildCard(m) {
 
   return `<div class="match-card ${cardCls}" data-id="${m.id}">
     <!-- Bandeau style Betclic - image plein cadre avec cotes intégrées -->
-    <div style="position:relative;height:${started ? '120px' : '180px'};border-radius:8px 8px 0 0;overflow:hidden;background:linear-gradient(135deg,#15324e 0%,#0d2137 55%,#0a1a2e 100%)">
+    <div style="position:relative;height:${started ? '120px' : '168px'};border-radius:8px 8px 0 0;overflow:hidden;background:linear-gradient(135deg,#15324e 0%,#0d2137 55%,#0a1a2e 100%)">
       <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:36px;opacity:0.20">
         ${homeLogo ? `<img src="${homeLogo}" style="width:92px;height:92px;object-fit:contain" onerror="this.style.display='none'">` : ''}
         ${awayLogo ? `<img src="${awayLogo}" style="width:92px;height:92px;object-fit:contain" onerror="this.style.display='none'">` : ''}
@@ -2065,7 +2065,7 @@ function buildCard(m) {
       </div>
       ${!started ? (bpEnsureH2H(m), bpH2HHtml(m)) : ''}
       <!-- Equipes au milieu -->
-      <div style="position:absolute;bottom:${started ? '16px' : '58px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="position:absolute;bottom:${started ? '16px' : '54px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:5px;position:relative">
           ${!started ? `<div style="position:absolute;bottom:100%;left:0;margin-bottom:3px">${bpTeamMeta(m.homeId, m.home, 'left')}</div>` : ''}
           ${homeLogo ? `<img src="${homeLogo}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,1))">` : ''}
@@ -2523,7 +2523,7 @@ function bpH2HHtml(m) {
   const expanded = !!bpH2HExpanded[m.id];
   const hint = (l2 && !expanded) ? '<span style="font-size:8px;color:rgba(255,255,255,0.55);margin-left:3px">▾</span>' : '';
 
-  let html = '<div onclick="event.stopPropagation(); bpToggleH2H(' + m.id + ')" style="position:absolute;top:26px;left:0;right:0;text-align:center;z-index:3;cursor:pointer">';
+  let html = '<div onclick="event.stopPropagation(); bpToggleH2H(' + m.id + ')" style="position:absolute;top:22px;left:0;right:0;text-align:center;z-index:3;cursor:pointer">';
   html += lbl('Face à face') + row(l1, hint);
   if (expanded && l2) {
     html += '<div style="height:5px"></div>' + lbl('À domicile') + row(l2);
