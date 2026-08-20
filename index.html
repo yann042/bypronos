@@ -799,7 +799,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);display:none;align-items:flex-start;justify-content:center;padding:28px 12px;overflow:auto}
 .compo-box{background:var(--bg2,#fff);color:var(--txt,#111);max-width:640px;width:100%;border-radius:14px;padding:18px 16px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
 .compo-close{position:absolute;top:10px;right:13px;font-size:18px;cursor:pointer;color:var(--txt2);font-weight:700}
-.compo-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:14px;padding-right:20px}
+.compo-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;padding-right:20px}
+.compo-ref{text-align:center;font-size:11px;color:var(--txt2);margin-bottom:12px}
 .compo-team{margin-bottom:14px}
 .compo-team-head{font-size:14px;font-weight:800;border-bottom:1px solid var(--bord);padding-bottom:5px;margin-bottom:6px}
 .compo-p{font-size:13px;padding:2px 0;display:flex;align-items:center;gap:8px}
@@ -812,7 +813,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-head-row>div{flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .compo-foot-row{margin-top:6px;font-size:11px;color:var(--txt2);font-style:italic}
 .compo-foot-row>div{flex:1;text-align:center}
-.pitch{background:repeating-linear-gradient(90deg,#2f8a54,#2f8a54 22px,#2b804d 22px,#2b804d 44px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 4px 22px;display:flex;flex-direction:row;min-height:290px;position:relative;overflow:hidden}
+.pitch-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;letter-spacing:3px;color:rgba(255,255,255,.11);text-transform:uppercase;white-space:nowrap}
+.pitch-wm b{color:rgba(46,255,168,.16);margin-right:4px}
+.pitch{background:repeating-linear-gradient(90deg,#2f8a54,#2f8a54 22px,#2b804d 22px,#2b804d 44px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:20px 4px;display:flex;flex-direction:row;min-height:298px;position:relative;overflow:hidden}
 .pitch::before{content:'';position:absolute;top:8px;bottom:8px;left:50%;width:1px;background:rgba(255,255,255,.32)}
 .pitch::after{content:'';position:absolute;top:calc(50% - 22px);left:calc(50% - 22px);width:44px;height:44px;border:1px solid rgba(255,255,255,.32);border-radius:50%}
 .pitch-side{flex:1;display:flex;flex-direction:row;justify-content:space-around;position:relative;z-index:2}
@@ -841,7 +844,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-flag.br{bottom:2px;right:2px}
 .pitch-namerow{display:flex;align-items:center;justify-content:center;gap:2px;max-width:84px;margin-top:1px}
 .pitch-name{font-size:10px;color:#fff;text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
-.pitch-coach{position:absolute;bottom:4px;z-index:4;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);padding:1px 7px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitch-coach{position:absolute;bottom:2px;z-index:4;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);padding:1px 7px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pitch-coach.left{left:6px}
 .pitch-coach.right{right:6px}
 .compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
@@ -2473,6 +2476,7 @@ function mapFixture(f) {
     round: (f.league && f.league.round) || '',
     venueId: (f.fixture.venue && f.fixture.venue.id) || null,
     venue: (f.fixture.venue && f.fixture.venue.name) || '',
+    referee: (f.fixture && f.fixture.referee) || '',
     ts: f.fixture.timestamp || Math.floor(d.getTime() / 1000),
     odds: [1.90, 3.40, 3.90] // PROVISOIRE : remplace par les vraies cotes via /odds
   };
@@ -2606,7 +2610,7 @@ function bpBannerStatsHtml(m) {
   const wrap = function(inner){ return '<div style="position:absolute;bottom:88px;left:0;right:0;text-align:center;z-index:3">' + inner + '</div>'; };
   const compoChip = '<span onclick="event.stopPropagation(); bpOpenCompo(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📋 Compos</span>';
   if (!bpStatsOpen[m.id]) {
-    const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Statistiques</span>';
+    const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Stats</span>';
     return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
@@ -3073,7 +3077,7 @@ window.bpResetManual = async function(name) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v11').once('value');
+    const snap = await db.ref('fixturesCache_v12').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -3085,7 +3089,7 @@ async function loadFixtures() {
       if (!cache.oddsAt || (Date.now() - cache.oddsAt) > 3600000) {
         await enrichOdds(bpAllMatches);
         bpApplyLeagueFilter();
-        try { await db.ref('fixturesCache_v11').update({ matches: bpAllMatches, oddsAt: Date.now() }); } catch (e) {}
+        try { await db.ref('fixturesCache_v12').update({ matches: bpAllMatches, oddsAt: Date.now() }); } catch (e) {}
       }
       return;
     }
@@ -3111,7 +3115,7 @@ async function loadFixtures() {
       bpApplyLeagueFilter();
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
-        await db.ref('fixturesCache_v11').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: bpAllMatches });
+        await db.ref('fixturesCache_v12').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: bpAllMatches });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
@@ -3632,7 +3636,8 @@ function bpPitchColumns(team, reverse, evMap){
 }
 function bpPitchDual(home, away, evMap){
   const coach = function(name, side){ return name ? '<div class="pitch-coach ' + side + '">' + bpEscape(name) + '</div>' : ''; };
-  const markings = '<div class="pitch-boundary"></div>' +
+  const markings = '<div class="pitch-wm"><b>BY</b> PRONOS</div>' +
+    '<div class="pitch-boundary"></div>' +
     '<div class="pitch-box left"></div><div class="pitch-box right"></div>' +
     '<div class="pitch-arc tl"></div><div class="pitch-arc tr"></div><div class="pitch-arc bl"></div><div class="pitch-arc br"></div>' +
     '<div class="pitch-flag l tl"></div><div class="pitch-flag l bl"></div><div class="pitch-flag r tr"></div><div class="pitch-flag r br"></div>';
@@ -3649,6 +3654,7 @@ function bpRenderCompo(m) {
   const body = document.getElementById('compoBody');
   if (!body) return;
   let html = '<div class="compo-title">' + bpEscape(m.home) + ' - ' + bpEscape(m.away) + '</div>';
+  if (m.referee) html += '<div class="compo-ref">⚖️ Arbitre : ' + bpEscape(m.referee) + '</div>';
   const data = bpLineups[m.id];
   if (data === 'loading' || data === undefined) { body.innerHTML = html + '<div class="compo-muted">Chargement…</div>'; return; }
   if (!Array.isArray(data) || !data.length) {
