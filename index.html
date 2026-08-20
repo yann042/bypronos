@@ -797,7 +797,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .iw-btn.primary{background:#0d6e4f;color:#fff;border-color:#0d6e4f}
 .iw-btn.danger{color:#c0392b;border-color:#e5b0aa;background:transparent}
 .compo-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);display:none;align-items:flex-start;justify-content:center;padding:28px 12px;overflow:auto}
-.compo-box{background:var(--bg2,#fff);color:var(--txt,#111);max-width:460px;width:100%;border-radius:14px;padding:18px 16px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.compo-box{background:var(--bg2,#fff);color:var(--txt,#111);max-width:640px;width:100%;border-radius:14px;padding:18px 16px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
 .compo-close{position:absolute;top:10px;right:13px;font-size:18px;cursor:pointer;color:var(--txt2);font-weight:700}
 .compo-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:14px;padding-right:20px}
 .compo-team{margin-bottom:14px}
@@ -807,6 +807,18 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-pos{color:var(--txt2);font-size:10px;margin-left:auto}
 .compo-coach{font-size:11px;color:var(--txt2);margin-top:6px;font-style:italic}
 .compo-muted{text-align:center;color:var(--txt2);padding:22px 10px;font-size:13px;line-height:1.6}
+.compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.compo-grid{grid-template-columns:1fr}}
+.pitch{background:repeating-linear-gradient(#2f8a54,#2f8a54 18px,#2b804d 18px,#2b804d 36px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:12px 3px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;min-height:214px;position:relative;overflow:hidden}
+.pitch::before{content:'';position:absolute;left:8px;right:8px;top:50%;height:1px;background:rgba(255,255,255,.28)}
+.pitch::after{content:'';position:absolute;left:50%;top:calc(50% - 20px);width:40px;height:40px;border:1px solid rgba(255,255,255,.28);border-radius:50%;transform:translateX(-50%)}
+.pitch-row{display:flex;justify-content:space-around;align-items:center;position:relative;z-index:1}
+.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0}
+.pitch-jersey{width:22px;height:22px;border-radius:50%;background:#fff;color:#111;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.pitch-name{font-size:8px;color:#fff;text-align:center;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.compo-subs{margin-top:8px}
+.compo-subs-head{font-size:11px;font-weight:800;color:var(--txt2);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none}
+.compo-subs-body{margin-top:4px}
 .scorers{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:2px 10px 4px;padding-top:4px;font-size:11px;color:var(--txt2)}
 .scorers .sc-side{flex:1;line-height:1.5;min-width:40%}
 .scorers .sc-side.away{text-align:right}
@@ -3531,6 +3543,47 @@ async function bpEnsureLineups(m) {
   } catch(e) { bpLineups[m.id] = []; }
   if (bpCompoMatch && bpCompoMatch.id === m.id) bpRenderCompo(m);
 }
+function bpShortName(name){ const parts = String(name || '').trim().split(' '); return parts[parts.length - 1] || String(name || ''); }
+function bpPitchPlayer(p){
+  return '<div class="pitch-player"><div class="pitch-jersey">' + (p.n != null ? p.n : '') + '</div><div class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</div></div>';
+}
+function bpPitch(t){
+  const xi = t.startXI || [];
+  if (!xi.length) return '';
+  const rows = {};
+  const hasGrid = xi.some(function(p){ return p.grid; });
+  xi.forEach(function(p){
+    let row, col;
+    if (hasGrid && p.grid) { const q = String(p.grid).split(':'); row = parseInt(q[0]) || 1; col = parseInt(q[1]) || 1; }
+    else { row = ({ G: 1, D: 2, M: 3, F: 4 })[p.pos] || 3; col = 1; }
+    (rows[row] = rows[row] || []).push({ p: p, col: col });
+  });
+  const nums = Object.keys(rows).map(Number).sort(function(a, b){ return a - b; });
+  // Ligne 1 = gardien/défense (en bas), on affiche de l'attaque (haut) vers le gardien (bas)
+  let html = '<div class="pitch">';
+  nums.slice().reverse().forEach(function(rn){
+    const line = rows[rn].sort(function(a, b){ return a.col - b.col; });
+    html += '<div class="pitch-row">' + line.map(function(x){ return bpPitchPlayer(x.p); }).join('') + '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+function bpTeamBlock(t){
+  let h = '<div class="compo-team">';
+  h += '<div class="compo-team-head">' + bpEscape(t.name || '') + (t.formation ? ' · <b>' + bpEscape(t.formation) + '</b>' : '') + '</div>';
+  h += bpPitch(t);
+  if (t.coach) h += '<div class="compo-coach">Entraîneur : ' + bpEscape(t.coach) + '</div>';
+  const subs = t.subs || [];
+  if (subs.length) {
+    h += '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div>';
+    h += '<div class="compo-subs-body" style="display:none">' + subs.map(function(p){
+      return '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (p.pos ? '<span class="compo-pos">' + bpEscape(p.pos) + '</span>' : '') + '</div>';
+    }).join('') + '</div></div>';
+  }
+  h += '</div>';
+  return h;
+}
+window.bpToggleSubs = function(el){ const b = el.nextElementSibling; if (b) b.style.display = (b.style.display === 'none' ? 'block' : 'none'); };
 function bpRenderCompo(m) {
   const body = document.getElementById('compoBody');
   if (!body) return;
@@ -3541,15 +3594,7 @@ function bpRenderCompo(m) {
     body.innerHTML = html + '<div class="compo-muted"><b>Compositions pas encore disponibles.</b><br>Elles sortent en général environ 1h avant le match. Reviens un peu plus tard !</div>';
     return;
   }
-  data.forEach(function(t){
-    html += '<div class="compo-team">';
-    html += '<div class="compo-team-head">' + bpEscape(t.name || '') + (t.formation ? ' · <b>' + bpEscape(t.formation) + '</b>' : '') + '</div>';
-    (t.startXI || []).forEach(function(p){
-      html += '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (p.pos ? '<span class="compo-pos">' + bpEscape(p.pos) + '</span>' : '') + '</div>';
-    });
-    if (t.coach) html += '<div class="compo-coach">Entraîneur : ' + bpEscape(t.coach) + '</div>';
-    html += '</div>';
-  });
+  html += '<div class="compo-grid">' + data.map(bpTeamBlock).join('') + '</div>';
   body.innerHTML = html;
 }
 window.bpOpenCompo = function(mid) {
