@@ -796,6 +796,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .iw-btn{font-size:12px;font-weight:700;padding:5px 11px;border-radius:7px;border:1px solid var(--bord);background:var(--bg2);color:var(--txt);cursor:pointer}
 .iw-btn.primary{background:#0d6e4f;color:#fff;border-color:#0d6e4f}
 .iw-btn.danger{color:#c0392b;border-color:#e5b0aa;background:transparent}
+.compo-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);display:none;align-items:flex-start;justify-content:center;padding:28px 12px;overflow:auto}
+.compo-box{background:var(--bg2,#fff);color:var(--txt,#111);max-width:460px;width:100%;border-radius:14px;padding:18px 16px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.compo-close{position:absolute;top:10px;right:13px;font-size:18px;cursor:pointer;color:var(--txt2);font-weight:700}
+.compo-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:14px;padding-right:20px}
+.compo-team{margin-bottom:14px}
+.compo-team-head{font-size:14px;font-weight:800;border-bottom:1px solid var(--bord);padding-bottom:5px;margin-bottom:6px}
+.compo-p{font-size:13px;padding:2px 0;display:flex;align-items:center;gap:8px}
+.compo-n{display:inline-block;min-width:22px;text-align:center;font-weight:800;background:var(--bg1,#eef1f4);border-radius:4px;font-size:11px;padding:1px 0}
+.compo-pos{color:var(--txt2);font-size:10px;margin-left:auto}
+.compo-coach{font-size:11px;color:var(--txt2);margin-top:6px;font-style:italic}
+.compo-muted{text-align:center;color:var(--txt2);padding:22px 10px;font-size:13px;line-height:1.6}
 .scorers{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:2px 10px 4px;padding-top:4px;font-size:11px;color:var(--txt2)}
 .scorers .sc-side{flex:1;line-height:1.5;min-width:40%}
 .scorers .sc-side.away{text-align:right}
@@ -1156,6 +1167,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   </div>
 
 <div class="notif" id="notif"></div>
+<div class="compo-modal" id="compoModal"><div class="compo-box"><div class="compo-close" onclick="bpCloseCompo()">✕</div><div id="compoBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
     <span class="goal-emoji">⚽</span>
@@ -2551,9 +2563,10 @@ async function bpEnsureH2H(m) {
 function bpBannerStatsHtml(m) {
   bpEnsureH2H(m);
   const wrap = function(inner){ return '<div style="position:absolute;bottom:88px;left:0;right:0;text-align:center;z-index:3">' + inner + '</div>'; };
+  const compoChip = '<span onclick="event.stopPropagation(); bpOpenCompo(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 12px;border-radius:11px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📋 Compos</span>';
   if (!bpStatsOpen[m.id]) {
     const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 12px;border-radius:11px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Statistiques</span>';
-    return wrap(btn);
+    return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
   const tagBtn = function(id, label){
@@ -2561,7 +2574,7 @@ function bpBannerStatsHtml(m) {
     return '<span onclick="event.stopPropagation(); bpSetBannerTab(' + m.id + ', \'' + id + '\')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:2px 9px;border-radius:11px;white-space:nowrap;background:' + (active ? 'rgba(255,255,255,0.94)' : 'rgba(0,0,0,0.42)') + ';color:' + (active ? '#0d2137' : 'rgba(255,255,255,0.82)') + '">' + label + '</span>';
   };
   const closeChip = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:9px;font-weight:800;padding:2px 7px;border-radius:11px;background:rgba(0,0,0,0.42);color:rgba(255,255,255,0.7)">✕</span>';
-  const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:center">' +
+  const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:center">' + compoChip +
     tagBtn('classement', 'Classement') + tagBtn('forme', 'Forme') + tagBtn('h2h', 'Face à face') + tagBtn('h2hdom', 'Dom/Ext') + closeChip +
   '</div>';
   let content = '';
@@ -3489,6 +3502,65 @@ window.bpDeleteLot = async function(id) {
   if (!confirm('Supprimer ce lot ?')) return;
   try { await fetch(FB_URL + bpInstantBase() + '/' + id + '.json', { method: 'DELETE' }); renderInstantView(); } catch(e) {}
 };
+
+// ==============================================
+// -- COMPOSITIONS (lineups) --------------------
+// ==============================================
+const BP_LINEUPS_URL = 'https://livescores-huouv7kgya-uc.a.run.app/lineups';
+const bpLineups = {}; // matchId -> [teams] | 'loading'
+let bpCompoMatch = null;
+async function bpEnsureLineups(m) {
+  if (!m || !m.id) return;
+  const cur = bpLineups[m.id];
+  if (cur === 'loading' || (Array.isArray(cur) && cur.length)) return;
+  bpLineups[m.id] = 'loading';
+  try {
+    const snap = await db.ref('lineupsCache/' + m.id).once('value');
+    const cache = snap.val();
+    if (cache && cache.ts && (Date.now() - cache.ts) < 15 * 60000 && Array.isArray(cache.l) && cache.l.length) {
+      bpLineups[m.id] = cache.l;
+      if (bpCompoMatch && bpCompoMatch.id === m.id) bpRenderCompo(m);
+      return;
+    }
+    const r = await fetch(BP_LINEUPS_URL + '?fixture=' + m.id);
+    const d = await r.json();
+    if (d && Array.isArray(d.lineups)) {
+      bpLineups[m.id] = d.lineups;
+      if (d.lineups.length) db.ref('lineupsCache/' + m.id).set({ ts: Date.now(), l: d.lineups });
+    } else { bpLineups[m.id] = []; }
+  } catch(e) { bpLineups[m.id] = []; }
+  if (bpCompoMatch && bpCompoMatch.id === m.id) bpRenderCompo(m);
+}
+function bpRenderCompo(m) {
+  const body = document.getElementById('compoBody');
+  if (!body) return;
+  let html = '<div class="compo-title">' + bpEscape(m.home) + ' - ' + bpEscape(m.away) + '</div>';
+  const data = bpLineups[m.id];
+  if (data === 'loading' || data === undefined) { body.innerHTML = html + '<div class="compo-muted">Chargement…</div>'; return; }
+  if (!Array.isArray(data) || !data.length) {
+    body.innerHTML = html + '<div class="compo-muted"><b>Compositions pas encore disponibles.</b><br>Elles sortent en général environ 1h avant le match. Reviens un peu plus tard !</div>';
+    return;
+  }
+  data.forEach(function(t){
+    html += '<div class="compo-team">';
+    html += '<div class="compo-team-head">' + bpEscape(t.name || '') + (t.formation ? ' · <b>' + bpEscape(t.formation) + '</b>' : '') + '</div>';
+    (t.startXI || []).forEach(function(p){
+      html += '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (p.pos ? '<span class="compo-pos">' + bpEscape(p.pos) + '</span>' : '') + '</div>';
+    });
+    if (t.coach) html += '<div class="compo-coach">Entraîneur : ' + bpEscape(t.coach) + '</div>';
+    html += '</div>';
+  });
+  body.innerHTML = html;
+}
+window.bpOpenCompo = function(mid) {
+  const m = (matches || []).find(function(x){ return x.id === mid; });
+  if (!m) return;
+  bpCompoMatch = m;
+  const modal = document.getElementById('compoModal'); if (modal) modal.style.display = 'flex';
+  bpRenderCompo(m);
+  bpEnsureLineups(m);
+};
+window.bpCloseCompo = function(){ const modal = document.getElementById('compoModal'); if (modal) modal.style.display = 'none'; bpCompoMatch = null; };
 
 function scrollToMatch(id, el) {
   document.querySelectorAll('.sport-item[onclick]').forEach(e=>e.classList.remove('active'));
