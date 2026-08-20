@@ -2893,6 +2893,18 @@ async function recomputeStandings(playersArg) {
           sR += rPts; sS += scPts;
           days[dayKey].ptsResult += rPts; days[dayKey].ptsScore += scPts;
         }
+      } else if (b.finalHome != null && b.finalAway != null) {
+        // Reglement DURABLE : match hors fenetre API -> on score depuis le resultat stocke dans le pari
+        const lp = calcLivePts(b, b.finalHome, b.finalAway);
+        if (lp) {
+          let rPts = 0, scPts = 0;
+          if (lp.type === 'max')         { rPts = b.resultOdd; scPts = b.scoreOdd; }
+          else if (lp.type === 'bonus')  { rPts = b.resultOdd; scPts = 0.5; }
+          else if (lp.type === 'result') { rPts = b.resultOdd; scPts = 0; }
+          else                           { rPts = -1;          scPts = 0; }
+          sR += rPts; sS += scPts;
+          days[dayKey].ptsResult += rPts; days[dayKey].ptsScore += scPts;
+        }
       }
       // match non termine => 0 point pour l'instant
     });
