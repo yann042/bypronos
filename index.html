@@ -1555,11 +1555,15 @@ let currentLeague = null; // { code, name, isAdmin }
 // /ligues/{code}/players/{nom} → paris du joueur
 // /ligues/{code}/config → { name, admin, matches, createdAt }
 
+// Code de ligue CANONIQUE (identique pour localStorage ET Firebase) — anti-fuite inter-ligues
+function bpLeagueCodeNorm() {
+  let code = (currentLeague && currentLeague.code) ? currentLeague.code : (localStorage.getItem('bypronos_league') || '');
+  try { const p = JSON.parse(code); if (p && p.code) code = p.code; } catch(e){}
+  code = String(code).toUpperCase().replace(/[^A-Z0-9_]/g, '') || 'NONE';
+  return code;
+}
 function getLeagueUrl() {
-  const lc = localStorage.getItem('bypronos_league') || 'global';
-  let leagueCode = lc;
-  try { const p = JSON.parse(lc); if (p && p.code) leagueCode = p.code; } catch(e) {}
-  return FB_URL + '/leagues/' + leagueCode + '/standings';
+  return FB_URL + '/leagues/' + bpLeagueCodeNorm() + '/standings';
 }
 
 function savePlayers_league(data) {
@@ -3371,10 +3375,7 @@ function scrollToMatch(id, el) {
 const STORAGE_KEY='bypronos_players';
 const BP_RESERVED_KEYS = { config:1, players:1, standings:1, teams:1, info:1, bets:1, matchesLock:1, global:1 };
 function bpPlayersKey() {
-  let code = (currentLeague && currentLeague.code) ? currentLeague.code : (localStorage.getItem('bypronos_league') || '');
-  try { const p = JSON.parse(code); if (p && p.code) code = p.code; } catch(e){}
-  code = String(code).toUpperCase().replace(/[^A-Z0-9_]/g, '') || 'NONE';
-  return 'bypronos_players_' + code;
+  return 'bypronos_players_' + bpLeagueCodeNorm();
 }
 function bpFilterPlayers(obj) {
   const out = {};
