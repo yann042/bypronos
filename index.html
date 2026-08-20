@@ -819,7 +819,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-col{flex:1;display:flex;flex-direction:column;justify-content:space-around;align-items:center;gap:4px}
 .pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
 .pitch-jersey{width:22px;height:22px;border-radius:50%;background:#fff;color:#111;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
-.pitch-side:last-child .pitch-jersey{background:#1f6fd6;color:#fff}
+.pitch-ev{font-size:9px;line-height:1;letter-spacing:-1px;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.pitch-goal{position:absolute;top:calc(50% - 26px);width:9px;height:52px;border:2px solid rgba(255,255,255,.85);z-index:1;background-image:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px),repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px)}
+.pitch-goal.left{left:0;border-right:none;border-radius:0 4px 4px 0}
+.pitch-goal.right{right:0;border-left:none;border-radius:4px 0 0 4px}
 .pitch-name{font-size:8px;color:#fff;text-align:center;max-width:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
 .pitch-coach{position:absolute;bottom:5px;z-index:2;font-size:9px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);padding:1px 7px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pitch-coach.left{left:6px}
@@ -3552,10 +3555,43 @@ async function bpEnsureLineups(m) {
   if (bpCompoMatch && bpCompoMatch.id === m.id) bpRenderCompo(m);
 }
 function bpShortName(name){ const parts = String(name || '').trim().split(' '); return parts[parts.length - 1] || String(name || ''); }
-function bpPitchPlayer(p){
-  return '<div class="pitch-player"><div class="pitch-jersey">' + (p.n != null ? p.n : '') + '</div><div class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</div></div>';
+const bpMatchEv = {}; // matchId -> { playerId: {goals, yellow, red, subbed} } | 'loading'
+async function bpEnsureMatchEvents(m) {
+  if (!m || !m.id) return;
+  if (!isMatchStarted(m.time, m.id)) { bpMatchEv[m.id] = {}; return; }
+  bpMatchEv[m.id] = bpMatchEv[m.id] && bpMatchEv[m.id] !== 'loading' ? bpMatchEv[m.id] : 'loading';
+  try {
+    const r = await fetch(BP_EVENTS_URL + '?fixture=' + m.id);
+    const d = await r.json();
+    const map = {};
+    (d.response || []).forEach(function(e){
+      const pid = e.player && e.player.id;
+      const aid = e.assist && e.assist.id;
+      if (e.type === 'Goal' && pid != null) { map[pid] = map[pid] || {}; if (!/missed/i.test(e.detail||'')) map[pid].goals = (map[pid].goals || 0) + 1; }
+      else if (e.type === 'Card' && pid != null) { map[pid] = map[pid] || {}; if (/red/i.test(e.detail || '')) map[pid].red = true; else map[pid].yellow = true; }
+      else if (e.type === 'subst' && aid != null) { map[aid] = map[aid] || {}; map[aid].subbed = true; }
+    });
+    bpMatchEv[m.id] = map;
+  } catch(e) { bpMatchEv[m.id] = {}; }
+  if (bpCompoMatch && bpCompoMatch.id === m.id) bpRenderCompo(m);
 }
-function bpPitchColumns(team, reverse){
+function bpPitchPlayer(p, colors, isGK, evMap, fbBg, fbFg){
+  let bg = fbBg, fg = fbFg, border = fbBg;
+  if (colors) {
+    const c = isGK ? (colors.goalkeeper || colors.player) : colors.player;
+    if (c && c.primary) { bg = '#' + c.primary; fg = '#' + (c.number || '111111'); border = '#' + (c.border || c.primary); }
+  }
+  let icons = '';
+  if (evMap && p.id != null && evMap[p.id]) {
+    const e = evMap[p.id];
+    if (e.goals) { for (let i = 0; i < Math.min(e.goals, 3); i++) icons += '⚽'; }
+    if (e.yellow) icons += '🟨';
+    if (e.red) icons += '🟥';
+    if (e.subbed) icons += '🔄';
+  }
+  return '<div class="pitch-player"><div class="pitch-jersey" style="background:' + bg + ';color:' + fg + ';border:1.5px solid ' + border + '">' + (p.n != null ? p.n : '') + '</div>' + (icons ? '<div class="pitch-ev">' + icons + '</div>' : '') + '<div class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</div></div>';
+}
+function bpPitchColumns(team, reverse, evMap){
   const xi = team.startXI || [];
   const rows = {};
   const hasGrid = xi.some(function(p){ return p.grid; });
@@ -3567,33 +3603,22 @@ function bpPitchColumns(team, reverse){
   });
   const nums = Object.keys(rows).map(Number).sort(function(a, b){ return a - b; });
   const order = reverse ? nums.slice().reverse() : nums.slice();
+  const colors = team.colors || null;
+  const fbBg = reverse ? '#1f6fd6' : '#ffffff';
+  const fbFg = reverse ? '#ffffff' : '#111111';
   return order.map(function(rn){
     const line = rows[rn].sort(function(a, b){ return a.col - b.col; });
-    return '<div class="pitch-col">' + line.map(function(x){ return bpPitchPlayer(x.p); }).join('') + '</div>';
+    return '<div class="pitch-col">' + line.map(function(x){ return bpPitchPlayer(x.p, colors, x.p.pos === 'G', evMap, fbBg, fbFg); }).join('') + '</div>';
   }).join('');
 }
-function bpPitchDual(home, away){
+function bpPitchDual(home, away, evMap){
   const coach = function(name, side){ return name ? '<div class="pitch-coach ' + side + '">' + bpEscape(name) + '</div>' : ''; };
   return '<div class="pitch">' +
-    '<div class="pitch-side">' + bpPitchColumns(home, false) + '</div>' +
-    '<div class="pitch-side">' + bpPitchColumns(away, true) + '</div>' +
+    '<div class="pitch-goal left"></div><div class="pitch-goal right"></div>' +
+    '<div class="pitch-side">' + bpPitchColumns(home, false, evMap) + '</div>' +
+    '<div class="pitch-side">' + bpPitchColumns(away, true, evMap) + '</div>' +
     coach(home.coach, 'left') + coach(away.coach, 'right') +
   '</div>';
-}
-function bpTeamBlock(t){
-  let h = '<div class="compo-team">';
-  h += '<div class="compo-team-head">' + bpEscape(t.name || '') + (t.formation ? ' · <b>' + bpEscape(t.formation) + '</b>' : '') + '</div>';
-  h += bpPitch(t);
-  if (t.coach) h += '<div class="compo-coach">Entraîneur : ' + bpEscape(t.coach) + '</div>';
-  const subs = t.subs || [];
-  if (subs.length) {
-    h += '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div>';
-    h += '<div class="compo-subs-body" style="display:none">' + subs.map(function(p){
-      return '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (p.pos ? '<span class="compo-pos">' + bpEscape(p.pos) + '</span>' : '') + '</div>';
-    }).join('') + '</div></div>';
-  }
-  h += '</div>';
-  return h;
 }
 window.bpToggleSubs = function(el){ const b = el.nextElementSibling; if (b) b.style.display = (b.style.display === 'none' ? 'block' : 'none'); };
 function bpRenderCompo(m) {
@@ -3609,8 +3634,10 @@ function bpRenderCompo(m) {
   let home = data.find(function(t){ return t.teamId != null && t.teamId === m.homeId; });
   let away = data.find(function(t){ return t.teamId != null && t.teamId === m.awayId; });
   if (!home || !away || home === away) { home = data[0]; away = data[1] || data[0]; }
+  const ev = bpMatchEv[m.id];
+  const evMap = (ev && ev !== 'loading') ? ev : null;
   html += '<div class="compo-head-row"><div>' + bpEscape(home.name || '') + (home.formation ? ' · ' + bpEscape(home.formation) : '') + '</div><div>' + bpEscape(away.name || '') + (away.formation ? ' · ' + bpEscape(away.formation) : '') + '</div></div>';
-  html += bpPitchDual(home, away);
+  html += bpPitchDual(home, away, evMap);
   const subBlock = function(t){
     const subs = t.subs || [];
     if (!subs.length) return '<div></div>';
@@ -3626,6 +3653,7 @@ window.bpOpenCompo = function(mid) {
   const modal = document.getElementById('compoModal'); if (modal) modal.style.display = 'flex';
   bpRenderCompo(m);
   bpEnsureLineups(m);
+  bpEnsureMatchEvents(m);
 };
 window.bpCloseCompo = function(){ const modal = document.getElementById('compoModal'); if (modal) modal.style.display = 'none'; bpCompoMatch = null; };
 
