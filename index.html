@@ -800,7 +800,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-box{background:var(--bg2,#fff);color:var(--txt,#111);max-width:640px;width:100%;border-radius:14px;padding:18px 16px;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.4)}
 .compo-close{position:absolute;top:10px;right:13px;font-size:18px;cursor:pointer;color:var(--txt2);font-weight:700}
 .compo-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;padding-right:20px}
-.compo-ref{text-align:center;font-size:11px;color:var(--txt2);margin-bottom:12px}
+.compo-ref{text-align:center;font-size:11px;color:var(--txt2);margin-bottom:12px;line-height:1.6}
 .compo-team{margin-bottom:14px}
 .compo-team-head{font-size:14px;font-weight:800;border-bottom:1px solid var(--bord);padding-bottom:5px;margin-bottom:6px}
 .compo-p{font-size:13px;padding:2px 0;display:flex;align-items:center;gap:8px}
@@ -3661,10 +3661,12 @@ function bpRenderCompo(m) {
   const body = document.getElementById('compoBody');
   if (!body) return;
   let html = '<div class="compo-title">' + bpEscape(m.home) + ' - ' + bpEscape(m.away) + '</div>';
-  const infoBits = [];
-  if (m.venue) infoBits.push('🏟️ ' + bpEscape(m.venue));
-  if (m.referee) infoBits.push('<svg width="13" height="11" viewBox="0 0 30 20" style="vertical-align:-1px;margin-right:3px" fill="currentColor"><circle cx="18" cy="11" r="8"></circle><circle cx="18" cy="11" r="2.4" fill="#2b804d"></circle><rect x="0" y="7" width="13" height="6" rx="3"></rect><rect x="16" y="0" width="4" height="5" rx="2"></rect></svg>' + bpEscape(m.referee));
-  if (infoBits.length) html += '<div class="compo-ref">' + infoBits.join(' · ') + '</div>';
+  if (m.venue || m.referee) {
+    html += '<div class="compo-ref">';
+    if (m.venue) html += '<div><svg width="14" height="11" viewBox="0 0 28 20" style="vertical-align:-1px;margin-right:4px" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="26" height="18" rx="2"></rect><line x1="14" y1="1" x2="14" y2="19"></line><circle cx="14" cy="10" r="3"></circle></svg>' + bpEscape(m.venue) + '</div>';
+    if (m.referee) html += '<div><svg width="13" height="11" viewBox="0 0 30 20" style="vertical-align:-1px;margin-right:4px" fill="currentColor"><circle cx="18" cy="11" r="8"></circle><circle cx="18" cy="11" r="2.4" fill="#2b804d"></circle><rect x="0" y="7" width="13" height="6" rx="3"></rect><rect x="16" y="0" width="4" height="5" rx="2"></rect></svg>Arbitre : ' + bpEscape(m.referee) + '</div>';
+    html += '</div>';
+  }
   const data = bpLineups[m.id];
   if (data === 'loading' || data === undefined) { body.innerHTML = html + '<div class="compo-muted">Chargement…</div>'; return; }
   if (!Array.isArray(data) || !data.length) {
