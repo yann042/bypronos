@@ -2126,6 +2126,7 @@ function buildCard(m) {
 
   const compLabel = m.comp === 'worldcup' ? 'Coupe du Monde 2026' : m.comp === 'premier' ? 'Premier League' : m.comp === 'ligue2' ? 'Ligue 2' : 'Ligue 1';
   const compIcon = m.comp === 'worldcup' ? '🌍' : m.comp === 'premier' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿' : '🇫🇷';
+  const tvStr = bpBroadcaster(m.comp);
   const timeStr = started ? (finished ? '✅ FIN' : '<span style="font-size:9px;font-weight:800;color:#fff;background:#e03030;padding:1px 5px;border-radius:3px;margin-right:3px">LIVE</span><span class="live-minute">' + (live ? live.minute + "'" : '...') + '</span>') : (m.date ? '<span style="font-size:9px;opacity:.7;margin-right:3px">' + m.date.slice(8)+'/'+m.date.slice(5,7) + '</span>' : '') + '🕐 ' + m.time;
   const curatedImg = BP_TEAM_IMAGES[m.home] || BP_TEAM_IMAGES[m.away] || '';
   const venueImg = m.venueId ? ('https://media.api-sports.io/football/venues/' + m.venueId + '.png') : '';
@@ -2143,7 +2144,10 @@ function buildCard(m) {
       <!-- Compet + heure en haut -->
       <div style="position:absolute;top:8px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <span style="color:rgba(255,255,255,0.9);font-size:9px;font-weight:600;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${compIcon} ${compLabel}</span>
-        <span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${timeStr}</span>
+        <div style="display:flex;align-items:center;gap:4px">
+          ${tvStr ? `<span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">📺 ${tvStr}</span>` : ''}
+          <span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${timeStr}</span>
+        </div>
       </div>
       ${!started ? bpBannerStatsHtml(m) : ''}
       <!-- Equipes au milieu -->
@@ -2459,6 +2463,9 @@ const BP_TEAM_IMAGES = {
   'Dijon': 'img/dijon.jpg'
 };
 
+// Diffuseur TV par championnat (approximatif — modifiable ici)
+const BP_TV = { ligue1: 'Ligue 1+', ligue2: 'beIN Sports', premier: 'Canal+' };
+function bpBroadcaster(comp){ return BP_TV[comp] || ''; }
 function mapFixture(f) {
   const d = new Date(f.fixture.date); // ISO UTC -> heure locale
   const pad = n => String(n).padStart(2, '0');
@@ -3654,7 +3661,10 @@ function bpRenderCompo(m) {
   const body = document.getElementById('compoBody');
   if (!body) return;
   let html = '<div class="compo-title">' + bpEscape(m.home) + ' - ' + bpEscape(m.away) + '</div>';
-  if (m.referee) html += '<div class="compo-ref">⚖️ Arbitre : ' + bpEscape(m.referee) + '</div>';
+  const infoBits = [];
+  if (m.venue) infoBits.push('🏟️ ' + bpEscape(m.venue));
+  if (m.referee) infoBits.push('<svg width="13" height="11" viewBox="0 0 30 20" style="vertical-align:-1px;margin-right:3px" fill="currentColor"><circle cx="18" cy="11" r="8"></circle><circle cx="18" cy="11" r="2.4" fill="#2b804d"></circle><rect x="0" y="7" width="13" height="6" rx="3"></rect><rect x="16" y="0" width="4" height="5" rx="2"></rect></svg>' + bpEscape(m.referee));
+  if (infoBits.length) html += '<div class="compo-ref">' + infoBits.join(' · ') + '</div>';
   const data = bpLineups[m.id];
   if (data === 'loading' || data === undefined) { body.innerHTML = html + '<div class="compo-muted">Chargement…</div>'; return; }
   if (!Array.isArray(data) || !data.length) {
