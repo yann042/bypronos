@@ -2861,6 +2861,16 @@ async function recomputeStandings(playersArg) {
     try { players = await loadPlayersFromLeague(); } catch (e) { players = loadPlayers(); }
   }
   if (!players || typeof players !== 'object') return;
+  // Matchs OFFICIELS réglés (au moins un joueur a parié ET match terminé) — base de la pénalité d'omission
+  const bpOfficial = {};
+  Object.keys(players).forEach(function(nm){
+    const _vb = players[nm] && players[nm].validatedBets; if (!_vb) return;
+    Object.keys(_vb).forEach(function(mid){
+      const _b = _vb[mid]; if (!_b) return;
+      const _l = liveData[parseInt(mid)] || liveData[mid];
+      if (_b.cashedOut || (_l && _l.finished) || (_b.finalHome != null && _b.finalAway != null)) bpOfficial[mid] = true;
+    });
+  });
   Object.keys(players).forEach(name => {
     const p = players[name];
     if (!p) return;
@@ -2908,6 +2918,11 @@ async function recomputeStandings(playersArg) {
       }
       // match non termine => 0 point pour l'instant
     });
+    // Omission de prono = pari faux : -1 par match officiel réglé non pronostiqué
+    let bpOmiss = 0;
+    Object.keys(bpOfficial).forEach(function(mid){ if (!(vb[mid] || vb[String(mid)] || vb[parseInt(mid)])) bpOmiss += 1; });
+    sR -= bpOmiss;
+    if (bpOmiss) p.season.omissions = bpOmiss;
     const mR = p.season.manualResult || 0, mS = p.season.manualScore || 0, mB = p.season.manualBets || 0;
     p.season.ptsResult = Math.round((sR + mR) * 100) / 100; // + ajustements manuels (matchs hors appli)
     p.season.ptsScore  = Math.round((sS + mS) * 100) / 100;
