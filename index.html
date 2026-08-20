@@ -3084,7 +3084,7 @@ window.bpResetManual = async function(name) {
 async function loadFixtures() {
   // 1) Cache RTDB (partage par tous, rafraichi ~1x/jour)
   try {
-    const snap = await db.ref('fixturesCache_v12').once('value');
+    const snap = await db.ref('fixturesCache_v13').once('value');
     const cache = snap.val();
     if (cache && cache.updatedAt && (Date.now() - cache.updatedAt) < BP_FIXTURES_TTL
         && Array.isArray(cache.matches) && cache.matches.length) {
@@ -3096,7 +3096,7 @@ async function loadFixtures() {
       if (!cache.oddsAt || (Date.now() - cache.oddsAt) > 3600000) {
         await enrichOdds(bpAllMatches);
         bpApplyLeagueFilter();
-        try { await db.ref('fixturesCache_v12').update({ matches: bpAllMatches, oddsAt: Date.now() }); } catch (e) {}
+        try { await db.ref('fixturesCache_v13').update({ matches: bpAllMatches, oddsAt: Date.now() }); } catch (e) {}
       }
       return;
     }
@@ -3122,7 +3122,7 @@ async function loadFixtures() {
       bpApplyLeagueFilter();
       bpApplyTestLive(); fetchResults(); // regler les pronos si des matchs sont termines
       try {
-        await db.ref('fixturesCache_v12').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: bpAllMatches });
+        await db.ref('fixturesCache_v13').set({ updatedAt: Date.now(), oddsAt: Date.now(), matches: bpAllMatches });
       } catch (e) { console.warn('Cache fixtures (ecriture):', e); }
     } else {
       console.warn('Aucun match renvoye par /fixtures');
