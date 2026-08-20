@@ -2463,6 +2463,20 @@ const BP_TEAM_IMAGES = {
   'Dijon': 'img/dijon.jpg'
 };
 
+// Stades par équipe à domicile (secours quand l'API ne renvoie pas le nom du stade — modifiable ici)
+const BP_STADES = {
+  'Marseille': 'Orange Vélodrome', 'Paris SG': 'Parc des Princes', 'Paris Saint-Germain': 'Parc des Princes',
+  'Lyon': 'Groupama Stadium', 'Monaco': 'Stade Louis-II', 'Lille': 'Stade Pierre-Mauroy', 'Nice': 'Allianz Riviera',
+  'Rennes': 'Roazhon Park', 'Lens': 'Stade Bollaert-Delelis', 'Nantes': 'Stade de la Beaujoire', 'Strasbourg': 'Stade de la Meinau',
+  'Montpellier': 'Stade de la Mosson', 'Toulouse': 'Stadium de Toulouse', 'Brest': 'Stade Francis-Le Blé', 'Reims': 'Stade Auguste-Delaune',
+  'Auxerre': 'Stade de l\'Abbé-Deschamps', 'Angers': 'Stade Raymond-Kopa', 'Le Havre': 'Stade Océane', 'Saint-Étienne': 'Stade Geoffroy-Guichard',
+  'Lorient': 'Stade du Moustoir', 'Metz': 'Stade Saint-Symphorien', 'Dijon': 'Stade Gaston-Gérard', 'Guingamp': 'Stade de Roudourou',
+  'Grenoble': 'Stade des Alpes', 'Nancy': 'Stade Marcel-Picot', 'Le Mans': 'MMArena', 'Laval': 'Stade Francis-Le Basser',
+  'Pau': 'Nouste Camp', 'Rodez': 'Stade Paul-Lignon', 'Bastia': 'Stade Armand-Cesari', 'Amiens': 'Stade de la Licorne',
+  'Troyes': 'Stade de l\'Aube', 'Clermont Foot': 'Stade Gabriel-Montpied', 'Red Star': 'Stade Bauer', 'Annecy': 'Parc des Sports',
+  'Dunkerque': 'Stade Marcel-Tribut', 'Boulogne': 'Stade de la Libération'
+};
+function bpStadeFor(m){ if (m.venue) return m.venue; return BP_STADES[m.home] || (m.venueCity ? ('à ' + m.venueCity) : ''); }
 // Diffuseur TV par championnat (approximatif — modifiable ici)
 const BP_TV = { ligue1: 'Ligue 1+', ligue2: 'beIN Sports', premier: 'Canal+' };
 function bpBroadcaster(comp){ return BP_TV[comp] || ''; }
@@ -2483,6 +2497,7 @@ function mapFixture(f) {
     round: (f.league && f.league.round) || '',
     venueId: (f.fixture.venue && f.fixture.venue.id) || null,
     venue: (f.fixture.venue && f.fixture.venue.name) || '',
+    venueCity: (f.fixture.venue && f.fixture.venue.city) || '',
     referee: (f.fixture && f.fixture.referee) || '',
     ts: f.fixture.timestamp || Math.floor(d.getTime() / 1000),
     odds: [1.90, 3.40, 3.90] // PROVISOIRE : remplace par les vraies cotes via /odds
@@ -3661,9 +3676,10 @@ function bpRenderCompo(m) {
   const body = document.getElementById('compoBody');
   if (!body) return;
   let html = '<div class="compo-title">' + bpEscape(m.home) + ' - ' + bpEscape(m.away) + '</div>';
-  if (m.venue || m.referee) {
+  if (bpStadeFor(m) || m.referee) {
     html += '<div class="compo-ref">';
-    if (m.venue) html += '<div><svg width="14" height="11" viewBox="0 0 28 20" style="vertical-align:-1px;margin-right:4px" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="26" height="18" rx="2"></rect><line x1="14" y1="1" x2="14" y2="19"></line><circle cx="14" cy="10" r="3"></circle></svg>' + bpEscape(m.venue) + '</div>';
+    const _stade = bpStadeFor(m);
+    if (_stade) html += '<div><svg width="14" height="11" viewBox="0 0 28 20" style="vertical-align:-1px;margin-right:4px" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="26" height="18" rx="2"></rect><line x1="14" y1="1" x2="14" y2="19"></line><circle cx="14" cy="10" r="3"></circle></svg>' + bpEscape(_stade) + '</div>';
     if (m.referee) html += '<div><svg width="13" height="11" viewBox="0 0 30 20" style="vertical-align:-1px;margin-right:4px" fill="currentColor"><circle cx="18" cy="11" r="8"></circle><circle cx="18" cy="11" r="2.4" fill="#2b804d"></circle><rect x="0" y="7" width="13" height="6" rx="3"></rect><rect x="16" y="0" width="4" height="5" rx="2"></rect></svg>Arbitre : ' + bpEscape(m.referee) + '</div>';
     html += '</div>';
   }
