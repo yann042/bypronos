@@ -828,7 +828,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-coach.left{left:6px}
 .pitch-coach.right{right:6px}
 .compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
-.compo-subs-head{font-size:11px;font-weight:800;color:var(--txt2);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none}
+.compo-subs-head{font-size:12px;font-weight:800;color:var(--txt);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none;margin-bottom:2px}
+.compo-subs-body .compo-p{font-size:12px}
 .compo-subs-body{margin-top:4px}
 .scorers{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin:2px 10px 4px;padding-top:4px;font-size:11px;color:var(--txt2)}
 .scorers .sc-side{flex:1;line-height:1.5;min-width:40%}
@@ -3641,7 +3642,7 @@ function bpRenderCompo(m) {
   const subBlock = function(t){
     const subs = t.subs || [];
     if (!subs.length) return '<div></div>';
-    return '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div><div class="compo-subs-body" style="display:none">' + subs.map(function(p){ return '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (p.pos ? '<span class="compo-pos">' + bpEscape(p.pos) + '</span>' : '') + '</div>'; }).join('') + '</div></div>';
+    return '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div><div class="compo-subs-body" style="display:block">' + subs.map(function(p){ return '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (p.pos ? '<span class="compo-pos">' + bpEscape(p.pos) + '</span>' : '') + '</div>'; }).join('') + '</div></div>';
   };
   html += '<div class="compo-grid">' + subBlock(home) + subBlock(away) + '</div>';
   body.innerHTML = html;
