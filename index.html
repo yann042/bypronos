@@ -2563,18 +2563,18 @@ async function bpEnsureH2H(m) {
 function bpBannerStatsHtml(m) {
   bpEnsureH2H(m);
   const wrap = function(inner){ return '<div style="position:absolute;bottom:88px;left:0;right:0;text-align:center;z-index:3">' + inner + '</div>'; };
-  const compoChip = '<span onclick="event.stopPropagation(); bpOpenCompo(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 12px;border-radius:11px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📋 Compos</span>';
+  const compoChip = '<span onclick="event.stopPropagation(); bpOpenCompo(' + m.id + ')" style="cursor:pointer;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📋 Compos</span>';
   if (!bpStatsOpen[m.id]) {
-    const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 12px;border-radius:11px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Statistiques</span>';
+    const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Statistiques</span>';
     return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
   const tagBtn = function(id, label){
     const active = (tab === id);
-    return '<span onclick="event.stopPropagation(); bpSetBannerTab(' + m.id + ', \'' + id + '\')" style="cursor:pointer;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:2px 9px;border-radius:11px;white-space:nowrap;background:' + (active ? 'rgba(255,255,255,0.94)' : 'rgba(0,0,0,0.42)') + ';color:' + (active ? '#0d2137' : 'rgba(255,255,255,0.82)') + '">' + label + '</span>';
+    return '<span onclick="event.stopPropagation(); bpSetBannerTab(' + m.id + ', \'' + id + '\')" style="cursor:pointer;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:1px 6px;border-radius:10px;white-space:nowrap;background:' + (active ? 'rgba(255,255,255,0.94)' : 'rgba(0,0,0,0.42)') + ';color:' + (active ? '#0d2137' : 'rgba(255,255,255,0.82)') + '">' + label + '</span>';
   };
-  const closeChip = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:9px;font-weight:800;padding:2px 7px;border-radius:11px;background:rgba(0,0,0,0.42);color:rgba(255,255,255,0.7)">✕</span>';
-  const tags = '<div style="display:inline-flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:center">' + compoChip +
+  const closeChip = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:8px;font-weight:800;padding:1px 6px;border-radius:10px;background:rgba(0,0,0,0.42);color:rgba(255,255,255,0.7)">✕</span>';
+  const tags = '<div style="display:inline-flex;gap:3px;flex-wrap:nowrap;justify-content:center;align-items:center;max-width:100%">' + compoChip +
     tagBtn('classement', 'Classement') + tagBtn('forme', 'Forme') + tagBtn('h2h', 'Face à face') + tagBtn('h2hdom', 'Dom/Ext') + closeChip +
   '</div>';
   let content = '';
