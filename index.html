@@ -821,6 +821,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-jersey{width:22px;height:22px;border-radius:50%;background:#fff;color:#111;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
 .pitch-side:last-child .pitch-jersey{background:#1f6fd6;color:#fff}
 .pitch-name{font-size:8px;color:#fff;text-align:center;max-width:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.pitch-coach{position:absolute;bottom:5px;z-index:2;font-size:9px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);padding:1px 7px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitch-coach.left{left:6px}
+.pitch-coach.right{right:6px}
 .compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
 .compo-subs-head{font-size:11px;font-weight:800;color:var(--txt2);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none}
 .compo-subs-body{margin-top:4px}
@@ -3570,9 +3573,11 @@ function bpPitchColumns(team, reverse){
   }).join('');
 }
 function bpPitchDual(home, away){
+  const coach = function(name, side){ return name ? '<div class="pitch-coach ' + side + '">' + bpEscape(name) + '</div>' : ''; };
   return '<div class="pitch">' +
     '<div class="pitch-side">' + bpPitchColumns(home, false) + '</div>' +
     '<div class="pitch-side">' + bpPitchColumns(away, true) + '</div>' +
+    coach(home.coach, 'left') + coach(away.coach, 'right') +
   '</div>';
 }
 function bpTeamBlock(t){
@@ -3601,12 +3606,11 @@ function bpRenderCompo(m) {
     body.innerHTML = html + '<div class="compo-muted"><b>Compositions pas encore disponibles.</b><br>Elles sortent en général environ 1h avant le match. Reviens un peu plus tard !</div>';
     return;
   }
-  let home = data.find(function(t){ return t.teamId === m.homeId; });
-  let away = data.find(function(t){ return t.teamId === m.awayId; });
-  if (!home || !away) { home = data[0]; away = data[1] || data[0]; }
+  let home = data.find(function(t){ return t.teamId != null && t.teamId === m.homeId; });
+  let away = data.find(function(t){ return t.teamId != null && t.teamId === m.awayId; });
+  if (!home || !away || home === away) { home = data[0]; away = data[1] || data[0]; }
   html += '<div class="compo-head-row"><div>' + bpEscape(home.name || '') + (home.formation ? ' · ' + bpEscape(home.formation) : '') + '</div><div>' + bpEscape(away.name || '') + (away.formation ? ' · ' + bpEscape(away.formation) : '') + '</div></div>';
   html += bpPitchDual(home, away);
-  if (home.coach || away.coach) html += '<div class="compo-foot-row"><div>' + (home.coach ? bpEscape(home.coach) : '') + '</div><div>' + (away.coach ? bpEscape(away.coach) : '') + '</div></div>';
   const subBlock = function(t){
     const subs = t.subs || [];
     if (!subs.length) return '<div></div>';
