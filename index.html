@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#056b52">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="By Pronos">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){});});}</script>
 <title>By Pronos - Pronostics entre amis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -808,6 +817,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-pos{color:var(--txt2);font-size:10px;margin-left:auto}
 .compo-coach{font-size:11px;color:var(--txt2);margin-top:6px;font-style:italic}
 .compo-muted{text-align:center;color:var(--txt2);padding:22px 10px;font-size:13px;line-height:1.6}
+.iw-ticket{background:linear-gradient(135deg,#8e44ad,#c0392b);color:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;margin-bottom:6px;flex-wrap:wrap}
+.iw-note{font-size:12px;color:var(--txt2);background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:6px}
+.iw-gain{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bord)}
+.bp-wheel-wrap{position:relative;width:290px;height:290px;margin:6px auto 12px}
+.bp-wheel{width:290px;height:290px;border-radius:50%;position:relative;border:6px solid #222;box-shadow:0 6px 24px rgba(0,0,0,.4);transition:transform 4.5s cubic-bezier(.17,.67,.2,1);overflow:hidden}
+.bp-wheel-label{position:absolute;left:50%;top:0;height:50%;width:0;transform-origin:50% 100%;display:flex;justify-content:center}
+.bp-wheel-label>span{position:absolute;top:10px;transform:translateX(-50%) rotate(90deg);transform-origin:left center;white-space:nowrap;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.bp-wheel-pointer{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:20px solid #f1c40f;z-index:5;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.bp-wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.bp-confetti{position:absolute;top:-12px;width:8px;height:13px;z-index:20;border-radius:1px;animation:bpfall 2.3s linear forwards}
+@keyframes bpfall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
 .compo-head-row,.compo-foot-row{display:flex;gap:8px}
 .compo-head-row{margin-bottom:5px;font-size:12px;font-weight:800}
 .compo-head-row>div{flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1212,6 +1232,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 <div class="notif" id="notif"></div>
 <div class="compo-modal" id="compoModal"><div class="compo-box"><div class="compo-close" onclick="bpCloseCompo()">✕</div><div id="compoBody"></div></div></div>
+<div class="compo-modal" id="bpWheelModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpCloseWheel()">✕</div><div class="compo-title">🎡 La roue des cadeaux</div><div id="bpWheelBox"></div><div id="bpWheelResult" style="min-height:22px;font-size:15px;font-weight:700;margin:4px 0 10px"></div><button class="iw-btn primary" id="bpWheelSpinBtn" style="font-size:15px;padding:9px 20px" onclick="bpSpinWheel()">Tourner</button></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
     <span class="goal-emoji">⚽</span>
@@ -1289,6 +1310,8 @@ function bpCashoutFrozen(matchId, elapsed) {
   return null;
 }
 // Cashout — formule réglée au simulateur (aléa 2,8 buts/90', générosité 95%, cartons rouges)
+// ==== CASHOUT : desactive (equite entre joueurs). Repasser a true pour reactiver. ====
+const BP_CASHOUT_ENABLED = false;
 function calcCashoutValue(bet, liveHome, liveAway, elapsed, matchId) {
   if (!bet || liveHome === null || liveAway === null) return 0;
   const RATE = 2.8 / 90, GEN = 0.95;
@@ -1349,6 +1372,7 @@ function calcCashoutValue(bet, liveHome, liveAway, elapsed, matchId) {
 }
 
 async function doCashout(matchId) {
+  if (!BP_CASHOUT_ENABLED) { return; }
   if (!currentPlayer) return;
   const league = localStorage.getItem('bypronos_league') || 'global';
   const m = matches.find(function(x){ return x.id === matchId; });
@@ -1920,6 +1944,7 @@ function renderLiveProno(matchId, hs, as) {
 
 // Bouton cashout pour le bandeau live (juste sous le score)
 function getCashoutHtml(matchId, hs, as) {
+  if (!BP_CASHOUT_ENABLED) return '';
   try {
     if (hs === '?' || as === '?' || hs === undefined || as === undefined) return '';
     let b = null;
@@ -3509,6 +3534,138 @@ function bpWeightedPick(list) {
   for (let i = 0; i < list.length; i++) { r -= w[i]; if (r <= 0) return list[i]; }
   return list[list.length - 1];
 }
+function bpTrunc(s, n){ s = String(s||''); return s.length > n ? s.slice(0, n-1) + '\u2026' : s; }
+function bpRangeStats(data, from, to){
+  const vb = (data && data.validatedBets) || {};
+  let pts = 0, sc = 0, bets = 0;
+  Object.keys(vb).forEach(function(mid){
+    const b = vb[mid];
+    if (!b || !b.ts || b.ts < from || b.ts >= to) return;
+    bets++;
+    if (b.cashedOut) { pts += (b.cashoutValue || 0); return; }
+    const live = liveData[parseInt(mid)];
+    const fh = live ? live.homeScore : b.finalHome;
+    const fa = live ? live.awayScore : b.finalAway;
+    if (fh != null && fa != null) {
+      const lp = calcLivePts(b, fh, fa);
+      if (lp) { pts += lp.pts; if (lp.type === 'max') sc += (b.scoreOdd || 0); else if (lp.type === 'bonus') sc += 0.5; }
+    }
+  });
+  return { pts: Math.round(pts*100)/100, score: Math.round(sc*100)/100, bets: bets };
+}
+async function bpProcessWeeklyTicket(){
+  try {
+    const code = bpLeagueCode();
+    if (code === 'NONE') return;
+    const now = new Date();
+    const dow = (now.getDay() + 6) % 7;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow, 0,0,0,0);
+    const curMon = Math.floor(monday.getTime()/1000);
+    const prevMon = curMon - 7*86400;
+    const metaSnap = await db.ref('instantwin_meta/' + code).once('value');
+    const meta = metaSnap.val() || {};
+    if (meta.lastRewardedWeek === prevMon) return;
+    const players = await loadPlayersFromLeague();
+    const RES = ['config','players','standings','teams','info','bets','matchesLock','global'];
+    let best = null;
+    const stats = {};
+    Object.keys(players).forEach(function(name){
+      if (RES.indexOf(name) !== -1) return;
+      const st = bpRangeStats(players[name], prevMon, curMon);
+      stats[name] = st;
+      if (st.bets === 0) return;
+      if (!best || st.pts > best.pts || (st.pts === best.pts && st.score > best.score)) best = { name:name, pts:st.pts, score:st.score };
+    });
+    await db.ref('instantwin_meta/' + code + '/lastRewardedWeek').set(prevMon);
+    if (!best) { console.log('\ud83c\udf9f\ufe0f Semaine sans prono : aucun ticket.'); return; }
+    const winners = Object.keys(stats).filter(function(n){ return stats[n].bets>0 && stats[n].pts===best.pts && stats[n].score===best.score; });
+    for (const w of winners) {
+      const ref = db.ref('instantwin_tickets/' + code + '/' + w);
+      const s = await ref.once('value');
+      await ref.set((s.val()||0) + 1);
+    }
+    console.log('\ud83c\udf9f\ufe0f Ticket(s) attribue(s) (semaine ecoulee) :', winners.join(', '));
+    if (currentPlayer && winners.indexOf(currentPlayer) !== -1) { try { showNotif('\ud83c\udf9f\ufe0f Tu as gagne la semaine : 1 ticket pour la roue !'); } catch(e){} }
+  } catch(e) { console.warn('bpProcessWeeklyTicket', e); }
+}
+async function bpMyTicketCount(){
+  if (!currentPlayer || bpLeagueCode() === 'NONE') return 0;
+  try { const s = await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).once('value'); return s.val() || 0; } catch(e) { return 0; }
+}
+let bpWheelLots = [], bpWheelSpinning = false, bpWheelRot = 0;
+function bpRenderWheel(lots){
+  const box = document.getElementById('bpWheelBox');
+  if (!box) return;
+  const n = lots.length;
+  if (!n) { box.innerHTML = '<div class="compo-muted">Aucun cadeau dans la roue. Ajoute des cadeaux d\'abord.</div>'; return; }
+  const seg = 360 / n;
+  const cols = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393','#16a085','#d35400'];
+  let stops = [];
+  for (let i=0;i<n;i++){ stops.push(cols[i%cols.length] + ' ' + (i*seg) + 'deg ' + ((i+1)*seg) + 'deg'); }
+  let labels = '';
+  for (let i=0;i<n;i++){
+    const mid = i*seg + seg/2;
+    labels += '<div class="bp-wheel-label" style="transform:rotate(' + mid + 'deg)"><span>' + bpEscape(bpTrunc(lots[i].name, 16)) + '</span></div>';
+  }
+  box.innerHTML = '<div class="bp-wheel-wrap"><div class="bp-wheel-pointer"></div><div class="bp-wheel" id="bpWheel" style="background:conic-gradient(' + stops.join(',') + ')">' + labels + '</div><div class="bp-wheel-hub">\U0001F381</div></div>';
+  bpWheelRot = 0;
+}
+window.bpOpenWheel = async function(){
+  const code = bpLeagueCode();
+  let data = {};
+  try { data = (await fetch(FB_URL + bpInstantBase() + '.json').then(function(r){ return r.json(); })) || {}; } catch(e){}
+  bpWheelLots = Object.keys(data).map(function(id){ return Object.assign({id:id}, data[id]); }).filter(function(l){ return l && l.name; });
+  const modal = document.getElementById('bpWheelModal'); if (modal) modal.style.display = 'flex';
+  bpRenderWheel(bpWheelLots);
+  const res = document.getElementById('bpWheelResult'); if (res) res.textContent = '';
+  const myT = await bpMyTicketCount();
+  const btn = document.getElementById('bpWheelSpinBtn');
+  if (btn) { btn.disabled = (myT <= 0 || !bpWheelLots.length); btn.textContent = myT > 0 ? ('\ud83c\udf9f\ufe0f Tourner (' + myT + ')') : 'Aucun ticket'; }
+};
+window.bpCloseWheel = function(){ const m = document.getElementById('bpWheelModal'); if (m) m.style.display = 'none'; };
+window.bpSpinWheel = async function(){
+  if (bpWheelSpinning) return;
+  const myT = await bpMyTicketCount();
+  if (myT <= 0) { alert('Tu n\'as pas de ticket.'); return; }
+  if (!bpWheelLots.length) { alert('Aucun cadeau dans la roue.'); return; }
+  bpWheelSpinning = true;
+  const n = bpWheelLots.length, seg = 360 / n;
+  const winIdx = Math.floor(Math.random() * n);
+  const wheel = document.getElementById('bpWheel');
+  const target = 360*6 + (360 - (winIdx*seg + seg/2));
+  const finalRot = (bpWheelRot - (bpWheelRot % 360)) + target;
+  bpWheelRot = finalRot;
+  const btn = document.getElementById('bpWheelSpinBtn'); if (btn) btn.disabled = true;
+  if (wheel) { wheel.style.transition = 'transform 4.5s cubic-bezier(.17,.67,.2,1)'; wheel.style.transform = 'rotate(' + finalRot + 'deg)'; }
+  setTimeout(async function(){
+    const lot = bpWheelLots[winIdx];
+    const res = document.getElementById('bpWheelResult');
+    if (res) res.innerHTML = '\ud83c\udf89 Tu gagnes : <b>' + bpEscape(lot.name) + '</b> !';
+    bpConfetti();
+    try {
+      const code = bpLeagueCode();
+      await db.ref('instantwin_tickets/' + code + '/' + currentPlayer).set(Math.max(0, myT - 1));
+      const gid = 'g_' + Date.now();
+      await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: lot.name, ts: Date.now() });
+    } catch(e){}
+    bpWheelSpinning = false;
+    const myT2 = await bpMyTicketCount();
+    if (btn) { btn.disabled = myT2 <= 0; btn.textContent = myT2 > 0 ? ('\ud83c\udf9f\ufe0f Tourner (' + myT2 + ')') : 'Ticket epuise'; }
+    try { renderInstantView(); } catch(e){}
+  }, 4700);
+};
+function bpConfetti(){
+  const box = document.getElementById('bpWheelModal'); if (!box) return;
+  const cols = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22'];
+  for (let i=0;i<44;i++){
+    const d = document.createElement('div'); d.className = 'bp-confetti';
+    d.style.left = (Math.random()*100) + '%';
+    d.style.background = cols[i%cols.length];
+    d.style.animationDelay = (Math.random()*0.35) + 's';
+    box.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 2600);
+  }
+}
 async function renderInstantView() {
   const listEl = document.getElementById('iwList');
   if (!listEl) return;
@@ -4823,6 +4980,7 @@ window.addEventListener('firebaseReady', () => {
   watchFirebase();
   preloadMatchImages();
   fetchStandings();
+  bpProcessWeeklyTicket();
 });
 if (window.firebaseReady) {
   syncFromFirebase();
