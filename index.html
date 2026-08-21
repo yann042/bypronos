@@ -3670,43 +3670,45 @@ async function renderInstantView() {
   const listEl = document.getElementById('iwList');
   if (!listEl) return;
   const sub = document.getElementById('iwSubtitle');
-  if (sub) sub.textContent = (currentLeague ? (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' · Récompenses';
-  if (bpLeagueCode() === 'NONE') { listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Rejoins une ligue pour gérer les lots.</div>'; return; }
-  listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement…</div>';
-  let data = {};
+  if (sub) sub.textContent = (currentLeague ? (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' · Roue & cadeaux';
+  if (bpLeagueCode() === 'NONE') { listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Rejoins une ligue pour jouer.</div>'; return; }
+  listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
+  const code = bpLeagueCode();
+  let data = {}, tickets = {}, gains = {};
   try { data = (await fetch(FB_URL + bpInstantBase() + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
-  const lots = Object.keys(data || {}).map(function(id){ return Object.assign({ id: id }, data[id]); });
-  lots.sort(function(a, b){ return (b.createdAt || 0) - (a.createdAt || 0); });
-  const toAward = lots.filter(function(l){ return !l.winner; });
-  const awarded = lots.filter(function(l){ return l.winner; });
-  let html = '<div class="ev-section-title">🎁 Lots à attribuer</div>';
-  html += toAward.length ? toAward.map(bpLotCard).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun lot pour le moment. Ajoute le premier !</div>';
-  if (awarded.length) {
-    html += '<div class="ev-section-title">🎉 Déjà gagnés</div>';
-    html += awarded.map(bpLotCard).join('');
+  try { tickets = (await fetch(FB_URL + '/instantwin_tickets/' + code + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
+  try { gains = (await fetch(FB_URL + '/instantwin_gains/' + code + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
+  const lots = Object.keys(data || {}).map(function(id){ return Object.assign({ id: id }, data[id]); }).filter(function(l){ return l && l.name; });
+  lots.sort(function(a, b){ return (a.createdAt || 0) - (b.createdAt || 0); });
+  const myT = (currentPlayer && tickets && tickets[currentPlayer]) ? tickets[currentPlayer] : 0;
+  let html = '';
+  html += '<div class="ev-section-title">\ud83c\udfa1 La roue de la semaine</div>';
+  if (myT > 0) {
+    html += '<div class="iw-ticket"><span>\ud83c\udf9f\ufe0f Tu as ' + myT + ' ticket' + (myT > 1 ? 's' : '') + ' !</span><button class="iw-btn primary" onclick="bpOpenWheel()">Lancer la roue</button></div>';
+  } else {
+    html += '<div class="iw-note">\ud83c\udf9f\ufe0f Le <b>vainqueur de la semaine</b> gagne un ticket (attribu\u00e9 automatiquement chaque lundi) pour faire tourner la roue et remporter un cadeau. Pas de ticket pour toi cette semaine \u2014 \u00e0 toi de gagner la semaine !</div>';
+  }
+  const holders = Object.keys(tickets || {}).filter(function(n){ return tickets[n] > 0; });
+  if (holders.length) {
+    html += '<div style="font-size:11px;color:var(--txt2);margin:2px 2px 8px">\ud83c\udfab Tickets en jeu : ' + holders.map(function(n){ return bpEscape(n) + ' (' + tickets[n] + ')'; }).join(', ') + '</div>';
+  }
+  html += '<div class="ev-section-title">\ud83c\udf81 Les cadeaux dans la roue</div>';
+  html += lots.length ? lots.map(bpLotCard).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun cadeau. Ajoute le premier ci-dessus !</div>';
+  const gList = Object.keys(gains || {}).map(function(id){ return gains[id]; }).filter(Boolean).sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
+  if (gList.length) {
+    html += '<div class="ev-section-title">\ud83c\udfc6 Cadeaux gagn\u00e9s</div>';
+    html += gList.slice(0, 40).map(function(g){
+      return '<div class="iw-gain"><span><b>' + bpEscape(g.player || '?') + '</b> \u2014 ' + bpEscape(g.lot || '') + '</span><span style="color:var(--txt2);font-size:11px">' + (g.ts ? new Date(g.ts).toLocaleDateString('fr-FR') : '') + '</span></div>';
+    }).join('');
   }
   listEl.innerHTML = html;
 }
 function bpLotCard(lot) {
-  const won = !!lot.winner;
-  let actions;
-  if (won) {
-    const method = lot.method === 'draw' ? '🎲 tirage pondéré' : (lot.method === 'top' ? '🏆 1er du classement' : '');
-    actions = '<div style="margin-top:6px;font-size:14px;font-weight:800;color:#0a7d52">🎉 Gagné par ' + bpEscape(lot.winner) + '</div>' +
-      '<div style="font-size:10px;color:var(--txt2)">' + method + (lot.wonAt ? ' · ' + new Date(lot.wonAt).toLocaleDateString('fr-FR') : '') + '</div>' +
-      '<div style="margin-top:8px;display:flex;gap:6px"><button class="iw-btn" onclick="bpResetLot(\'' + lot.id + '\')">↺ Rejouer</button><button class="iw-btn danger" onclick="bpDeleteLot(\'' + lot.id + '\')">Supprimer</button></div>';
-  } else {
-    actions = '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">' +
-      '<button class="iw-btn primary" onclick="bpAwardLotTop(\'' + lot.id + '\')">🏆 Au 1er</button>' +
-      '<button class="iw-btn primary" onclick="bpAwardLotDraw(\'' + lot.id + '\')">🎲 Tirage pondéré</button>' +
-      '<button class="iw-btn danger" onclick="bpDeleteLot(\'' + lot.id + '\')">Supprimer</button>' +
-    '</div>';
-  }
-  return '<div class="ev-card' + (won ? ' past' : '') + '" style="flex-direction:column;gap:2px">' +
-    '<div style="font-weight:800;font-size:15px">🎁 ' + bpEscape(lot.name) + '</div>' +
+  return '<div class="ev-card" style="flex-direction:column;gap:2px">' +
+    '<div style="font-weight:800;font-size:15px">\ud83c\udf81 ' + bpEscape(lot.name) + '</div>' +
     (lot.desc ? '<div class="ev-meta">' + bpEscape(lot.desc) + '</div>' : '') +
-    (lot.createdBy ? '<div style="font-size:10px;color:var(--txt2)">Proposé par ' + bpEscape(lot.createdBy) + '</div>' : '') +
-    actions +
+    (lot.createdBy ? '<div style="font-size:10px;color:var(--txt2)">Propos\u00e9 par ' + bpEscape(lot.createdBy) + '</div>' : '') +
+    '<div style="margin-top:6px"><button class="iw-btn danger" onclick="bpDeleteLot(\'' + lot.id + '\')">Supprimer</button></div>' +
   '</div>';
 }
 async function bpSetLotWinner(id, winner, method) {
