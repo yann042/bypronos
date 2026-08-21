@@ -3607,7 +3607,7 @@ function bpRenderWheel(lots){
     const mid = i*seg + seg/2;
     labels += '<div class="bp-wheel-label" style="transform:rotate(' + mid + 'deg)"><span>' + bpEscape(bpTrunc(lots[i].name, 16)) + '</span></div>';
   }
-  box.innerHTML = '<div class="bp-wheel-wrap"><div class="bp-wheel-pointer"></div><div class="bp-wheel" id="bpWheel" style="background:conic-gradient(' + stops.join(',') + ')">' + labels + '</div><div class="bp-wheel-hub">\U0001F381</div></div>';
+  box.innerHTML = '<div class="bp-wheel-wrap"><div class="bp-wheel-pointer"></div><div class="bp-wheel" id="bpWheel" style="background:conic-gradient(' + stops.join(',') + ')">' + labels + '</div><div class="bp-wheel-hub">🎁</div></div>';
   bpWheelRot = 0;
 }
 window.bpOpenWheel = async function(){
