@@ -835,14 +835,14 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-foot-row>div{flex:1;text-align:center}
 .pitch-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;letter-spacing:3px;color:rgba(255,255,255,.11);text-transform:uppercase;white-space:nowrap}
 .pitch-wm b{color:rgba(46,255,168,.16);margin-right:4px}
-.pitch{background:repeating-linear-gradient(90deg,#2f8a54,#2f8a54 22px,#2b804d 22px,#2b804d 44px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:18px 2px;display:flex;flex-direction:row;min-height:290px;position:relative;overflow:hidden}
+.pitch{background:repeating-linear-gradient(90deg,#2f8a54,#2f8a54 22px,#2b804d 22px,#2b804d 44px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:18px 1px;display:flex;flex-direction:row;min-height:290px;position:relative;overflow:hidden}
 .pitch::before{content:'';position:absolute;top:8px;bottom:8px;left:50%;width:1px;background:rgba(255,255,255,.32)}
 .pitch::after{content:'';position:absolute;top:calc(50% - 22px);left:calc(50% - 22px);width:44px;height:44px;border:1px solid rgba(255,255,255,.32);border-radius:50%}
 .pitch-side{flex:1;display:flex;flex-direction:row;justify-content:space-around;position:relative;z-index:2}
 .pitch-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:space-around;align-items:center;gap:2px}
-.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
-.pitch-jw{position:relative;width:21px;height:21px;margin:0 auto}
-.pitch-jersey{width:21px;height:21px;border-radius:50%;background:#fff;color:#111;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;min-width:0;overflow:hidden;padding:0 1px}
+.pitch-jw{position:relative;width:20px;height:20px;margin:0 auto}
+.pitch-jersey{width:20px;height:20px;border-radius:50%;background:#fff;color:#111;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
 .pitch-ev{position:absolute;top:-6px;right:-9px;font-size:10px;line-height:1;letter-spacing:-2px;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9);z-index:3}
 .pitch-goal{position:absolute;top:calc(50% - 26px);width:9px;height:52px;border:2px solid rgba(255,255,255,.85);z-index:1;background-image:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px),repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px)}
 .pitch-goal.left{left:0;border-right:none;border-radius:0 4px 4px 0}
@@ -864,7 +864,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-flag.tr{top:2px;right:2px}
 .pitch-flag.br{bottom:2px;right:2px}
 
-.pitch-name{font-size:9px;color:#fff;text-align:center;max-width:52px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.pitch-name{font-size:8.5px;color:#fff;text-align:center;max-width:100%;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
 .pitch-coach{position:absolute;bottom:2px;z-index:4;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);padding:1px 7px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pitch-coach.left{left:6px}
 .pitch-coach.right{right:6px}
@@ -3812,7 +3812,7 @@ async function bpEnsureMatchEvents(m) {
       const aid = e.assist && e.assist.id;
       if (e.type === 'Goal' && pid != null) { map[pid] = map[pid] || {}; if (!/missed/i.test(e.detail||'')) map[pid].goals = (map[pid].goals || 0) + 1; }
       else if (e.type === 'Card' && pid != null) { map[pid] = map[pid] || {}; if (/red/i.test(e.detail || '')) map[pid].red = true; else map[pid].yellow = true; }
-      else if (e.type === 'subst' && aid != null) { map[aid] = map[aid] || {}; map[aid].subbed = true; }
+      else if (e.type === 'subst') { if (aid != null) { map[aid] = map[aid] || {}; map[aid].subbed = true; } if (pid != null) { map[pid] = map[pid] || {}; map[pid].subbed = true; } }
     });
     bpMatchEv[m.id] = map;
   } catch(e) { bpMatchEv[m.id] = {}; }
