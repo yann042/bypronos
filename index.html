@@ -1752,6 +1752,15 @@ function getAllPronosHtml(matchId, hs, as) {
     const live = (hs !== '?' && hs !== undefined && as !== '?' && as !== undefined);
     const finished = !!(liveData[mid] && liveData[mid].finished);
     if (!live) return ''; // pre-match : ne pas devoiler les pronos des autres joueurs
+    // Omission de prono = pari a vide (-1) : on ajoute les joueurs de la ligue qui n'ont pas parie
+    try {
+      const _bet = {}; rows.forEach(function(r){ _bet[r.name] = 1; });
+      const _RES = {config:1,players:1,standings:1,teams:1,info:1,bets:1,matchesLock:1,global:1};
+      Object.keys(players).forEach(function(nm){
+        if (_RES[nm] || _bet[nm]) return;
+        rows.push({ name: nm, h: null, a: null, pts: -1, potential: 0, isMe: nm === currentPlayer, omission: true });
+      });
+    } catch(e){}
     rows.sort(function(x,y){ const vx=live?(x.pts==null?-999:x.pts):x.potential, vy=live?(y.pts==null?-999:y.pts):y.potential; return vy-vx; });
     let _lastKey = null, _lastRank = 0;
     rows.forEach(function(r, i){
@@ -1762,11 +1771,11 @@ function getAllPronosHtml(matchId, hs, as) {
     const items = rows.map(function(r, i){
       const rank = r.rank;
       const rc = rank===1 ? '#e0a81c' : rank===2 ? '#9aa4ad' : rank===3 ? '#c17f43' : '#6b7280';
-      const ptsHtml = live ? (r.cashedOut ? '<span class="lr-pts cash">💸 ' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>');
+      const ptsHtml = r.omission ? '<span class="lr-pts neg">-1</span>' : (live ? (r.cashedOut ? '<span class="lr-pts cash">💸 ' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>'));
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
         '<span class="lr-rank" style="background:' + rc + '">' + rank + '</span>' +
-        '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + '</span>' +
-        '<span class="lr-score">' + r.h + '-' + r.a + '</span>' +
+        '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + (r.omission?' · pari à vide':'') + '</span>' +
+        '<span class="lr-score">' + (r.omission ? '∅' : (r.h + '-' + r.a)) + '</span>' +
         ptsHtml +
       '</div>';
     }).join('');
@@ -2174,7 +2183,7 @@ function buildCard(m) {
           <span style="color:rgba(255,255,255,0.9);font-size:9px;background:rgba(0,0,0,0.3);padding:2px 7px;border-radius:10px">${timeStr}</span>
         </div>
       </div>
-      ${!started ? bpBannerStatsHtml(m) : ''}
+      ${bpBannerStatsHtml(m)}
       <!-- Equipes au milieu -->
       <div style="position:absolute;bottom:${started ? '16px' : '62px'};left:10px;right:10px;display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:5px">
@@ -2977,7 +2986,7 @@ async function fetchResults() {
           if (!prev || prev.homeScore !== v.h || prev.awayScore !== v.a || prev.finished !== v.f) _ch = true;
           liveData[fid] = { homeScore: v.h, awayScore: v.a, minute: v.m, finished: v.f, status: v.s, homeTeamId: v.ht, awayTeamId: v.at };
         });
-        if (_ch) { await recomputeStandings(); renderMatches(); }
+        if (_ch) { await recomputeStandings(); renderMatches(); try { renderRanking(); } catch(e){} }
         return; // cache frais -> pas d'appel API
       }
     } catch(e) {}
@@ -3018,7 +3027,7 @@ async function fetchResults() {
       db.ref('liveCache').set({ ts: Date.now(), r: _compact });
     } catch(e) {}
     for (let s = 0; s < bpScorerQueue.length; s++) { await fetchScorers(bpScorerQueue[s]); await new Promise(function(r){ setTimeout(r, 120); }); }
-    if (changed) await recomputeStandings();
+    if (changed) { await recomputeStandings(); try { renderMatches(); renderRanking(); } catch(e){} }
     if (changed || bpScorerQueue.length) renderMatches();
   } finally { bpResultsRunning = false; }
 }
