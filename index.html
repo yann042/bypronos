@@ -810,6 +810,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-close{position:absolute;top:10px;right:13px;font-size:18px;cursor:pointer;color:var(--txt2);font-weight:700}
 .compo-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;padding-right:20px}
 .compo-ref{text-align:center;font-size:11px;color:var(--txt2);margin-bottom:12px;line-height:1.6}
+.compo-live{text-align:center;font-size:16px;margin:2px 0 10px;font-family:'Barlow Condensed',sans-serif}
+.compo-live b{font-size:20px;letter-spacing:1px}
+.compo-live-badge{background:#e5251b;color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;vertical-align:2px;animation:bppulse 1.4s infinite}
+.compo-live-ft{background:#5a6a5a;color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;vertical-align:2px}
+.compo-live-min{color:#e5251b;font-weight:800;font-size:14px}
+@keyframes bppulse{50%{opacity:.55}}
 .compo-team{margin-bottom:14px}
 .compo-team-head{font-size:14px;font-weight:800;border-bottom:1px solid var(--bord);padding-bottom:5px;margin-bottom:6px}
 .compo-p{font-size:13px;padding:2px 0;display:flex;align-items:center;gap:8px}
@@ -840,7 +846,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch::after{content:'';position:absolute;top:calc(50% - 18px);left:calc(50% - 18px);width:36px;height:36px;border:1px solid rgba(255,255,255,.28);border-radius:50%}
 .pitch-side{flex:1;display:flex;flex-direction:column;justify-content:space-around;position:relative;z-index:2}
 .pitch-row{display:flex;flex-direction:row;justify-content:space-around;align-items:flex-start}
-.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1 1 0;min-width:0;overflow:hidden;padding:0 2px}
+.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1 1 0;min-width:0;padding:0 2px;position:relative}
 .pitch-jw{position:relative;width:23px;height:23px;margin:0 auto}
 .pitch-jersey{width:23px;height:23px;border-radius:50%;background:#fff;color:#111;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
 .pitch-ev{position:absolute;top:-8px;right:-7px;font-size:12px;line-height:1;white-space:nowrap;z-index:3;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
@@ -865,9 +871,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-flag.br{bottom:2px;right:2px}
 
 .pitch-name{font-size:10px;color:#fff;text-align:center;max-width:100%;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
-.pitch-coach{position:absolute;z-index:4;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.5);padding:1px 9px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;left:50%;transform:translateX(-50%)}
-.pitch-coach.top{top:2px}
-.pitch-coach.bottom{bottom:2px}
+.pitch-coach{position:absolute;z-index:4;font-size:9.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.5);padding:1px 8px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:66%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;left:5px}
+.pitch-coach.top{top:3px}
+.pitch-coach.bottom{bottom:3px}
 .compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
 .compo-subs-head{font-size:12px;font-weight:800;color:var(--txt);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none;margin-bottom:2px}
 .compo-subs-body .compo-p{font-size:12px}
@@ -3864,9 +3870,9 @@ function bpPitchDual(home, away, evMap){
     '<div class="pitch-goal top"></div><div class="pitch-goal bottom"></div>';
   return '<div class="pitch">' +
     markings +
-    '<div class="pitch-side">' + bpPitchColumns(away, false, evMap, true) + '</div>' +
-    '<div class="pitch-side">' + bpPitchColumns(home, true, evMap, false) + '</div>' +
-    coach(away.coach, 'top') + coach(home.coach, 'bottom') +
+    '<div class="pitch-side">' + bpPitchColumns(home, false, evMap, false) + '</div>' +
+    '<div class="pitch-side">' + bpPitchColumns(away, true, evMap, true) + '</div>' +
+    coach(home.coach, 'top') + coach(away.coach, 'bottom') +
   '</div>';
 }
 window.bpToggleSubs = function(el){ const b = el.nextElementSibling; if (b) b.style.display = (b.style.display === 'none' ? 'block' : 'none'); };
@@ -3874,6 +3880,20 @@ function bpRenderCompo(m) {
   const body = document.getElementById('compoBody');
   if (!body) return;
   let html = '<div class="compo-title">' + bpEscape(m.home) + ' - ' + bpEscape(m.away) + '</div>';
+  try {
+    const _lv = liveData[m.id];
+    const _started = (typeof isMatchStarted === 'function') && isMatchStarted(m.time, m.id);
+    const _fin = (typeof isMatchFinished === 'function') && isMatchFinished(m.time, m.id);
+    if (_lv && (_started || _fin)) {
+      const _sc = (_lv.homeScore != null ? _lv.homeScore : '?') + ' - ' + (_lv.awayScore != null ? _lv.awayScore : '?');
+      if (_fin || _lv.finished) {
+        html += '<div class="compo-live"><span class="compo-live-ft">Terminé</span> <b>' + _sc + '</b></div>';
+      } else {
+        const _min = _lv.minute != null ? (_lv.minute + "'") : (_lv.status || 'en cours');
+        html += '<div class="compo-live"><span class="compo-live-badge">● LIVE</span> <b>' + _sc + '</b> <span class="compo-live-min">' + _min + '</span></div>';
+      }
+    }
+  } catch(e){}
   if (bpStadeFor(m) || m.referee) {
     html += '<div class="compo-ref">';
     const _stade = bpStadeFor(m);
