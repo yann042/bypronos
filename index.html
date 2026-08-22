@@ -835,22 +835,22 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-foot-row>div{flex:1;text-align:center}
 .pitch-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;letter-spacing:3px;color:rgba(255,255,255,.11);text-transform:uppercase;white-space:nowrap}
 .pitch-wm b{color:rgba(46,255,168,.16);margin-right:4px}
-.pitch{background:repeating-linear-gradient(90deg,#2f8a54,#2f8a54 22px,#2b804d 22px,#2b804d 44px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:18px 1px;display:flex;flex-direction:row;gap:10px;min-height:322px;position:relative;overflow:hidden}
-.pitch::before{content:'';position:absolute;top:8px;bottom:8px;left:50%;width:1px;background:rgba(255,255,255,.32)}
+.pitch{background:repeating-linear-gradient(0deg,#2f8a54,#2f8a54 26px,#2b804d 26px,#2b804d 52px);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:2px 6px;display:flex;flex-direction:column;gap:12px;min-height:474px;position:relative;overflow:hidden}
+.pitch::before{content:'';position:absolute;left:8px;right:8px;top:50%;height:1px;background:rgba(255,255,255,.32)}
 .pitch::after{content:'';position:absolute;top:calc(50% - 18px);left:calc(50% - 18px);width:36px;height:36px;border:1px solid rgba(255,255,255,.28);border-radius:50%}
-.pitch-side{flex:1;display:flex;flex-direction:row;justify-content:space-around;position:relative;z-index:2}
-.pitch-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:space-around;align-items:center;gap:2px}
-.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;min-width:0;overflow:hidden;padding:0 1px}
-.pitch-jw{position:relative;width:19px;height:19px;margin:0 auto}
-.pitch-jersey{width:19px;height:19px;border-radius:50%;background:#fff;color:#111;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.pitch-side{flex:1;display:flex;flex-direction:column;justify-content:space-around;position:relative;z-index:2}
+.pitch-row{display:flex;flex-direction:row;justify-content:space-around;align-items:flex-start}
+.pitch-player{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1 1 0;min-width:0;overflow:hidden;padding:0 2px}
+.pitch-jw{position:relative;width:23px;height:23px;margin:0 auto}
+.pitch-jersey{width:23px;height:23px;border-radius:50%;background:#fff;color:#111;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.45)}
 .pitch-ev{position:absolute;top:-8px;right:-7px;font-size:12px;line-height:1;white-space:nowrap;z-index:3;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
-.pitch-goal{position:absolute;top:calc(50% - 26px);width:9px;height:52px;border:2px solid rgba(255,255,255,.85);z-index:1;background-image:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px),repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px)}
-.pitch-goal.left{left:0;border-right:none;border-radius:0 4px 4px 0}
-.pitch-goal.right{right:0;border-left:none;border-radius:4px 0 0 4px}
+.pitch-goal{position:absolute;left:calc(50% - 26px);width:52px;height:9px;border:2px solid rgba(255,255,255,.85);z-index:1;background-image:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px),repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 5px)}
+.pitch-goal.top{top:0;border-bottom:none;border-radius:0 0 4px 4px}
+.pitch-goal.bottom{bottom:0;border-top:none;border-radius:4px 4px 0 0}
 .pitch-boundary{position:absolute;inset:5px;border:1.5px solid rgba(255,255,255,.6);border-radius:2px;z-index:1;pointer-events:none}
-.pitch-box{position:absolute;top:calc(50% - 40px);height:80px;width:40px;border:1.5px solid rgba(255,255,255,.55);z-index:1;pointer-events:none}
-.pitch-box.left{left:5px;border-left:none}
-.pitch-box.right{right:5px;border-right:none}
+.pitch-box{position:absolute;left:calc(50% - 42px);width:84px;height:38px;border:1.5px solid rgba(255,255,255,.55);z-index:1;pointer-events:none}
+.pitch-box.top{top:5px;border-top:none}
+.pitch-box.bottom{bottom:5px;border-bottom:none}
 .pitch-arc{position:absolute;width:11px;height:11px;border:1.5px solid rgba(255,255,255,.55);z-index:1;pointer-events:none}
 .pitch-arc.tl{top:5px;left:5px;border-top:none;border-left:none;border-radius:0 0 11px 0}
 .pitch-arc.tr{top:5px;right:5px;border-top:none;border-right:none;border-radius:0 0 0 11px}
@@ -864,10 +864,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .pitch-flag.tr{top:2px;right:2px}
 .pitch-flag.br{bottom:2px;right:2px}
 
-.pitch-name{font-size:8.5px;color:#fff;text-align:center;max-width:100%;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
-.pitch-coach{position:absolute;bottom:2px;z-index:4;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.42);padding:1px 7px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pitch-coach.left{left:6px}
-.pitch-coach.right{right:6px}
+.pitch-name{font-size:10px;color:#fff;text-align:center;max-width:100%;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.pitch-coach{position:absolute;z-index:4;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.5);padding:1px 9px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;left:50%;transform:translateX(-50%)}
+.pitch-coach.top{top:2px}
+.pitch-coach.bottom{bottom:2px}
 .compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
 .compo-subs-head{font-size:12px;font-weight:800;color:var(--txt);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none;margin-bottom:2px}
 .compo-subs-body .compo-p{font-size:12px}
@@ -3834,7 +3834,7 @@ function bpPitchPlayer(p, colors, isGK, evMap, fbBg, fbFg){
   }
   return '<div class="pitch-player"><div class="pitch-jw"><div class="pitch-jersey" style="background:' + bg + ';color:' + fg + ';border:1.5px solid ' + border + '">' + (p.n != null ? p.n : '') + '</div>' + (icons ? '<span class="pitch-ev">' + icons + '</span>' : '') + '</div><div class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</div></div>';
 }
-function bpPitchColumns(team, reverse, evMap){
+function bpPitchColumns(team, reverse, evMap, isAway){
   const xi = team.startXI || [];
   const rows = {};
   const hasGrid = xi.some(function(p){ return p.grid; });
@@ -3847,26 +3847,26 @@ function bpPitchColumns(team, reverse, evMap){
   const nums = Object.keys(rows).map(Number).sort(function(a, b){ return a - b; });
   const order = reverse ? nums.slice().reverse() : nums.slice();
   const colors = team.colors || null;
-  const fbBg = reverse ? '#1f6fd6' : '#ffffff';
-  const fbFg = reverse ? '#ffffff' : '#111111';
+  const fbBg = isAway ? '#1f6fd6' : '#ffffff';
+  const fbFg = isAway ? '#ffffff' : '#111111';
   return order.map(function(rn){
     const line = rows[rn].sort(function(a, b){ return a.col - b.col; });
-    return '<div class="pitch-col">' + line.map(function(x){ return bpPitchPlayer(x.p, colors, x.p.pos === 'G', evMap, fbBg, fbFg); }).join('') + '</div>';
+    return '<div class="pitch-row">' + line.map(function(x){ return bpPitchPlayer(x.p, colors, x.p.pos === 'G', evMap, fbBg, fbFg); }).join('') + '</div>';
   }).join('');
 }
 function bpPitchDual(home, away, evMap){
   const coach = function(name, side){ return name ? '<div class="pitch-coach ' + side + '">' + bpEscape(name) + '</div>' : ''; };
   const markings = '<div class="pitch-wm"><b>BY</b> PRONOS</div>' +
     '<div class="pitch-boundary"></div>' +
-    '<div class="pitch-box left"></div><div class="pitch-box right"></div>' +
+    '<div class="pitch-box top"></div><div class="pitch-box bottom"></div>' +
     '<div class="pitch-arc tl"></div><div class="pitch-arc tr"></div><div class="pitch-arc bl"></div><div class="pitch-arc br"></div>' +
-    '<div class="pitch-flag l tl"></div><div class="pitch-flag l bl"></div><div class="pitch-flag r tr"></div><div class="pitch-flag r br"></div>';
+    '<div class="pitch-flag l tl"></div><div class="pitch-flag l bl"></div><div class="pitch-flag r tr"></div><div class="pitch-flag r br"></div>' +
+    '<div class="pitch-goal top"></div><div class="pitch-goal bottom"></div>';
   return '<div class="pitch">' +
     markings +
-    '<div class="pitch-goal left"></div><div class="pitch-goal right"></div>' +
-    '<div class="pitch-side">' + bpPitchColumns(home, false, evMap) + '</div>' +
-    '<div class="pitch-side">' + bpPitchColumns(away, true, evMap) + '</div>' +
-    coach(home.coach, 'left') + coach(away.coach, 'right') +
+    '<div class="pitch-side">' + bpPitchColumns(away, false, evMap, true) + '</div>' +
+    '<div class="pitch-side">' + bpPitchColumns(home, true, evMap, false) + '</div>' +
+    coach(away.coach, 'top') + coach(home.coach, 'bottom') +
   '</div>';
 }
 window.bpToggleSubs = function(el){ const b = el.nextElementSibling; if (b) b.style.display = (b.style.display === 'none' ? 'block' : 'none'); };
