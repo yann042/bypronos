@@ -2070,8 +2070,8 @@ function buildCard(m) {
   const pendingBadge = oddsPending ? '<div style="text-align:center;font-size:10px;font-weight:800;color:#8a94a6;letter-spacing:0.6px;text-transform:uppercase;margin:4px 0 2px">\u23f3 Cotes \u00e0 venir</div>' : '';
   const resultRow = `${pendingBadge}<div class="result-row" style="${oddsPending ? 'opacity:0.5;pointer-events:none' : ''}">
     <div class="result-btn ${selWin}" onclick="selectResult(${m.id},'win')">
-      <span class="rb-label rb-full">${m.home}</span>
-      <span class="rb-label rb-short" style="display:none">${m.home}</span>
+      <span class="rb-label rb-full">${bpTeamName(m.home)}</span>
+      <span class="rb-label rb-short" style="display:none">${bpTeamName(m.home)}</span>
       <span class="rb-odd">${m.odds[0].toFixed(2)}</span>
     </div>
     <div class="result-btn ${selDraw}" onclick="selectResult(${m.id},'draw')">
@@ -2080,8 +2080,8 @@ function buildCard(m) {
       <span class="rb-odd">${m.odds[1].toFixed(2)}</span>
     </div>
     <div class="result-btn ${selLose}" onclick="selectResult(${m.id},'lose')">
-      <span class="rb-label rb-full">${m.away}</span>
-      <span class="rb-label rb-short" style="display:none">${m.away}</span>
+      <span class="rb-label rb-full">${bpTeamName(m.away)}</span>
+      <span class="rb-label rb-short" style="display:none">${bpTeamName(m.away)}</span>
       <span class="rb-odd">${m.odds[2].toFixed(2)}</span>
     </div>
   </div>`;
@@ -2094,12 +2094,12 @@ function buildCard(m) {
     const pillCls = scoreKey.startsWith('other') ? 'other' : scoreKey;
 
     const clsLabel = {
-      win:        '✦ ' + m.home + ' gagne - choisissez le score',
+      win:        '✦ ' + bpTeamName(m.home) + ' gagne - choisissez le score',
       draw:       '◆ Match nul - choisissez le score',
-      lose:       '✦ ' + m.away + ' gagne - choisissez le score',
-      other_win:  '🔥 ' + m.home + ' gagne (6+ buts) - score exact',
+      lose:       '✦ ' + bpTeamName(m.away) + ' gagne - choisissez le score',
+      other_win:  '🔥 ' + bpTeamName(m.home) + ' gagne (6+ buts) - score exact',
       other_draw: '🔥 Match nul (6+ buts) - score exact',
-      other_lose: '🔥 ' + m.away + ' gagne (6+ buts) - score exact',
+      other_lose: '🔥 ' + bpTeamName(m.away) + ' gagne (6+ buts) - score exact',
     };
 
     const scores = (SCORES[scoreKey] || []).map(s => ({
@@ -2154,8 +2154,8 @@ function buildCard(m) {
     </div>`;
   }
 
-  const homeName = m.home;
-  const awayName = m.away;
+  const homeName = bpTeamName(m.home);
+  const awayName = bpTeamName(m.away);
 
   const started  = isMatchStarted(m.time, m.id);
   const finished = isMatchFinished(m.time, m.id);
@@ -2764,7 +2764,7 @@ function bpClassementContent(m) {
   };
   const sh = bpStandFor(m.homeId, m.home), sa = bpStandFor(m.awayId, m.away);
   if (!sh && !sa) return bpMuted('Classement indisponible');
-  return '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + one(m.home, sh) + one(m.away, sa) + '</div>';
+  return '<div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">' + one(bpTeamName(m.home), sh) + one(bpTeamName(m.away), sa) + '</div>';
 }
 function bpH2HContent(m, domOnly) {
   const games = bpH2H[m.id];
@@ -4454,7 +4454,7 @@ function renderHistoryPanel() {
       const wk = bpWeekKey(b.ts); if (wk) weeksPresent[wk] = 1;
       const mm = matches.find(function(x){ return String(x.id) === String(mid); });
       const home = (mm && mm.home) || b.home, away = (mm && mm.away) || b.away;
-      matchesPresent[mid] = (home && away) ? (home + ' - ' + away) : ('Match #' + mid);
+      matchesPresent[mid] = (home && away) ? (bpTeamName(home) + ' - ' + bpTeamName(away)) : ('Match #' + mid);
     });
   });
 
@@ -4523,7 +4523,7 @@ function renderHistoryPanel() {
   histEl.innerHTML = _entries.map(([mid, pronos]) => {
     const m = matches.find(x => String(x.id) === String(mid));
     const _b0 = (pronos[0] && pronos[0].bet) || {};
-    const matchName = m ? m.home + ' - ' + m.away : ((_b0.home && _b0.away) ? _b0.home + ' - ' + _b0.away : 'Match #' + mid);
+    const matchName = m ? bpTeamName(m.home) + ' - ' + bpTeamName(m.away) : ((_b0.home && _b0.away) ? bpTeamName(_b0.home) + ' - ' + bpTeamName(_b0.away) : 'Match #' + mid);
     const live = liveData[parseInt(mid)];
     const started = (m && isMatchStarted(m.time, m.id)) || !!live || (_b0.finalHome != null);
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : (_b0.finalHome != null ? _b0.finalHome + '-' + _b0.finalAway : '?-?');
