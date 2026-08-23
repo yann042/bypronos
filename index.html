@@ -817,11 +817,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .compo-live-min{color:#e5251b;font-weight:800;font-size:15px;margin-left:5px}
 ".compo-in{color:#0a7d52;font-weight:800;font-size:10px;margin-left:6px}
 .compo-subev{margin-left:6px;font-size:11px;letter-spacing:-1px}
+.compo-p.out{color:#e05555}
+.compo-out{color:#e05555;font-weight:800;font-size:10px;margin-left:6px}
 .pitch-name.out{color:#ff6b6b}
 .pitch-out{color:#ff6b6b;font-weight:800;font-size:9px;flex:none;margin-left:1px}
 .pitch-form{position:absolute;z-index:4;font-size:10px;font-weight:800;color:#fff;background:rgba(0,0,0,.6);padding:2px 8px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pitch-form.tl{top:3px;left:5px}
-.pitch-form.br{bottom:3px;left:5px}
+.pitch-form.tl{top:3px;right:5px}
+.pitch-form.br{bottom:3px;right:5px}
 .compo-p.entered{color:#0a7d52}
 @keyframes bppulse{50%{opacity:.5}}
 .compo-team{margin-bottom:14px}
@@ -881,8 +883,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
 .pitch-name{font-size:10px;color:#fff;text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.9)}
 .pitch-coach{position:absolute;z-index:4;font-size:9.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.5);padding:1px 8px;border-radius:8px;text-shadow:0 1px 2px rgba(0,0,0,.9);max-width:66%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pitch-coach.top{top:3px;right:5px}
-.pitch-coach.bottom{bottom:3px;right:5px}
+.pitch-coach.top{top:3px;left:5px}
+.pitch-coach.bottom{bottom:3px;left:5px}
 .compo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
 .compo-subs-head{font-size:12px;font-weight:800;color:var(--txt);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;user-select:none;margin-bottom:2px}
 .compo-subs-body .compo-p{font-size:12px}
@@ -3868,7 +3870,7 @@ function bpPitchPlayer(p, colors, isGK, evMap, fbBg, fbFg){
     if (e.red) icons += '🟥';
     if (e.subbed) outMin = (e.subMin != null ? e.subMin : '');
   }
-  const nameSpan = '<span class="pitch-name' + (outMin != null ? ' out' : '') + '">' + bpEscape(bpShortName(p.name)) + '</span>';
+  const nameSpan = '<span class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</span>';
   const outHtml = (outMin != null) ? '<span class="pitch-out">↓' + outMin + "'</span>" : '';
   return '<div class="pitch-player"><div class="pitch-jw"><div class="pitch-jersey" style="background:' + bg + ';color:' + fg + ';border:1.5px solid ' + border + '">' + (p.n != null ? p.n : '') + '</div></div><div class="pitch-namerow">' + nameSpan + (icons ? '<span class="pitch-ev">' + icons + '</span>' : '') + outHtml + '</div></div>';
 }
@@ -3950,8 +3952,12 @@ function bpRenderCompo(m) {
   html += bpPitchDual(home, away, evMap);
   const subBlock = function(t){
     const subs = t.subs || [];
-    if (!subs.length) return '<div></div>';
-    return '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div><div class="compo-subs-body" style="display:block">' + subs.map(function(p){ const _ev = bpMatchEv[m.id]; const _e = (_ev && p.id != null) ? _ev[p.id] : null; const _in = (_e && _e.subMin != null && _e.subbed) ? _e.subMin : null; let _ic = ''; if (_e) { if (_e.goals) { for (let i = 0; i < Math.min(_e.goals, 3); i++) _ic += '⚽'; } if (_e.yellow) _ic += '🟨'; if (_e.red) _ic += '🟥'; } return '<div class="compo-p' + (_in != null ? ' entered' : '') + '"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (_ic ? '<span class="compo-subev">' + _ic + '</span>' : '') + (_in != null ? '<span class="compo-in">↑ ' + _in + "'</span>" : '') + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; }).join('') + '</div></div>';
+    const _ev = bpMatchEv[m.id];
+    const outs = (t.startXI || []).filter(function(p){ return _ev && p.id != null && _ev[p.id] && _ev[p.id].subbed; });
+    if (!subs.length && !outs.length) return '<div></div>';
+    const subRows = subs.map(function(p){ const _e = (_ev && p.id != null) ? _ev[p.id] : null; const _in = (_e && _e.subMin != null && _e.subbed) ? _e.subMin : null; let _ic = ''; if (_e) { if (_e.goals) { for (let i = 0; i < Math.min(_e.goals, 3); i++) _ic += '⚽'; } if (_e.yellow) _ic += '🟨'; if (_e.red) _ic += '🟥'; } return '<div class="compo-p' + (_in != null ? ' entered' : '') + '"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (_ic ? '<span class="compo-subev">' + _ic + '</span>' : '') + (_in != null ? '<span class="compo-in">↑ ' + _in + "'</span>" : '') + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; }).join('');
+    const outRows = outs.map(function(p){ const _mn = _ev[p.id].subMin != null ? _ev[p.id].subMin : ''; let _ic = ''; const _e = _ev[p.id]; if (_e.goals) { for (let i = 0; i < Math.min(_e.goals, 3); i++) _ic += '⚽'; } if (_e.yellow) _ic += '🟨'; if (_e.red) _ic += '🟥'; return '<div class="compo-p out"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (_ic ? '<span class="compo-subev">' + _ic + '</span>' : '') + '<span class="compo-out">↓ ' + _mn + "'</span>" + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; }).join('');
+    return '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div><div class="compo-subs-body" style="display:block">' + subRows + outRows + '</div></div>';
   };
   html += '<div class="compo-grid">' + subBlock(home) + subBlock(away) + '</div>';
   body.innerHTML = html;
