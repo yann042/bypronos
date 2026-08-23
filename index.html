@@ -3837,6 +3837,7 @@ async function bpEnsureLineups(m) {
 function bpShortName(name){ const parts = String(name || '').trim().split(' '); return parts[parts.length - 1] || String(name || ''); }
 function bpPosFr(pos){ return pos === 'F' ? 'A' : (pos || ''); }
 const bpMatchEv = {}; // matchId -> { playerId: {goals, yellow, red, subbed} } | 'loading'
+const bpMatchSubs = {}; // matchId -> [ { p:idEntrant, a:idSortant, min } ]
 async function bpEnsureMatchEvents(m) {
   if (!m || !m.id) return;
   if (!isMatchStarted(m.time, m.id)) { bpMatchEv[m.id] = {}; return; }
@@ -3845,12 +3846,13 @@ async function bpEnsureMatchEvents(m) {
     const r = await fetch(BP_EVENTS_URL + '?fixture=' + m.id);
     const d = await r.json();
     const map = {};
+    bpMatchSubs[m.id] = [];
     (d.response || []).forEach(function(e){
       const pid = e.player && e.player.id;
       const aid = e.assist && e.assist.id;
       if (e.type === 'Goal' && pid != null) { map[pid] = map[pid] || {}; if (!/missed/i.test(e.detail||'')) map[pid].goals = (map[pid].goals || 0) + 1; }
       else if (e.type === 'Card' && pid != null) { map[pid] = map[pid] || {}; if (/red/i.test(e.detail || '')) map[pid].red = true; else map[pid].yellow = true; }
-      else if (e.type === 'subst') { const _mn = (e.time && e.time.elapsed != null) ? e.time.elapsed : null; if (aid != null) { map[aid] = map[aid] || {}; map[aid].subbed = true; if (_mn != null) map[aid].subMin = _mn; } if (pid != null) { map[pid] = map[pid] || {}; map[pid].subbed = true; if (_mn != null) map[pid].subMin = _mn; } }
+      else if (e.type === 'subst') { const _mn = (e.time && e.time.elapsed != null) ? e.time.elapsed : null; if (aid != null) { map[aid] = map[aid] || {}; map[aid].subbed = true; if (_mn != null) map[aid].subMin = _mn; } if (pid != null) { map[pid] = map[pid] || {}; map[pid].subbed = true; if (_mn != null) map[pid].subMin = _mn; } bpMatchSubs[m.id].push({ p: pid, a: aid, min: _mn }); }
     });
     bpMatchEv[m.id] = map;
   } catch(e) { bpMatchEv[m.id] = {}; }
@@ -3868,10 +3870,10 @@ function bpPitchPlayer(p, colors, isGK, evMap, fbBg, fbFg){
     if (e.goals) { for (let i = 0; i < Math.min(e.goals, 3); i++) icons += '⚽'; }
     if (e.yellow) icons += '🟨';
     if (e.red) icons += '🟥';
-    if (e.subbed) outMin = (e.subMin != null ? e.subMin : '');
+    if (e.subbed) { icons += '🔄'; outMin = (e.subMin != null ? e.subMin : ''); }
   }
   const nameSpan = '<span class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</span>';
-  const outHtml = (outMin != null) ? '<span class="pitch-out">↓' + outMin + "'</span>" : '';
+  const outHtml = (outMin != null && outMin !== '') ? '<span class="pitch-out">' + outMin + "'</span>" : '';
   return '<div class="pitch-player"><div class="pitch-jw"><div class="pitch-jersey" style="background:' + bg + ';color:' + fg + ';border:1.5px solid ' + border + '">' + (p.n != null ? p.n : '') + '</div></div><div class="pitch-namerow">' + nameSpan + (icons ? '<span class="pitch-ev">' + icons + '</span>' : '') + outHtml + '</div></div>';
 }
 function bpPitchColumns(team, reverse, evMap, isAway){
@@ -3952,12 +3954,34 @@ function bpRenderCompo(m) {
   html += bpPitchDual(home, away, evMap);
   const subBlock = function(t){
     const subs = t.subs || [];
+    const xi = t.startXI || [];
     const _ev = bpMatchEv[m.id];
-    const outs = (t.startXI || []).filter(function(p){ return _ev && p.id != null && _ev[p.id] && _ev[p.id].subbed; });
-    if (!subs.length && !outs.length) return '<div></div>';
-    const subRows = subs.map(function(p){ const _e = (_ev && p.id != null) ? _ev[p.id] : null; const _in = (_e && _e.subMin != null && _e.subbed) ? _e.subMin : null; let _ic = ''; if (_e) { if (_e.goals) { for (let i = 0; i < Math.min(_e.goals, 3); i++) _ic += '⚽'; } if (_e.yellow) _ic += '🟨'; if (_e.red) _ic += '🟥'; } return '<div class="compo-p' + (_in != null ? ' entered' : '') + '"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (_ic ? '<span class="compo-subev">' + _ic + '</span>' : '') + (_in != null ? '<span class="compo-in">↑ ' + _in + "'</span>" : '') + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; }).join('');
-    const outRows = outs.map(function(p){ const _mn = _ev[p.id].subMin != null ? _ev[p.id].subMin : ''; let _ic = ''; const _e = _ev[p.id]; if (_e.goals) { for (let i = 0; i < Math.min(_e.goals, 3); i++) _ic += '⚽'; } if (_e.yellow) _ic += '🟨'; if (_e.red) _ic += '🟥'; return '<div class="compo-p out"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (_ic ? '<span class="compo-subev">' + _ic + '</span>' : '') + '<span class="compo-out">↓ ' + _mn + "'</span>" + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; }).join('');
-    return '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div><div class="compo-subs-body" style="display:block">' + subRows + outRows + '</div></div>';
+    const pairs = bpMatchSubs[m.id] || [];
+    if (!subs.length) return '<div></div>';
+    // index des joueurs de l'équipe (titulaires + banc)
+    const byId = {};
+    xi.forEach(function(p){ if (p.id != null) byId[p.id] = { p: p, xi: true }; });
+    subs.forEach(function(p){ if (p.id != null) byId[p.id] = { p: p, xi: false }; });
+    // icônes buts/cartons d'un joueur
+    const icOf = function(p){ const _e = (_ev && p.id != null) ? _ev[p.id] : null; let s = ''; if (_e) { if (_e.goals) { for (let i = 0; i < Math.min(_e.goals, 3); i++) s += '⚽'; } if (_e.yellow) s += '🟨'; if (_e.red) s += '🟥'; } return s; };
+    const rowOut = function(p, mn){ return '<div class="compo-p out"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (icOf(p) ? '<span class="compo-subev">' + icOf(p) + '</span>' : '') + '<span class="compo-out">↓ ' + mn + "'</span>" + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; };
+    const rowIn = function(p, mn){ return '<div class="compo-p entered" style="margin-bottom:5px"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (icOf(p) ? '<span class="compo-subev">' + icOf(p) + '</span>' : '') + '<span class="compo-in">↑ ' + mn + "'</span>" + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; };
+    const rowPlain = function(p){ return '<div class="compo-p"><span class="compo-n">' + (p.n != null ? p.n : '') + '</span><span>' + bpEscape(p.name || '') + '</span>' + (icOf(p) ? '<span class="compo-subev">' + icOf(p) + '</span>' : '') + (p.pos ? '<span class="compo-pos">' + bpEscape(bpPosFr(p.pos)) + '</span>' : '') + '</div>'; };
+    let html2 = '', used = {};
+    // paires : sortant (rouge) puis entrant (vert), enchaînés
+    pairs.forEach(function(pr){
+      const A = byId[pr.p], B = byId[pr.a];
+      if (!A || !B) return;
+      let out = null, inp = null;
+      if (A.xi && !B.xi) { out = A.p; inp = B.p; }
+      else if (B.xi && !A.xi) { out = B.p; inp = A.p; }
+      else return;
+      html2 += rowOut(out, pr.min != null ? pr.min : '') + rowIn(inp, pr.min != null ? pr.min : '');
+      used[inp.id] = 1;
+    });
+    // remplaçants restants (non entrés)
+    subs.forEach(function(p){ if (p.id != null && used[p.id]) return; html2 += rowPlain(p); });
+    return '<div class="compo-subs"><div class="compo-subs-head" onclick="bpToggleSubs(this)">Remplaçants (' + subs.length + ') ▾</div><div class="compo-subs-body" style="display:block">' + html2 + '</div></div>';
   };
   html += '<div class="compo-grid">' + subBlock(home) + subBlock(away) + '</div>';
   body.innerHTML = html;
