@@ -2264,6 +2264,9 @@ function renderMatches() {
     if (currentComp !== 'all' && (m.comp || 'ligue1') !== currentComp) return false;
     return true;
   });
+  // Épingler les matchs EN DIRECT en tête de liste (le reste garde son ordre chronologique)
+  const _isLive = function(m){ try { return isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id); } catch(e){ return false; } };
+  filtered.sort(function(a, b){ return (_isLive(b) ? 1 : 0) - (_isLive(a) ? 1 : 0); });
   document.getElementById('matchList').innerHTML = filtered.map(buildCard).join('');
 }
 
@@ -3834,7 +3837,19 @@ async function bpEnsureLineups(m) {
   } catch(e) { bpLineups[m.id] = []; }
   if (bpCompoMatch && bpCompoMatch.id === m.id) bpRenderCompo(m);
 }
-function bpShortName(name){ const parts = String(name || '').trim().split(' '); return parts[parts.length - 1] || String(name || ''); }
+function bpShortName(name){
+  let s = String(name || '').trim();
+  if (!s) return '';
+  const parts = s.split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  // Prénom réduit à une initiale (ex: "M. De Lange") -> tout ce qui suit l'initiale
+  if (/^[A-Za-zÀ-ÿ]\.?$/.test(parts[0])) return parts.slice(1).join(' ');
+  // Sinon nom de famille = dernier mot, en incluant les particules (de, le, van, ...)
+  const PART = ['de','del','della','di','da','le','la','du','des','van','von','den','der','ter','el','al','bin','ben','dos','das','do','mac','mc','st','saint','o','ould','af','av'];
+  let i = parts.length - 1;
+  while (i > 0 && PART.indexOf(parts[i-1].toLowerCase().replace(/[.'\u2019]/g,'')) !== -1) i--;
+  return parts.slice(i).join(' ');
+}
 function bpPosFr(pos){ return pos === 'F' ? 'A' : (pos || ''); }
 const bpMatchEv = {}; // matchId -> { playerId: {goals, yellow, red, subbed} } | 'loading'
 const bpMatchSubs = {}; // matchId -> [ { p:idEntrant, a:idSortant, min } ]
@@ -3873,7 +3888,7 @@ function bpPitchPlayer(p, colors, isGK, evMap, fbBg, fbFg){
     if (e.subbed) { icons += '🔄'; outMin = (e.subMin != null ? e.subMin : ''); }
   }
   const nameSpan = '<span class="pitch-name">' + bpEscape(bpShortName(p.name)) + '</span>';
-  const outHtml = (outMin != null && outMin !== '') ? '<span class="pitch-out">' + outMin + "'</span>" : '';
+  const outHtml = '';
   return '<div class="pitch-player"><div class="pitch-jw"><div class="pitch-jersey" style="background:' + bg + ';color:' + fg + ';border:1.5px solid ' + border + '">' + (p.n != null ? p.n : '') + '</div></div><div class="pitch-namerow">' + nameSpan + (icons ? '<span class="pitch-ev">' + icons + '</span>' : '') + outHtml + '</div></div>';
 }
 function bpPitchColumns(team, reverse, evMap, isAway){
