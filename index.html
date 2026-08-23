@@ -770,7 +770,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .prono-chip .chip-pts.neg{background:#cc2200;color:#fff}
 .live-rank{margin:6px 10px 8px;border-top:1px solid var(--bord);padding-top:8px}
 .live-rank-title{font-size:9px;font-weight:800;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-.lr-row{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:7px;margin-bottom:3px;background:var(--bg3)}
+.lr-row{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;margin-bottom:3px;background:var(--bg3)}
+.lr-pot-inline{font-size:10px;font-weight:800;color:#b8860b;white-space:nowrap;flex-shrink:0;letter-spacing:-.2px}
+.lr-pot-inline .r{color:#057a3a;margin-right:5px}
 .lr-row.is-me{background:rgba(5,107,82,.10);border:1px solid rgba(5,107,82,.35)}
 .lr-rank{font-size:13px;font-weight:800;width:24px;height:24px;line-height:24px;text-align:center;color:#fff;border-radius:50%;flex-shrink:0}
 .lr-name{font-size:12px;font-weight:600;color:var(--txt);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1758,12 +1760,12 @@ function getAllPronosHtml(matchId, hs, as) {
       let ptsVal;
       if (vb.cashedOut) { ptsVal = vb.cashoutValue; }
       else { const lp = calcLivePts(vb, hs, as); ptsVal = lp ? lp.pts : null; }
-      rows.push({ name: name, h: vb.h, a: vb.a, pts: ptsVal, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, isMe: name === currentPlayer, cashedOut: !!vb.cashedOut });
+      rows.push({ name: name, h: vb.h, a: vb.a, pts: ptsVal, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, resultOdd: vb.resultOdd||0, scoreOdd: vb.scoreOdd||0, isMe: name === currentPlayer, cashedOut: !!vb.cashedOut });
     });
     if (window.bpPreviewMode && Array.isArray(window.bpPreviewPronos)) {
       window.bpPreviewPronos.forEach(function(p){
         const pts = calcLivePts({h:p.h,a:p.a,resultOdd:p.resultOdd||2,scoreOdd:p.scoreOdd||10}, hs, as);
-        rows.push({ name: p.name, h: p.h, a: p.a, pts: pts ? pts.pts : null, potential: Math.round(((p.resultOdd||2)+(p.scoreOdd||10))*100)/100, isMe: false });
+        rows.push({ name: p.name, h: p.h, a: p.a, pts: pts ? pts.pts : null, potential: Math.round(((p.resultOdd||2)+(p.scoreOdd||10))*100)/100, resultOdd: p.resultOdd||2, scoreOdd: p.scoreOdd||10, isMe: false });
       });
     }
     if (!rows.length) return '';
@@ -1790,11 +1792,15 @@ function getAllPronosHtml(matchId, hs, as) {
       const rank = r.rank;
       const rc = rank===1 ? '#e0a81c' : rank===2 ? '#9aa4ad' : rank===3 ? '#c17f43' : '#6b7280';
       const ptsHtml = r.omission ? '<span class="lr-pts neg">' + fmtPts(-1) + '</span>' : (live ? (r.cashedOut ? '<span class="lr-pts cash">💸 ' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>'));
+      const potInline = (live && !finished && !r.omission && !r.cashedOut)
+        ? ('<span class="lr-pot-inline" title="Points possibles : bon résultat / score exact"><span class="r">✅' + fmtPts(r.resultOdd) + '</span>🎯' + fmtPts(r.potential) + '</span>')
+        : '';
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
         '<span class="lr-rank" style="background:' + rc + '">' + rank + '</span>' +
         '<span class="lr-name">' + r.name + (r.isMe?' (moi)':'') + (r.omission?' · pari à vide':'') + '</span>' +
         '<span class="lr-score">' + (r.omission ? '∅' : (r.h + '-' + r.a)) + '</span>' +
         ptsHtml +
+        potInline +
       '</div>';
     }).join('');
     return '<div class="live-rank">' +
