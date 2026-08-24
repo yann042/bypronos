@@ -3814,11 +3814,216 @@ function bpShowRealDetail(el){
   } catch(e){}
 }
 function bpClosePotDetail(){ const m = document.getElementById('bpPotModal'); if (m) m.style.display = 'none'; }
+let bpPenState = null;
+window.bpOpenPenalty = async function(){
+  const modal = document.getElementById('bpPenModal'); if (!modal) return;
+  modal.style.display = 'flex';
+  const myT = await bpMyTicketCount();
+  bpPenState = { shots:0, goals:0, playing:false };
+  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) \u2014 5 tirs au but, plus tu marques, meilleur est le lot !') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
+  document.getElementById('bpPenScore').textContent = '';
+  document.getElementById('bpPenResult').textContent = '';
+  document.getElementById('bpPenZones').innerHTML = '';
+  const start = document.getElementById('bpPenStart');
+  if (start) { start.style.display = 'inline-block'; start.disabled = myT <= 0; start.textContent = myT > 0 ? 'Jouer (1 ticket)' : 'Aucun ticket'; }
+  bpPenReset();
+};
+window.bpClosePen = function(){ const m = document.getElementById('bpPenModal'); if (m) m.style.display = 'none'; bpPenState = null; };
+function bpPenReset(){
+  const k = document.getElementById('bpPenKeeper'); if (k) { k.style.transition = 'none'; k.style.transform = 'translateX(-50%)'; }
+  const b = document.getElementById('bpPenBall'); if (b) { b.style.transition = 'none'; b.style.transform = 'translateX(-50%)'; b.style.bottom = '2px'; b.style.opacity = '1'; }
+}
+window.bpStartPen = async function(){
+  if (!bpPenState || bpPenState.playing) return;
+  const myT = await bpMyTicketCount();
+  if (myT <= 0) { document.getElementById('bpPenInfo').innerHTML = 'Aucun ticket disponible.'; return; }
+  try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
+  bpPenState = { shots:0, goals:0, playing:true };
+  document.getElementById('bpPenStart').style.display = 'none';
+  document.getElementById('bpPenInfo').innerHTML = 'Choisis o\u00f9 tirer ! \U0001F945';
+  document.getElementById('bpPenResult').textContent = '';
+  bpPenRenderZones();
+  bpPenUpdateScore();
+};
+function bpPenUpdateScore(){
+  const s = document.getElementById('bpPenScore');
+  if (s) s.textContent = 'Tir ' + Math.min(bpPenState.shots + 1, 5) + '/5 \u00b7 \u26bd ' + bpPenState.goals + ' but' + (bpPenState.goals > 1 ? 's' : '');
+}
+function bpPenRenderZones(){
+  const z = document.getElementById('bpPenZones');
+  const labels = ['\u2196','\u2191','\u2197','\u2199','\u2193','\u2198'];
+  z.innerHTML = labels.map(function(l, i){ return '<button class="bp-pen-zone" onclick="bpPenShoot(' + i + ')">' + l + '</button>'; }).join('');
+}
+window.bpPenShoot = function(zone){
+  if (!bpPenState || !bpPenState.playing) return;
+  const zones = document.querySelectorAll('#bpPenZones .bp-pen-zone'); zones.forEach(function(b){ b.disabled = true; });
+  const keeperZone = (Math.random() < 0.30) ? zone : Math.floor(Math.random() * 6);
+  const goal = keeperZone !== zone;
+  const xoff = [-90, 0, 90, -90, 0, 90];
+  const ybot = ['104px','116px','104px','56px','62px','56px'];
+  const kx = [-80, 0, 80, -80, 0, 80];
+  const kyTop = [' translateY(-26px)',' translateY(-32px)',' translateY(-26px)','','',''];
+  const b = document.getElementById('bpPenBall');
+  const k = document.getElementById('bpPenKeeper');
+  if (k) { k.style.transition = 'all .45s cubic-bezier(.5,-0.3,.5,1.3)'; k.style.transform = 'translateX(-50%) translateX(' + kx[keeperZone] + 'px)' + kyTop[keeperZone]; }
+  if (b) { b.style.transition = 'all .5s ease'; b.style.transform = 'translateX(-50%) translateX(' + xoff[zone] + 'px)'; b.style.bottom = ybot[zone]; }
+  setTimeout(function(){
+    bpPenState.shots++;
+    if (goal) bpPenState.goals++;
+    const res = document.getElementById('bpPenResult');
+    if (res) res.innerHTML = goal ? '<span style="color:#0d7a4a">\u26bd BUT !</span>' : '<span style="color:#c0392b">\U0001F9E4 Arr\u00eat\u00e9 !</span>';
+    bpPenUpdateScore();
+    setTimeout(function(){
+      bpPenReset();
+      if (bpPenState.shots >= 5) { bpPenFinish(); }
+      else { const zs = document.querySelectorAll('#bpPenZones .bp-pen-zone'); zs.forEach(function(x){ x.disabled = false; }); if (res) res.textContent = ''; }
+    }, 850);
+  }, 560);
+};
+async function bpPenFinish(){
+  bpPenState.playing = false;
+  const g = bpPenState.goals;
+  let tier, tierTxt;
+  if (g === 5) { tier = '\U0001F3C6 Gros lot !'; tierTxt = 'Gros lot'; }
+  else if (g === 4) { tier = '\U0001F381 Beau lot !'; tierTxt = 'Beau lot'; }
+  else if (g === 3) { tier = '\U0001F36C Petit lot'; tierTxt = 'Petit lot'; }
+  else { tier = '\U0001F605 Pas de lot cette fois'; tierTxt = 'Pas de lot'; }
+  document.getElementById('bpPenZones').innerHTML = '';
+  document.getElementById('bpPenResult').innerHTML = '<div style="font-size:18px">' + g + '/5 buts</div><div style="margin-top:4px">' + tier + '</div>';
+  if (g >= 3) { try { bpConfetti(); } catch(e){} }
+  try {
+    const code = bpLeagueCode();
+    const gid = 'g_' + Date.now();
+    await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\u26bd Penalty ' + g + '/5 \u2014 ' + tierTxt, ts: Date.now() });
+  } catch(e){}
+  const myT = await bpMyTicketCount();
+  const start = document.getElementById('bpPenStart');
+  if (start) { start.style.display = 'inline-block'; start.disabled = myT <= 0; start.textContent = myT > 0 ? 'Rejouer (1 ticket)' : 'Aucun ticket'; }
+  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
+  try { renderInstantView(); } catch(e){}
+}
+const BP_QUIZ = {
+  "Ligue 1": [
+    {q:"Quel club français a gagné la Ligue des Champions en 1993 ?", o:["Bordeaux","Marseille","Monaco","Paris SG"], c:1},
+    {q:"Dans quel stade joue le Paris SG ?", o:["Vélodrome","Parc des Princes","Bollaert","Groupama Stadium"], c:1},
+    {q:"Quel club surnomme-t-on « les Verts » ?", o:["Nantes","Saint-Étienne","Rennes","Lens"], c:1},
+    {q:"Le « Classique » oppose le PSG à quel club ?", o:["Lyon","Marseille","Monaco","Lille"], c:1},
+    {q:"Le stade Vélodrome se trouve dans quelle ville ?", o:["Nice","Marseille","Toulon","Montpellier"], c:1},
+    {q:"Quel club surnomme-t-on « les Gones » ?", o:["Lyon","Saint-Étienne","Grenoble","Clermont"], c:0},
+    {q:"Les Girondins jouent dans quelle ville ?", o:["Bordeaux","Nantes","Toulouse","Angers"], c:0},
+    {q:"Le RC Lens joue dans quel stade ?", o:["Bollaert-Delelis","Pierre-Mauroy","Geoffroy-Guichard","Roazhon Park"], c:0},
+    {q:"Le LOSC est le club de quelle ville ?", o:["Lens","Lille","Le Havre","Lorient"], c:1},
+    {q:"Le stade Geoffroy-Guichard se trouve à ?", o:["Saint-Étienne","Nantes","Reims","Strasbourg"], c:0}
+  ],
+  "Coupe du Monde": [
+    {q:"Quel pays a remporté la Coupe du Monde 2018 ?", o:["Croatie","France","Allemagne","Brésil"], c:1},
+    {q:"Quel pays a gagné la Coupe du Monde 1998 ?", o:["Brésil","France","Italie","Espagne"], c:1},
+    {q:"Qui a remporté la Coupe du Monde 2014 ?", o:["Argentine","Allemagne","Pays-Bas","Brésil"], c:1},
+    {q:"La Coupe du Monde 2022 s'est jouée dans quel pays ?", o:["Qatar","Russie","Émirats","Arabie saoudite"], c:0},
+    {q:"Qui a marqué « la main de Dieu » en 1986 ?", o:["Pelé","Maradona","Platini","Zico"], c:1},
+    {q:"Quel pays a gagné le plus de Coupes du Monde ?", o:["Allemagne","Brésil","Italie","Argentine"], c:1},
+    {q:"En finale 1998, Zidane a marqué 2 buts de la tête contre ?", o:["Italie","Brésil","Croatie","Allemagne"], c:1},
+    {q:"La première Coupe du Monde (1930) a eu lieu où ?", o:["Uruguay","Brésil","Italie","France"], c:0},
+    {q:"Qui a gagné la Coupe du Monde 2010 ?", o:["Pays-Bas","Espagne","Allemagne","Uruguay"], c:1},
+    {q:"Combien d'étoiles la France a-t-elle sur son maillot ?", o:["1","2","3","4"], c:1}
+  ],
+  "Champions League": [
+    {q:"Quel club a gagné le plus de Ligues des Champions ?", o:["Milan AC","Real Madrid","Barcelone","Bayern"], c:1},
+    {q:"Quel club a gagné la C1 2005 après la « remontada » d'Istanbul ?", o:["Milan AC","Liverpool","Chelsea","Arsenal"], c:1},
+    {q:"Messi a passé l'essentiel de sa carrière dans quel club ?", o:["Real Madrid","Barcelone","Manchester City","PSG"], c:1},
+    {q:"Quel club allemand a gagné la C1 en 2013 et 2020 ?", o:["Dortmund","Bayern Munich","Leipzig","Schalke"], c:1},
+    {q:"Le trophée « aux grandes oreilles » désigne quelle compétition ?", o:["Europa League","Ligue des Champions","Coupe du Monde","Euro"], c:1},
+    {q:"L'Ajax Amsterdam est un club de quel pays ?", o:["Belgique","Pays-Bas","Allemagne","Danemark"], c:1},
+    {q:"Quel club italien surnomme-t-on « la Vieille Dame » ?", o:["Milan AC","Juventus","Inter","Naples"], c:1},
+    {q:"Cristiano Ronaldo a gagné la C1 avec le Real et quel club anglais ?", o:["Chelsea","Manchester United","Liverpool","Arsenal"], c:1},
+    {q:"Le Barça a gagné la C1 en 2011 en finale contre ?", o:["Manchester United","Chelsea","Arsenal","Bayern"], c:0},
+    {q:"Dans quelle ville joue le club du « Bayern » ?", o:["Berlin","Munich","Hambourg","Dortmund"], c:1}
+  ],
+  "Culture foot": [
+    {q:"Combien de joueurs par équipe sur le terrain ?", o:["10","11","12","9"], c:1},
+    {q:"Combien de temps dure un match (hors arrêts) ?", o:["80 min","90 min","100 min","120 min"], c:1},
+    {q:"Combien de points rapporte une victoire en championnat ?", o:["1","2","3","4"], c:2},
+    {q:"Un « hat-trick », c'est ?", o:["2 buts","3 buts","4 buts","Un arrêt"], c:1},
+    {q:"Que récompense le Ballon d'Or ?", o:["Le meilleur buteur","Le meilleur joueur","La meilleure équipe","Le meilleur gardien"], c:1},
+    {q:"Un « clean sheet » signifie ?", o:["Marquer 3 buts","Ne pas encaisser de but","Gagner dehors","Un carton rouge"], c:1},
+    {q:"Où le gardien peut-il prendre le ballon à la main ?", o:["Partout","Dans sa surface","Au centre","Nulle part"], c:1},
+    {q:"Un carton rouge signifie ?", o:["Avertissement","Exclusion","Penalty","But refusé"], c:1},
+    {q:"Pelé était un joueur de quelle nationalité ?", o:["Argentin","Brésilien","Portugais","Uruguayen"], c:1},
+    {q:"Le penalty se tire à quelle distance des buts ?", o:["9 m","11 m","16 m","6 m"], c:1}
+  ]
+};
+let bpQuiz = null;
+window.bpOpenQuiz = async function(){
+  const modal = document.getElementById('bpQuizModal'); if (!modal) return;
+  modal.style.display = 'flex';
+  const myT = await bpMyTicketCount();
+  const body = document.getElementById('bpQuizBody');
+  if (myT <= 0) { body.innerHTML = '<div class="iw-note" style="text-align:center">Il te faut un ticket (Bonus BY PRONOS) pour jouer.</div>'; return; }
+  body.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--txt2);margin-bottom:4px">Choisis un thème \u2014 5 s / question, 1 minute :</div><div class="bp-qz-theme">' +
+    Object.keys(BP_QUIZ).map(function(t){ return '<button class="bp-qz-tbtn" onclick="bpQuizStart(\'' + t + '\')">' + t + '</button>'; }).join('') + '</div>';
+};
+window.bpCloseQuiz = function(){ const m = document.getElementById('bpQuizModal'); if (m) m.style.display = 'none'; if (bpQuiz && bpQuiz.timer) clearInterval(bpQuiz.timer); bpQuiz = null; };
+window.bpQuizStart = async function(theme){
+  const myT = await bpMyTicketCount();
+  if (myT <= 0) return;
+  try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
+  const qs = (BP_QUIZ[theme] || []).slice().sort(function(){ return Math.random() - 0.5; });
+  bpQuiz = { theme: theme, qs: qs, i: 0, score: 0, start: Date.now(), timer: null, answered: false };
+  bpQuizShow();
+};
+function bpQuizShow(){
+  if (!bpQuiz) return;
+  const elapsed = (Date.now() - bpQuiz.start) / 1000;
+  if (elapsed >= 60 || bpQuiz.i >= bpQuiz.qs.length) { bpQuizEnd(); return; }
+  const q = bpQuiz.qs[bpQuiz.i];
+  bpQuiz.answered = false;
+  const opts = q.o.map(function(o, idx){ return '<button class="bp-qz-opt" data-i="' + idx + '" onclick="bpQuizAnswer(' + idx + ')">' + bpEscape(o) + '</button>'; }).join('');
+  document.getElementById('bpQuizBody').innerHTML =
+    '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2)"><span>' + bpEscape(bpQuiz.theme) + '</span><span>Q' + (bpQuiz.i + 1) + ' \u00b7 Score ' + bpQuiz.score + '</span></div>' +
+    '<div class="bp-qz-timer"><div class="bp-qz-timer-bar" id="bpQzBar"></div></div>' +
+    '<div class="bp-qz-q">' + bpEscape(q.q) + '</div>' +
+    '<div class="bp-qz-opts">' + opts + '</div>';
+  let t = 5.0;
+  const bar = document.getElementById('bpQzBar');
+  if (bpQuiz.timer) clearInterval(bpQuiz.timer);
+  bpQuiz.timer = setInterval(function(){
+    t -= 0.1;
+    if (bar) bar.style.width = Math.max(0, (t / 5) * 100) + '%';
+    if (t <= 0) { clearInterval(bpQuiz.timer); if (bpQuiz && !bpQuiz.answered) bpQuizAnswer(-1); }
+  }, 100);
+}
+window.bpQuizAnswer = function(idx){
+  if (!bpQuiz || bpQuiz.answered) return;
+  bpQuiz.answered = true;
+  if (bpQuiz.timer) clearInterval(bpQuiz.timer);
+  const q = bpQuiz.qs[bpQuiz.i];
+  const btns = document.querySelectorAll('#bpQuizBody .bp-qz-opt');
+  btns.forEach(function(b){ b.disabled = true; const bi = parseInt(b.getAttribute('data-i')); if (bi === q.c) b.classList.add('good'); else if (bi === idx && idx !== q.c) b.classList.add('bad'); });
+  if (idx === q.c) bpQuiz.score++;
+  setTimeout(function(){ if (!bpQuiz) return; bpQuiz.i++; bpQuizShow(); }, 750);
+};
+function bpQuizEnd(){
+  if (bpQuiz && bpQuiz.timer) clearInterval(bpQuiz.timer);
+  const sc = bpQuiz ? bpQuiz.score : 0;
+  let tier, tierTxt;
+  if (sc >= 8) { tier = '\U0001F3C6 Gros lot !'; tierTxt = 'Gros lot'; }
+  else if (sc >= 5) { tier = '\U0001F381 Beau lot !'; tierTxt = 'Beau lot'; }
+  else if (sc >= 3) { tier = '\U0001F36C Petit lot'; tierTxt = 'Petit lot'; }
+  else { tier = '\U0001F605 Pas de lot cette fois'; tierTxt = 'Pas de lot'; }
+  document.getElementById('bpQuizBody').innerHTML =
+    '<div style="text-align:center;padding:16px"><div style="font-size:20px;font-weight:800">' + sc + ' bonne' + (sc > 1 ? 's' : '') + ' r\u00e9ponse' + (sc > 1 ? 's' : '') + ' !</div><div style="font-size:22px;margin:10px 0">' + tier + '</div><button class="iw-btn primary" onclick="bpOpenQuiz()">Rejouer</button></div>';
+  if (sc >= 3) { try { bpConfetti(); } catch(e){} }
+  (async function(){
+    try { const code = bpLeagueCode(); const gid = 'g_' + Date.now(); await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\u2753 Quiz ' + sc + ' pts \u2014 ' + tierTxt, ts: Date.now() }); } catch(e){}
+    try { renderInstantView(); } catch(e){}
+  })();
+  bpQuiz = null;
+}
 async function renderInstantView() {
   const listEl = document.getElementById('iwList');
   if (!listEl) return;
   const sub = document.getElementById('iwSubtitle');
-  if (sub) sub.textContent = (currentLeague ? (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' · Roue & cadeaux';
+  if (sub) sub.textContent = (currentLeague ? (currentLeague.name || currentLeague.code) : 'Aucune ligue') + ' · Jeux & cadeaux';
   if (bpLeagueCode() === 'NONE') { listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Rejoins une ligue pour jouer.</div>'; return; }
   listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
   const code = bpLeagueCode();
@@ -3830,17 +4035,26 @@ async function renderInstantView() {
   lots.sort(function(a, b){ return (a.createdAt || 0) - (b.createdAt || 0); });
   const myT = (currentPlayer && tickets && tickets[currentPlayer]) ? tickets[currentPlayer] : 0;
   let html = '';
-  html += '<div class="ev-section-title">\ud83c\udfa1 La roue de la semaine</div>';
+  // BLOC BONUS BY PRONOS
+  html += '<div class="ev-section-title">🎁 Bonus BY PRONOS</div>';
+  html += '<div class="iw-note">Chaque lundi : <b>1 ticket</b> pour le <b>vainqueur de la semaine</b> + <b>1 ticket</b> pour chaque joueur ayant atteint <b>20 pts</b> sur la semaine. <span style="opacity:.75">(Un seul ticket même si vainqueur ET \u2265 20 pts.)</span></div>';
   if (myT > 0) {
-    html += '<div class="iw-ticket"><span>\ud83c\udf9f\ufe0f Tu as ' + myT + ' ticket' + (myT > 1 ? 's' : '') + ' !</span><button class="iw-btn primary" onclick="bpOpenWheel()">Lancer la roue</button></div>';
+    html += '<div class="iw-ticket"><span>🎟️ Tu as <b>' + myT + '</b> ticket' + (myT > 1 ? 's' : '') + ' \u00e0 dépenser dans les jeux !</span></div>';
   } else {
-    html += '<div class="iw-note">\ud83c\udf9f\ufe0f Le <b>vainqueur de la semaine</b> gagne un ticket (attribu\u00e9 automatiquement chaque lundi) pour faire tourner la roue et remporter un cadeau. Pas de ticket pour toi cette semaine \u2014 \u00e0 toi de gagner la semaine !</div>';
+    html += '<div class="iw-note" style="text-align:center">Pas de ticket cette semaine \u2014 \u00e0 toi de gagner la semaine ou d\'atteindre 20 pts ! 💪</div>';
   }
   const holders = Object.keys(tickets || {}).filter(function(n){ return tickets[n] > 0; });
   if (holders.length) {
-    html += '<div style="font-size:11px;color:var(--txt2);margin:2px 2px 8px">\ud83c\udfab Tickets en jeu : ' + holders.map(function(n){ return bpEscape(n) + ' (' + tickets[n] + ')'; }).join(', ') + '</div>';
+    html += '<div style="font-size:11px;color:var(--txt2);margin:2px 2px 10px">🎫 Tickets en jeu : ' + holders.map(function(n){ return bpEscape(n) + ' (' + tickets[n] + ')'; }).join(', ') + '</div>';
   }
-  html += '<div class="ev-section-title">\ud83c\udf81 Les cadeaux dans la roue</div>';
+  // BLOC JEUX
+  html += '<div class="ev-section-title">🎮 Les jeux \u2014 1 ticket = 1 partie</div>';
+  const _off = myT > 0 ? '' : ' off';
+  const gc = function(ic, nm, ds, fn){ return '<div class="iw-game' + _off + '" onclick="' + (myT > 0 ? fn : '') + '"><div class="ic">' + ic + '</div><div class="nm">' + nm + '</div><div class="ds">' + ds + '</div></div>'; };
+  html += '<div class="iw-games">' + gc('🎡','Roue','cadeaux','bpOpenWheel()') + gc('⚽','Penalty','5 tirs','bpOpenPenalty()') + gc('❓','Quiz','1 min','bpOpenQuiz()') + '</div>';
+  if (myT <= 0) html += '<div style="font-size:10px;color:var(--txt2);text-align:center;margin:-4px 0 8px">🔒 Gagne un ticket pour débloquer les jeux</div>';
+  // BLOC CADEAUX
+  html += '<div class="ev-section-title">🎁 Les cadeaux dans la roue</div>';
   html += lots.length ? lots.map(bpLotCard).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun cadeau. Ajoute le premier ci-dessus !</div>';
   const gList = Object.keys(gains || {}).map(function(id){ return gains[id]; }).filter(Boolean).sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
   if (gList.length) {
