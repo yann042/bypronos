@@ -1219,6 +1219,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
               <div style="display:flex;gap:4px">
                 <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
                 <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('semaine',this)">Semaine</button>
+                <button class="history-filter-btn" id="rankTabChoix" onclick="window.switchRankTab('choix',this)">Choix semaine</button>
               </div>
               <div id="teamToggle" style="display:none;gap:4px">
                 <button class="history-filter-btn active" id="rankTabIndividuel" onclick="window.switchRankMode('individuel',this)">Individuel</button>
@@ -1226,6 +1227,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
               </div>
             </div>
           </div>
+          <div id="rankWeekSelect" style="display:none;flex-wrap:wrap;gap:4px;padding:6px 10px 0"></div>
           <div class="results-panel-body" id="rankingList"></div>
         </div>
         <!-- Historique -->
@@ -4460,12 +4462,16 @@ function renderLiveView() {
   }).join('');;
 }
 
+var rankChosenWeek = null;
 window.switchRankTab = function switchRankTab(tab) {
   rankTab = tab;
   document.getElementById('rankTabSaison').classList.toggle('active', tab === 'saison');
   document.getElementById('rankTabJournee').classList.toggle('active', tab === 'semaine');
+  var _ch = document.getElementById('rankTabChoix'); if (_ch) _ch.classList.toggle('active', tab === 'choix');
+  var _sel = document.getElementById('rankWeekSelect'); if (_sel) _sel.style.display = (tab === 'choix') ? 'flex' : 'none';
   renderResultsView();
 }
+window.setRankWeek = function(el, wk){ rankChosenWeek = wk; renderRankingPanel(); };
 
 function renderResultsView() {
   renderRankingPanel();
@@ -4492,14 +4498,48 @@ function bpWeekPoints(data) {
     return Math.round(total * 100) / 100;
   } catch(e) { return 0; }
 }
+function bpWeekPointsFor(data, weekKey) {
+  try {
+    if (!weekKey) return 0;
+    const p = weekKey.split('-');
+    const start = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]), 0, 0, 0, 0);
+    const startTs = Math.floor(start.getTime() / 1000);
+    const endTs = startTs + 7 * 86400;
+    const vb = (data && data.validatedBets) || {};
+    let total = 0;
+    Object.keys(vb).forEach(function(mid){
+      const b = vb[mid];
+      if (!b.ts || b.ts < startTs || b.ts >= endTs) return;
+      if (b.cashedOut) { total += (b.cashoutValue || 0); return; }
+      const live = liveData[parseInt(mid)];
+      const fh = live ? live.homeScore : b.finalHome;
+      const fa = live ? live.awayScore : b.finalAway;
+      if (fh != null && fa != null) { const lp = calcLivePts(b, fh, fa); if (lp) total += lp.pts; }
+    });
+    return Math.round(total * 100) / 100;
+  } catch(e) { return 0; }
+}
 function renderRankingPanel() {
   const players = loadPlayers();
   const day = 'Journée en cours';
+  // Sélecteur des semaines passées (mode "Choix semaine")
+  if (rankTab === 'choix') {
+    const _weeks = {};
+    Object.values(players).forEach(function(d){ const vb = (d && d.validatedBets) || {}; Object.keys(vb).forEach(function(mid){ const wk = bpWeekKey(vb[mid].ts); if (wk) _weeks[wk] = 1; }); });
+    const wks = Object.keys(_weeks).sort().reverse();
+    if (!rankChosenWeek || wks.indexOf(rankChosenWeek) === -1) rankChosenWeek = wks[0] || null;
+    const sel = document.getElementById('rankWeekSelect');
+    if (sel) sel.innerHTML = wks.length
+      ? wks.map(function(wk){ return '<button class="history-filter-btn' + (rankChosenWeek === wk ? ' active' : '') + '" onclick="setRankWeek(this,\'' + wk + '\')">' + bpWeekLabel(wk) + '</button>'; }).join('')
+      : '<span style="font-size:11px;color:var(--txt2);padding:2px">Aucune semaine passée</span>';
+  }
   const rows = Object.entries(players)
     .map(([name, data]) => {
       const pts = rankTab === 'saison'
         ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
-        : bpWeekPoints(data);
+        : rankTab === 'choix'
+          ? bpWeekPointsFor(data, rankChosenWeek)
+          : bpWeekPoints(data);
       return { name, pts };
     })
     .sort((a, b) => b.pts - a.pts);
