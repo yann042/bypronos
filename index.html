@@ -781,6 +781,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .lr-pts.pot{background:#64748b;color:#fff}
 .lr-poss{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;padding:2px 6px;min-width:56px}
 .lr-poss small{font-size:7px;font-weight:800;opacity:.85;text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
+.bp-pot-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:7px 2px;font-size:13px;border-bottom:1px solid var(--bord)}
+.bp-pot-row b{font-size:14px}
+.bp-pot-row.tot{border-bottom:none;margin-top:4px;font-weight:800}
+.bp-pot-row.tot b{color:#056b52;font-size:17px}
 .lr-pts.cash{background:#1a6fd4;color:#fff}
 .ev-form{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:12px;margin:12px 0}
 .ev-form input,.ev-form textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--bord);border-radius:7px;padding:8px 10px;font-size:13px;color:var(--txt);margin-bottom:8px;font-family:inherit}
@@ -1284,6 +1288,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="compo-modal" id="bpWheelModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpCloseWheel()">✕</div><div class="compo-title">🎡 La roue des cadeaux</div><div id="bpWheelBox"></div><div id="bpWheelResult" style="min-height:22px;font-size:15px;font-weight:700;margin:4px 0 10px"></div><button class="iw-btn primary" id="bpWheelSpinBtn" style="font-size:15px;padding:9px 20px" onclick="bpSpinWheel()">Tourner</button></div></div>
 <div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-goal" id="bpPenGoal"><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div></div><div class="bp-pen-grass"></div><div class="bp-pen-score" id="bpPenScore"></div><div class="bp-pen-zones" id="bpPenZones"></div><div id="bpPenResult" style="min-height:20px;font-weight:800;margin-top:6px"></div><button class="iw-btn primary" id="bpPenStart" style="font-size:14px;padding:8px 18px;margin-top:6px" onclick="bpStartPen()">Jouer (1 ticket)</button></div></div>
 <div class="compo-modal" id="bpQuizModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseQuiz()">✕</div><div class="compo-title">❓ Quiz Foot</div><div id="bpQuizBody"></div></div></div>
+<div class="compo-modal" id="bpPotModal" onclick="if(event.target===this)bpClosePotDetail()"><div class="compo-box" style="max-width:280px"><div class="compo-close" onclick="bpClosePotDetail()">✕</div><div class="compo-title" id="bpPotTitle" style="font-size:16px">🎯 Points possibles</div><div id="bpPotBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
     <span class="goal-emoji">⚽</span>
@@ -1788,10 +1793,10 @@ function getAllPronosHtml(matchId, hs, as) {
       const name = entry[0], data = entry[1];
       const vb = data.validatedBets && (data.validatedBets[mid] || data.validatedBets[String(mid)]);
       if (!vb) return;
-      let ptsVal;
-      if (vb.cashedOut) { ptsVal = vb.cashoutValue; }
-      else { const lp = calcLivePts(vb, hs, as); ptsVal = lp ? lp.pts : null; }
-      rows.push({ name: name, h: vb.h, a: vb.a, pts: ptsVal, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, resultOdd: vb.resultOdd||0, scoreOdd: vb.scoreOdd||0, isMe: name === currentPlayer, cashedOut: !!vb.cashedOut });
+      let ptsVal, ptsType = null;
+      if (vb.cashedOut) { ptsVal = vb.cashoutValue; ptsType = 'cash'; }
+      else { const lp = calcLivePts(vb, hs, as); ptsVal = lp ? lp.pts : null; ptsType = lp ? lp.type : null; }
+      rows.push({ name: name, h: vb.h, a: vb.a, pts: ptsVal, ptsType: ptsType, potential: Math.round(((vb.resultOdd||0)+(vb.scoreOdd||0))*100)/100, resultOdd: vb.resultOdd||0, scoreOdd: vb.scoreOdd||0, isMe: name === currentPlayer, cashedOut: !!vb.cashedOut });
     });
     if (window.bpPreviewMode && Array.isArray(window.bpPreviewPronos)) {
       window.bpPreviewPronos.forEach(function(p){
@@ -1822,9 +1827,10 @@ function getAllPronosHtml(matchId, hs, as) {
     const items = rows.map(function(r, i){
       const rank = r.rank;
       const rc = rank===1 ? '#e0a81c' : rank===2 ? '#9aa4ad' : rank===3 ? '#c17f43' : '#6b7280';
-      const ptsHtml = r.omission ? '<span class="lr-pts neg lr-poss"><small>Réel</small>' + fmtPts(-1) + '</span>' : (live ? (r.cashedOut ? '<span class="lr-pts cash lr-poss"><small>Cashout</small>💸' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + ' lr-poss"><small>Réel</small>' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>'));
+      const _rdata = 'data-pts="' + r.pts + '" data-type="' + (r.ptsType||'') + '" data-r="' + r.resultOdd + '" data-s="' + r.scoreOdd + '" data-n="' + bpEscape(r.name) + '" onclick="bpShowRealDetail(this)" style="cursor:pointer"';
+      const ptsHtml = r.omission ? '<span class="lr-pts neg lr-poss" data-type="omission" data-n="' + bpEscape(r.name) + '" onclick="bpShowRealDetail(this)" style="cursor:pointer"><small>Réel</small>' + fmtPts(-1) + '</span>' : (live ? (r.cashedOut ? '<span class="lr-pts cash lr-poss" ' + _rdata + '><small>Cashout</small>💸' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + ' lr-poss" ' + _rdata + '><small>Réel</small>' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>'));
       const potInline = (live && !finished && !r.omission && !r.cashedOut)
-        ? ('<span class="lr-pts pot lr-poss" title="Points possibles à marquer (score exact)"><small>Pts possibles</small>' + fmtPts(r.potential) + '</span>')
+        ? ('<span class="lr-pts pot lr-poss" style="cursor:pointer" data-r="' + r.resultOdd + '" data-s="' + r.scoreOdd + '" data-n="' + bpEscape(r.name) + '" onclick="bpShowPotDetail(this)"><small>Pts possibles</small>' + fmtPts(r.potential) + '</span>')
         : '';
       return '<div class="lr-row' + (r.isMe?' is-me':'') + '">' +
         '<span class="lr-rank" style="background:' + rc + '">' + rank + '</span>' +
@@ -3759,6 +3765,53 @@ function bpConfetti(){
     setTimeout(function(){ d.remove(); }, 2600);
   }
 }
+function bpShowPotDetail(el){
+  try {
+    const r = parseFloat(el.getAttribute('data-r'))||0;
+    const s = parseFloat(el.getAttribute('data-s'))||0;
+    const n = el.getAttribute('data-n')||'';
+    const tot = Math.round((r+s)*100)/100;
+    document.getElementById('bpPotBody').innerHTML =
+      (n ? '<div style="font-weight:800;text-align:center;margin-bottom:8px">' + n + '</div>' : '') +
+      '<div class="bp-pot-row"><span>✅ Bon résultat</span><b>' + fmtPts(r) + ' pts</b></div>' +
+      '<div class="bp-pot-row"><span>🎯 Score exact</span><b>+' + fmtPts(s) + ' pts</b></div>' +
+      '<div class="bp-pot-row tot"><span>Total possible</span><b>' + fmtPts(tot) + ' pts</b></div>';
+    var _t=document.getElementById('bpPotTitle'); if(_t) _t.textContent='🎯 Points possibles';
+    document.getElementById('bpPotModal').style.display = 'flex';
+  } catch(e){}
+}
+function bpShowRealDetail(el){
+  try {
+    const type = el.getAttribute('data-type')||'';
+    const pts = parseFloat(el.getAttribute('data-pts'));
+    const r = parseFloat(el.getAttribute('data-r'))||0;
+    const s = parseFloat(el.getAttribute('data-s'))||0;
+    const n = el.getAttribute('data-n')||'';
+    let rowsH = '', total = pts;
+    if (type === 'max') {
+      rowsH = '<div class="bp-pot-row"><span>✅ Bon résultat</span><b>' + fmtPts(r) + '</b></div>' +
+              '<div class="bp-pot-row"><span>🎯 Score exact</span><b>+' + fmtPts(s) + '</b></div>';
+    } else if (type === 'bonus') {
+      rowsH = '<div class="bp-pot-row"><span>✅ Bon résultat</span><b>' + fmtPts(r) + '</b></div>' +
+              '<div class="bp-pot-row"><span>📏 Bon écart</span><b>+' + fmtPts(0.5) + '</b></div>';
+    } else if (type === 'result') {
+      rowsH = '<div class="bp-pot-row"><span>✅ Bon résultat</span><b>' + fmtPts(r) + '</b></div>';
+    } else if (type === 'cash') {
+      rowsH = '<div class="bp-pot-row"><span>💸 Cashout encaissé</span><b>' + fmtPts(pts) + '</b></div>';
+    } else if (type === 'omission') {
+      rowsH = '<div class="bp-pot-row"><span>∅ Pari à vide</span><b>' + fmtPts(-1) + '</b></div>'; total = -1;
+    } else {
+      rowsH = '<div class="bp-pot-row"><span>❌ Mauvais résultat</span><b>' + fmtPts(-1) + '</b></div>'; total = -1;
+    }
+    document.getElementById('bpPotBody').innerHTML =
+      (n ? '<div style="font-weight:800;text-align:center;margin-bottom:8px">' + n + '</div>' : '') +
+      rowsH +
+      '<div class="bp-pot-row tot"><span>Total actuel</span><b>' + fmtPts(total) + ' pts</b></div>';
+    var _t=document.getElementById('bpPotTitle'); if(_t) _t.textContent='📊 Points actuels';
+    document.getElementById('bpPotModal').style.display = 'flex';
+  } catch(e){}
+}
+function bpClosePotDetail(){ const m = document.getElementById('bpPotModal'); if (m) m.style.display = 'none'; }
 async function renderInstantView() {
   const listEl = document.getElementById('iwList');
   if (!listEl) return;
