@@ -842,7 +842,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .iw-ticket{background:linear-gradient(135deg,#8e44ad,#c0392b);color:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;margin-bottom:6px;flex-wrap:wrap}
 .iw-note{font-size:12px;color:var(--txt2);background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:6px}
 .iw-gain{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bord)}
-.iw-games{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.iw-games{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .iw-game{background:var(--bg2);border:1px solid var(--bord);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:.15s}
 .iw-game:active{transform:scale(.96)}
 .iw-game.off{opacity:.5;cursor:default}
@@ -879,6 +879,27 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .bp-qz-opt{background:var(--bg2);border:1.5px solid var(--bord);border-radius:9px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left}
 .bp-qz-opt.good{background:#0d7a4a;color:#fff;border-color:#0d7a4a}
 .bp-qz-opt.bad{background:#c0392b;color:#fff;border-color:#c0392b}
+/* Football Studio */
+.bp-fs-table{background:linear-gradient(#1a5c3a,#0e3d26);border-radius:14px;padding:16px 10px;margin:6px 0}
+.bp-fs-cards{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:12px}
+.bp-fs-side{text-align:center}
+.bp-fs-side .lab{font-size:10px;font-weight:800;margin-bottom:5px;letter-spacing:1px}
+.bp-fs-card{width:68px;height:96px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.35);position:relative}
+.bp-fs-card.back{background:repeating-linear-gradient(45deg,#2c3e50,#2c3e50 6px,#34495e 6px,#34495e 12px)}
+.bp-fs-card .rank{position:absolute;top:4px;left:6px;font-size:15px;line-height:1;font-weight:800}
+.bp-fs-card .rank.br{top:auto;left:auto;bottom:4px;right:6px;transform:rotate(180deg)}
+.bp-fs-red{color:#c0392b}
+.bp-fs-black{color:#111}
+.bp-fs-vs{color:#fff;font-weight:900;font-size:15px;opacity:.75}
+.bp-fs-bets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.bp-fs-bet{border:none;border-radius:10px;padding:9px 3px;cursor:pointer;color:#fff;text-align:center}
+.bp-fs-bet .t{font-size:12px;font-weight:800}
+.bp-fs-bet .s{font-size:8.5px;opacity:.9;font-weight:600}
+.bp-fs-bet.home{background:#c0392b}
+.bp-fs-bet.draw{background:#b8860b}
+.bp-fs-bet.away{background:#2471c9}
+.bp-fs-bet.sel{outline:3px solid #ffe000;transform:scale(1.03)}
+.bp-fs-bet:disabled{opacity:.45;cursor:default}
 .bp-wheel-wrap{position:relative;width:290px;height:290px;margin:6px auto 12px}
 .bp-wheel{width:290px;height:290px;border-radius:50%;position:relative;border:6px solid #222;box-shadow:0 6px 24px rgba(0,0,0,.4);transition:transform 4.5s cubic-bezier(.17,.67,.2,1);overflow:hidden}
 .bp-wheel-label{position:absolute;left:50%;top:0;height:50%;width:0;transform-origin:50% 100%;display:flex;justify-content:center}
@@ -1298,6 +1319,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="compo-modal" id="bpWheelModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpCloseWheel()">✕</div><div class="compo-title">🎡 La roue des cadeaux</div><div id="bpWheelBox"></div><div id="bpWheelResult" style="min-height:22px;font-size:15px;font-weight:700;margin:4px 0 10px"></div><button class="iw-btn primary" id="bpWheelSpinBtn" style="font-size:15px;padding:9px 20px" onclick="bpSpinWheel()">Tourner</button></div></div>
 <div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:370px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-mult" id="bpPenMult"></div><div class="bp-pen-stage" id="bpPenStage"><div class="bp-pen-goalframe"></div><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div><div class="bp-pen-zones" id="bpPenZones"></div></div><div class="bp-pen-score" id="bpPenScore"></div><div id="bpPenResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div class="bp-pen-diff" id="bpPenDiff"></div><div id="bpPenControls" style="margin-top:8px"></div></div></div>
 <div class="compo-modal" id="bpQuizModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseQuiz()">✕</div><div class="compo-title">❓ Quiz Foot</div><div id="bpQuizBody"></div></div></div>
+<div class="compo-modal" id="bpFsModal"><div class="compo-box" style="max-width:380px;text-align:center"><div class="compo-close" onclick="bpCloseFs()">✕</div><div class="compo-title">🃏 Football Studio</div><div id="bpFsInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-fs-table"><div class="bp-fs-cards"><div class="bp-fs-side"><div class="lab" style="color:#ff8a80">DOMICILE</div><div class="bp-fs-card back" id="bpFsCardH"></div></div><div class="bp-fs-vs">VS</div><div class="bp-fs-side"><div class="lab" style="color:#82b1ff">EXTÉRIEUR</div><div class="bp-fs-card back" id="bpFsCardA"></div></div></div><div class="bp-fs-bets" id="bpFsBets"></div></div><div id="bpFsResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div id="bpFsControls" style="margin-top:8px"></div></div></div>
 <div class="compo-modal" id="bpPotModal" onclick="if(event.target===this)bpClosePotDetail()"><div class="compo-box" style="max-width:280px"><div class="compo-close" onclick="bpClosePotDetail()">✕</div><div class="compo-title" id="bpPotTitle" style="font-size:16px">🎯 Points possibles</div><div id="bpPotBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
@@ -4062,6 +4084,78 @@ function bpQuizEnd(){
   })();
   bpQuiz = null;
 }
+let bpFs = null;
+const BP_FS_RANKS = [{v:2,r:'2'},{v:3,r:'3'},{v:4,r:'4'},{v:5,r:'5'},{v:6,r:'6'},{v:7,r:'7'},{v:8,r:'8'},{v:9,r:'9'},{v:10,r:'10'},{v:11,r:'J'},{v:12,r:'Q'},{v:13,r:'K'},{v:14,r:'A'}];
+window.bpOpenFs = async function(){
+  const modal = document.getElementById('bpFsModal'); if (!modal) return;
+  modal.style.display = 'flex';
+  const myT = await bpMyTicketCount();
+  bpFs = { bet:null, playing:false };
+  document.getElementById('bpFsInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) \u2014 2 cartes tir\u00e9es, la plus forte gagne. Mise sur Domicile, Nul ou Ext\u00e9rieur.') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
+  document.getElementById('bpFsResult').textContent = '';
+  bpFsResetCards(); bpFsRenderBets(); bpFsControls(myT);
+};
+window.bpCloseFs = function(){ const m = document.getElementById('bpFsModal'); if (m) m.style.display = 'none'; bpFs = null; };
+function bpFsResetCards(){ ['bpFsCardH','bpFsCardA'].forEach(function(id){ const el = document.getElementById(id); if (el) { el.className = 'bp-fs-card back'; el.innerHTML = ''; } }); }
+function bpFsRenderBets(){
+  const el = document.getElementById('bpFsBets'); if (!el) return;
+  const sel = function(s){ return (bpFs && bpFs.bet === s) ? ' sel' : ''; };
+  el.innerHTML =
+    '<button class="bp-fs-bet home' + sel('home') + '" onclick="bpFsBet(\'home\')"><div class="t">\U0001F534 DOMICILE</div><div class="s">~46% \u00b7 Beau lot</div></button>' +
+    '<button class="bp-fs-bet draw' + sel('draw') + '" onclick="bpFsBet(\'draw\')"><div class="t">\U0001F7E1 NUL</div><div class="s">~8% \u00b7 \U0001F3C6 JACKPOT</div></button>' +
+    '<button class="bp-fs-bet away' + sel('away') + '" onclick="bpFsBet(\'away\')"><div class="t">\U0001F535 EXT\u00c9RIEUR</div><div class="s">~46% \u00b7 Beau lot</div></button>';
+}
+window.bpFsBet = function(side){ if (!bpFs || bpFs.playing) return; bpFs.bet = side; bpFsRenderBets(); bpFsControls(); };
+async function bpFsControls(myT){
+  if (myT === undefined) myT = await bpMyTicketCount();
+  const ctrl = document.getElementById('bpFsControls'); if (!ctrl) return;
+  if (myT <= 0) ctrl.innerHTML = '<button class="iw-btn primary" disabled>Aucun ticket</button>';
+  else if (bpFs && bpFs.bet) ctrl.innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpStartFs()">Tirer les cartes (1 ticket)</button>';
+  else ctrl.innerHTML = '<div style="font-size:12px;color:var(--txt2)">\U0001F446 Choisis ton pari</div>';
+}
+window.bpStartFs = async function(){
+  if (!bpFs || bpFs.playing || !bpFs.bet) return;
+  const myT = await bpMyTicketCount();
+  if (myT <= 0) return;
+  try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
+  bpFs.playing = true;
+  document.getElementById('bpFsControls').innerHTML = '';
+  document.querySelectorAll('#bpFsBets .bp-fs-bet').forEach(function(b){ b.disabled = true; });
+  bpFsResetCards();
+  const home = bpFsDeal(), away = bpFsDeal();
+  document.getElementById('bpFsResult').innerHTML = '<span style="color:var(--txt2)">Distribution\u2026</span>';
+  setTimeout(function(){ bpFsShow(document.getElementById('bpFsCardH'), home); }, 450);
+  setTimeout(function(){ bpFsShow(document.getElementById('bpFsCardA'), away); }, 1050);
+  setTimeout(function(){ bpFsResolve(home, away); }, 1650);
+};
+function bpFsDeal(){ const rk = BP_FS_RANKS[Math.floor(Math.random() * 13)]; const suits = ['\u2660','\u2665','\u2666','\u2663']; const s = suits[Math.floor(Math.random() * 4)]; return { v: rk.v, r: rk.r, s: s, red: (s === '\u2665' || s === '\u2666') }; }
+function bpFsShow(el, card){
+  if (!el) return;
+  el.classList.remove('back');
+  const cls = card.red ? 'bp-fs-red' : 'bp-fs-black';
+  el.innerHTML = '<span class="rank ' + cls + '">' + card.r + card.s + '</span><span class="' + cls + '" style="font-size:34px;font-weight:800">' + card.s + '</span><span class="rank br ' + cls + '">' + card.r + card.s + '</span>';
+  if (el.animate) el.animate([{ transform:'rotateY(90deg) scale(.9)' },{ transform:'rotateY(0) scale(1)' }], { duration:300, easing:'ease-out' });
+}
+async function bpFsResolve(home, away){
+  const winner = home.v > away.v ? 'home' : (away.v > home.v ? 'away' : 'draw');
+  const win = bpFs.bet === winner;
+  const wlab = winner === 'home' ? '\U0001F534 Domicile gagne' : (winner === 'away' ? '\U0001F535 Ext\u00e9rieur gagne' : '\U0001F7E1 MATCH NUL');
+  const res = document.getElementById('bpFsResult');
+  let tierTxt = 'perdu';
+  if (win) {
+    if (winner === 'draw') { tierTxt = 'JACKPOT'; res.innerHTML = '<div>' + wlab + '</div><div style="font-size:19px;margin-top:2px">\U0001F3C6 JACKPOT ! Gros lot !</div>'; }
+    else { tierTxt = 'Beau lot'; res.innerHTML = '<div>' + wlab + '</div><div style="font-size:17px;margin-top:2px">\U0001F381 Gagn\u00e9 \u2014 Beau lot !</div>'; }
+    try { bpConfetti(); } catch(e){}
+  } else {
+    res.innerHTML = '<div>' + wlab + '</div><div style="font-size:15px;color:#c0392b;margin-top:2px">Perdu \u2014 pas de lot</div>';
+  }
+  try { const code = bpLeagueCode(); const gid = 'g_' + Date.now(); await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\U0001F0CF Football Studio \u2014 ' + tierTxt + ' (' + home.r + ' vs ' + away.r + ')', ts: Date.now() }); } catch(e){}
+  bpFs.playing = false;
+  const myT = await bpMyTicketCount();
+  document.getElementById('bpFsControls').innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpOpenFs()"' + (myT <= 0 ? ' disabled' : '') + '>' + (myT > 0 ? 'Rejouer (1 ticket)' : 'Aucun ticket') + '</button>';
+  document.getElementById('bpFsInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
+  try { renderInstantView(); } catch(e){}
+}
 async function renderInstantView() {
   const listEl = document.getElementById('iwList');
   if (!listEl) return;
@@ -4094,7 +4188,7 @@ async function renderInstantView() {
   html += '<div class="ev-section-title">🎮 Les jeux \u2014 1 ticket = 1 partie</div>';
   const _off = myT > 0 ? '' : ' off';
   const gc = function(ic, nm, ds, fn){ return '<div class="iw-game' + _off + '" onclick="' + (myT > 0 ? fn : '') + '"><div class="ic">' + ic + '</div><div class="nm">' + nm + '</div><div class="ds">' + ds + '</div></div>'; };
-  html += '<div class="iw-games">' + gc('🎡','Roue','cadeaux','bpOpenWheel()') + gc('⚽','Penalty','5 tirs','bpOpenPenalty()') + gc('❓','Quiz','1 min','bpOpenQuiz()') + '</div>';
+  html += '<div class="iw-games">' + gc('🎡','Roue','cadeaux','bpOpenWheel()') + gc('⚽','Penalty','5 tirs','bpOpenPenalty()') + gc('❓','Quiz','1 min','bpOpenQuiz()') + gc('🃏','Football Studio','2 cartes','bpOpenFs()') + '</div>';
   if (myT <= 0) html += '<div style="font-size:10px;color:var(--txt2);text-align:center;margin:-4px 0 8px">🔒 Gagne un ticket pour débloquer les jeux</div>';
   // BLOC CADEAUX
   html += '<div class="ev-section-title">🎁 Les cadeaux dans la roue</div>';
