@@ -778,8 +778,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .lr-pts{font-size:11px;font-weight:700;border-radius:8px;padding:1px 7px;min-width:40px;text-align:center}
 .lr-pts.pos{background:#057a3a;color:#fff}
 .lr-pts.neg{background:#cc2200;color:#fff}
-.lr-pts.pot{background:#eef7f2;color:#056b52;border:1px solid #bfe3d5}
-.lr-poss{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;padding:2px 8px}
+.lr-pts.pot{background:#64748b;color:#fff}
+.lr-poss{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;padding:2px 6px;min-width:56px}
 .lr-poss small{font-size:7px;font-weight:800;opacity:.85;text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
 .lr-pts.cash{background:#1a6fd4;color:#fff}
 .ev-form{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;padding:12px;margin:12px 0}
@@ -838,6 +838,35 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .iw-ticket{background:linear-gradient(135deg,#8e44ad,#c0392b);color:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;margin-bottom:6px;flex-wrap:wrap}
 .iw-note{font-size:12px;color:var(--txt2);background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:6px}
 .iw-gain{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bord)}
+.iw-games{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.iw-game{background:var(--bg2);border:1px solid var(--bord);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:.15s}
+.iw-game:active{transform:scale(.96)}
+.iw-game.off{opacity:.5;cursor:default}
+.iw-game .ic{font-size:26px;line-height:1}
+.iw-game .nm{font-size:12px;font-weight:800;margin-top:3px}
+.iw-game .ds{font-size:9px;color:var(--txt2)}
+/* Penalty */
+.bp-pen-goal{position:relative;width:100%;max-width:300px;height:150px;margin:6px auto;background:linear-gradient(#7ec8ff,#bfe3ff);border:4px solid #fff;border-bottom:none;border-radius:6px 6px 0 0;box-shadow:inset 0 0 0 2px #ddd;overflow:hidden}
+.bp-pen-goal::before{content:'';position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px);background-size:16px 16px}
+.bp-pen-grass{width:100%;max-width:308px;height:26px;margin:0 auto;background:#3a9d4e;border-radius:0 0 6px 6px}
+.bp-pen-keeper{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:40px;transition:all .45s cubic-bezier(.5,-0.3,.5,1.3);z-index:2}
+.bp-pen-ball{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:26px;transition:all .5s ease;z-index:3}
+.bp-pen-zones{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:6px;max-width:300px;margin:8px auto 0}
+.bp-pen-zone{background:var(--bg2);border:1.5px solid var(--bord);border-radius:8px;padding:12px 0;font-size:18px;cursor:pointer}
+.bp-pen-zone:active{background:var(--acc);color:#fff}
+.bp-pen-zone:disabled{opacity:.4}
+.bp-pen-score{font-size:14px;font-weight:800;margin:4px 0}
+/* Quiz */
+.bp-qz-theme{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.bp-qz-tbtn{background:var(--bg2);border:1.5px solid var(--bord);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer}
+.bp-qz-tbtn:active{background:var(--acc);color:#fff}
+.bp-qz-timer{height:6px;background:var(--bord);border-radius:3px;overflow:hidden;margin:6px 0}
+.bp-qz-timer-bar{height:100%;background:var(--acc);width:100%;transition:width .2s linear}
+.bp-qz-q{font-size:15px;font-weight:800;margin:10px 0;min-height:44px}
+.bp-qz-opts{display:flex;flex-direction:column;gap:7px}
+.bp-qz-opt{background:var(--bg2);border:1.5px solid var(--bord);border-radius:9px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+.bp-qz-opt.good{background:#0d7a4a;color:#fff;border-color:#0d7a4a}
+.bp-qz-opt.bad{background:#c0392b;color:#fff;border-color:#c0392b}
 .bp-wheel-wrap{position:relative;width:290px;height:290px;margin:6px auto 12px}
 .bp-wheel{width:290px;height:290px;border-radius:50%;position:relative;border:6px solid #222;box-shadow:0 6px 24px rgba(0,0,0,.4);transition:transform 4.5s cubic-bezier(.17,.67,.2,1);overflow:hidden}
 .bp-wheel-label{position:absolute;left:50%;top:0;height:50%;width:0;transform-origin:50% 100%;display:flex;justify-content:center}
@@ -1253,6 +1282,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="notif" id="notif"></div>
 <div class="compo-modal" id="compoModal"><div class="compo-box"><div class="compo-close" onclick="bpCloseCompo()">✕</div><div id="compoBody"></div></div></div>
 <div class="compo-modal" id="bpWheelModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpCloseWheel()">✕</div><div class="compo-title">🎡 La roue des cadeaux</div><div id="bpWheelBox"></div><div id="bpWheelResult" style="min-height:22px;font-size:15px;font-weight:700;margin:4px 0 10px"></div><button class="iw-btn primary" id="bpWheelSpinBtn" style="font-size:15px;padding:9px 20px" onclick="bpSpinWheel()">Tourner</button></div></div>
+<div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-goal" id="bpPenGoal"><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div></div><div class="bp-pen-grass"></div><div class="bp-pen-score" id="bpPenScore"></div><div class="bp-pen-zones" id="bpPenZones"></div><div id="bpPenResult" style="min-height:20px;font-weight:800;margin-top:6px"></div><button class="iw-btn primary" id="bpPenStart" style="font-size:14px;padding:8px 18px;margin-top:6px" onclick="bpStartPen()">Jouer (1 ticket)</button></div></div>
+<div class="compo-modal" id="bpQuizModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseQuiz()">✕</div><div class="compo-title">❓ Quiz Foot</div><div id="bpQuizBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
     <span class="goal-emoji">⚽</span>
@@ -1791,7 +1822,7 @@ function getAllPronosHtml(matchId, hs, as) {
     const items = rows.map(function(r, i){
       const rank = r.rank;
       const rc = rank===1 ? '#e0a81c' : rank===2 ? '#9aa4ad' : rank===3 ? '#c17f43' : '#6b7280';
-      const ptsHtml = r.omission ? '<span class="lr-pts neg">' + fmtPts(-1) + '</span>' : (live ? (r.cashedOut ? '<span class="lr-pts cash">💸 ' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + '">' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>'));
+      const ptsHtml = r.omission ? '<span class="lr-pts neg lr-poss"><small>Réel</small>' + fmtPts(-1) + '</span>' : (live ? (r.cashedOut ? '<span class="lr-pts cash lr-poss"><small>Cashout</small>💸' + fmtPts(r.pts) + '</span>' : ((r.pts==null) ? '' : '<span class="lr-pts ' + (r.pts>0?'pos':'neg') + ' lr-poss"><small>Réel</small>' + (r.pts>0?'+':'') + fmtPts(r.pts) + '</span>')) : ('<span class="lr-pts pot">' + fmtPts(r.potential) + ' pts</span>'));
       const potInline = (live && !finished && !r.omission && !r.cashedOut)
         ? ('<span class="lr-pts pot lr-poss" title="Points possibles à marquer (score exact)"><small>Pts possibles</small>' + fmtPts(r.potential) + '</span>')
         : '';
@@ -3637,7 +3668,10 @@ async function bpProcessWeeklyTicket(){
     });
     await db.ref('instantwin_meta/' + code + '/lastRewardedWeek').set(prevMon);
     if (!best) { console.log('\ud83c\udf9f\ufe0f Semaine sans prono : aucun ticket.'); return; }
-    const winners = Object.keys(stats).filter(function(n){ return stats[n].bets>0 && stats[n].pts===best.pts && stats[n].score===best.score; });
+    const _wset = {};
+    Object.keys(stats).forEach(function(n){ if (stats[n].bets>0 && stats[n].pts===best.pts && stats[n].score===best.score) _wset[n]=1; });
+    Object.keys(stats).forEach(function(n){ if (stats[n].bets>0 && stats[n].pts>=20) _wset[n]=1; });
+    const winners = Object.keys(_wset);
     for (const w of winners) {
       const ref = db.ref('instantwin_tickets/' + code + '/' + w);
       const s = await ref.once('value');
