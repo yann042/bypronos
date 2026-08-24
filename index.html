@@ -850,16 +850,24 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .iw-game .nm{font-size:12px;font-weight:800;margin-top:3px}
 .iw-game .ds{font-size:9px;color:var(--txt2)}
 /* Penalty */
-.bp-pen-goal{position:relative;width:100%;max-width:300px;height:150px;margin:6px auto;background:linear-gradient(#7ec8ff,#bfe3ff);border:4px solid #fff;border-bottom:none;border-radius:6px 6px 0 0;box-shadow:inset 0 0 0 2px #ddd;overflow:hidden}
-.bp-pen-goal::before{content:'';position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px);background-size:16px 16px}
-.bp-pen-grass{width:100%;max-width:308px;height:26px;margin:0 auto;background:#3a9d4e;border-radius:0 0 6px 6px}
-.bp-pen-keeper{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:40px;transition:all .45s cubic-bezier(.5,-0.3,.5,1.3);z-index:2}
-.bp-pen-ball{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:26px;transition:all .5s ease;z-index:3}
-.bp-pen-zones{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:6px;max-width:300px;margin:8px auto 0}
-.bp-pen-zone{background:var(--bg2);border:1.5px solid var(--bord);border-radius:8px;padding:12px 0;font-size:18px;cursor:pointer}
-.bp-pen-zone:active{background:var(--acc);color:#fff}
-.bp-pen-zone:disabled{opacity:.4}
-.bp-pen-score{font-size:14px;font-weight:800;margin:4px 0}
+.bp-pen-mult{display:flex;gap:3px;max-width:330px;margin:6px auto 8px}
+.bp-pen-mult .seg{flex:1;text-align:center;font-size:8px;font-weight:800;padding:4px 1px;border-radius:6px;background:var(--bg2);border:1px solid var(--bord);color:var(--txt2);line-height:1.15;transition:.2s}
+.bp-pen-mult .seg.on{background:linear-gradient(#f7c948,#e8871e);color:#3a2400;border-color:#e8871e;transform:scale(1.05)}
+.bp-pen-mult .seg .ic{font-size:14px;display:block}
+.bp-pen-stage{position:relative;width:100%;max-width:330px;height:200px;margin:0 auto;border-radius:10px;overflow:hidden;background:linear-gradient(#8ec9ff 0,#bfe4ff 42%,#57a84a 42%,#3d8a38 100%)}
+.bp-pen-goalframe{position:absolute;top:26px;left:50%;transform:translateX(-50%);width:240px;height:100px;border:5px solid #f5f5f5;border-bottom:none;border-radius:5px 5px 0 0;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.bp-pen-goalframe::before{content:'';position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px);background-size:15px 15px;opacity:.6}
+.bp-pen-zones{position:absolute;top:26px;left:50%;transform:translateX(-50%);width:240px;height:100px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;z-index:5}
+.bp-pen-zone{background:transparent;border:none;cursor:pointer;position:relative}
+.bp-pen-zone .arr{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;color:rgba(255,255,255,.5);text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none;transition:.12s}
+.bp-pen-zone:hover .arr,.bp-pen-zone:active .arr{color:#ffe000;transform:translate(-50%,-50%) scale(1.35)}
+.bp-pen-zone:disabled{cursor:default}
+.bp-pen-keeper{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:46px;z-index:4;transition:all .45s cubic-bezier(.5,-.3,.5,1.35);filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.bp-pen-ball{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:30px;z-index:6;transition:all .5s ease;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.bp-pen-diff{display:flex;gap:6px;justify-content:center;margin:8px auto 0;max-width:330px}
+.bp-pen-diff button{flex:1;font-size:11px;font-weight:700;padding:6px 4px;border-radius:8px;border:1.5px solid var(--bord);background:var(--bg2);cursor:pointer}
+.bp-pen-diff button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.bp-pen-score{font-size:13px;font-weight:800;margin:6px 0 2px}
 /* Quiz */
 .bp-qz-theme{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
 .bp-qz-tbtn{background:var(--bg2);border:1.5px solid var(--bord);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer}
@@ -1288,7 +1296,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="notif" id="notif"></div>
 <div class="compo-modal" id="compoModal"><div class="compo-box"><div class="compo-close" onclick="bpCloseCompo()">✕</div><div id="compoBody"></div></div></div>
 <div class="compo-modal" id="bpWheelModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpCloseWheel()">✕</div><div class="compo-title">🎡 La roue des cadeaux</div><div id="bpWheelBox"></div><div id="bpWheelResult" style="min-height:22px;font-size:15px;font-weight:700;margin:4px 0 10px"></div><button class="iw-btn primary" id="bpWheelSpinBtn" style="font-size:15px;padding:9px 20px" onclick="bpSpinWheel()">Tourner</button></div></div>
-<div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:360px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-goal" id="bpPenGoal"><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div></div><div class="bp-pen-grass"></div><div class="bp-pen-score" id="bpPenScore"></div><div class="bp-pen-zones" id="bpPenZones"></div><div id="bpPenResult" style="min-height:20px;font-weight:800;margin-top:6px"></div><button class="iw-btn primary" id="bpPenStart" style="font-size:14px;padding:8px 18px;margin-top:6px" onclick="bpStartPen()">Jouer (1 ticket)</button></div></div>
+<div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:370px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-mult" id="bpPenMult"></div><div class="bp-pen-stage" id="bpPenStage"><div class="bp-pen-goalframe"></div><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div><div class="bp-pen-zones" id="bpPenZones"></div></div><div class="bp-pen-score" id="bpPenScore"></div><div id="bpPenResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div class="bp-pen-diff" id="bpPenDiff"></div><div id="bpPenControls" style="margin-top:8px"></div></div></div>
 <div class="compo-modal" id="bpQuizModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseQuiz()">✕</div><div class="compo-title">❓ Quiz Foot</div><div id="bpQuizBody"></div></div></div>
 <div class="compo-modal" id="bpPotModal" onclick="if(event.target===this)bpClosePotDetail()"><div class="compo-box" style="max-width:280px"><div class="compo-close" onclick="bpClosePotDetail()">✕</div><div class="compo-title" id="bpPotTitle" style="font-size:16px">🎯 Points possibles</div><div id="bpPotBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
@@ -3814,92 +3822,127 @@ function bpShowRealDetail(el){
   } catch(e){}
 }
 function bpClosePotDetail(){ const m = document.getElementById('bpPotModal'); if (m) m.style.display = 'none'; }
-let bpPenState = null;
+let bpPen = null;
+const BP_PEN_TIERS = [
+  { ic:'\U0001F36C', name:'Petit lot' },
+  { ic:'\U0001F949', name:'Bronze' },
+  { ic:'\U0001F948', name:'Argent' },
+  { ic:'\U0001F947', name:'Or' },
+  { ic:'\U0001F3C6', name:'JACKPOT' }
+];
+const BP_PEN_DIFF = { facile:{ lab:'Facile', save:0.20 }, moyen:{ lab:'Moyen', save:0.38 }, difficile:{ lab:'Difficile', save:0.55 } };
 window.bpOpenPenalty = async function(){
   const modal = document.getElementById('bpPenModal'); if (!modal) return;
   modal.style.display = 'flex';
   const myT = await bpMyTicketCount();
-  bpPenState = { shots:0, goals:0, playing:false };
-  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) \u2014 5 tirs au but, plus tu marques, meilleur est le lot !') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
+  bpPen = { streak:0, diff:'moyen', playing:false };
+  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) \u2014 marque, puis encaisse ou continue pour un meilleur lot !') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
   document.getElementById('bpPenScore').textContent = '';
   document.getElementById('bpPenResult').textContent = '';
   document.getElementById('bpPenZones').innerHTML = '';
-  const start = document.getElementById('bpPenStart');
-  if (start) { start.style.display = 'inline-block'; start.disabled = myT <= 0; start.textContent = myT > 0 ? 'Jouer (1 ticket)' : 'Aucun ticket'; }
-  bpPenReset();
+  bpPenRenderMult(); bpPenRenderDiff(); bpPenReset();
+  document.getElementById('bpPenControls').innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpStartPen()"' + (myT <= 0 ? ' disabled' : '') + '>' + (myT > 0 ? 'Jouer (1 ticket)' : 'Aucun ticket') + '</button>';
 };
-window.bpClosePen = function(){ const m = document.getElementById('bpPenModal'); if (m) m.style.display = 'none'; bpPenState = null; };
+window.bpClosePen = function(){ const m = document.getElementById('bpPenModal'); if (m) m.style.display = 'none'; bpPen = null; };
+function bpPenRenderMult(){
+  const el = document.getElementById('bpPenMult'); if (!el) return;
+  el.innerHTML = BP_PEN_TIERS.map(function(t, i){ const on = (bpPen && bpPen.streak >= i + 1) ? ' on' : ''; return '<div class="seg' + on + '"><span class="ic">' + t.ic + '</span>' + t.name + '</div>'; }).join('');
+}
+function bpPenRenderDiff(){
+  const el = document.getElementById('bpPenDiff'); if (!el) return;
+  if (bpPen && bpPen.playing) { el.innerHTML = ''; return; }
+  el.innerHTML = '<span style="font-size:10px;color:var(--txt2);align-self:center">Gardien :</span>' + Object.keys(BP_PEN_DIFF).map(function(k){ const on = (bpPen && bpPen.diff === k) ? 'on' : ''; return '<button class="' + on + '" onclick="bpPenSetDiff(\'' + k + '\')">' + BP_PEN_DIFF[k].lab + '</button>'; }).join('');
+}
+window.bpPenSetDiff = function(k){ if (!bpPen || bpPen.playing) return; bpPen.diff = k; bpPenRenderDiff(); };
 function bpPenReset(){
   const k = document.getElementById('bpPenKeeper'); if (k) { k.style.transition = 'none'; k.style.transform = 'translateX(-50%)'; }
-  const b = document.getElementById('bpPenBall'); if (b) { b.style.transition = 'none'; b.style.transform = 'translateX(-50%)'; b.style.bottom = '2px'; b.style.opacity = '1'; }
-}
-window.bpStartPen = async function(){
-  if (!bpPenState || bpPenState.playing) return;
-  const myT = await bpMyTicketCount();
-  if (myT <= 0) { document.getElementById('bpPenInfo').innerHTML = 'Aucun ticket disponible.'; return; }
-  try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
-  bpPenState = { shots:0, goals:0, playing:true };
-  document.getElementById('bpPenStart').style.display = 'none';
-  document.getElementById('bpPenInfo').innerHTML = 'Choisis o\u00f9 tirer ! \U0001F945';
-  document.getElementById('bpPenResult').textContent = '';
-  bpPenRenderZones();
-  bpPenUpdateScore();
-};
-function bpPenUpdateScore(){
-  const s = document.getElementById('bpPenScore');
-  if (s) s.textContent = 'Tir ' + Math.min(bpPenState.shots + 1, 5) + '/5 \u00b7 \u26bd ' + bpPenState.goals + ' but' + (bpPenState.goals > 1 ? 's' : '');
+  const b = document.getElementById('bpPenBall'); if (b) { b.style.transition = 'none'; b.style.transform = 'translateX(-50%)'; b.style.bottom = '6px'; b.style.opacity = '1'; }
 }
 function bpPenRenderZones(){
-  const z = document.getElementById('bpPenZones');
-  const labels = ['\u2196','\u2191','\u2197','\u2199','\u2193','\u2198'];
-  z.innerHTML = labels.map(function(l, i){ return '<button class="bp-pen-zone" onclick="bpPenShoot(' + i + ')">' + l + '</button>'; }).join('');
+  const z = document.getElementById('bpPenZones'); if (!z) return;
+  const arr = ['\u2196','\u2191','\u2197','\u2199','\u2193','\u2198'];
+  z.innerHTML = arr.map(function(a, i){ return '<button class="bp-pen-zone" onclick="bpPenShoot(' + i + ')"><span class="arr">' + a + '</span></button>'; }).join('');
+}
+window.bpStartPen = async function(){
+  if (!bpPen || bpPen.playing) return;
+  const myT = await bpMyTicketCount();
+  if (myT <= 0) { document.getElementById('bpPenInfo').innerHTML = 'Aucun ticket.'; return; }
+  try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
+  bpPen.streak = 0; bpPen.playing = true;
+  document.getElementById('bpPenInfo').innerHTML = 'Choisis o\u00f9 tirer ! \U0001F945';
+  document.getElementById('bpPenResult').textContent = '';
+  document.getElementById('bpPenControls').innerHTML = '';
+  bpPenRenderDiff(); bpPenRenderMult(); bpPenRenderZones(); bpPenScoreLine();
+};
+function bpPenScoreLine(){
+  const s = document.getElementById('bpPenScore'); if (!s) return;
+  if (bpPen.streak > 0) { const t = BP_PEN_TIERS[bpPen.streak - 1]; s.innerHTML = '\u26bd ' + bpPen.streak + ' but' + (bpPen.streak > 1 ? 's' : '') + ' \u00b7 lot actuel : <b>' + t.ic + ' ' + t.name + '</b>'; }
+  else s.textContent = 'Premier tir \u2014 vise une zone !';
 }
 window.bpPenShoot = function(zone){
-  if (!bpPenState || !bpPenState.playing) return;
-  const zones = document.querySelectorAll('#bpPenZones .bp-pen-zone'); zones.forEach(function(b){ b.disabled = true; });
-  const keeperZone = (Math.random() < 0.30) ? zone : Math.floor(Math.random() * 6);
+  if (!bpPen || !bpPen.playing) return;
+  const zs = document.querySelectorAll('#bpPenZones .bp-pen-zone'); zs.forEach(function(b){ b.disabled = true; });
+  const saveP = BP_PEN_DIFF[bpPen.diff].save;
+  let keeperZone;
+  if (Math.random() < saveP) keeperZone = zone;
+  else { const others = [0,1,2,3,4,5].filter(function(x){ return x !== zone; }); keeperZone = others[Math.floor(Math.random() * others.length)]; }
   const goal = keeperZone !== zone;
-  const xoff = [-90, 0, 90, -90, 0, 90];
-  const ybot = ['104px','116px','104px','56px','62px','56px'];
-  const kx = [-80, 0, 80, -80, 0, 80];
-  const kyTop = [' translateY(-26px)',' translateY(-32px)',' translateY(-26px)','','',''];
+  const xoff = [-78, 0, 78, -78, 0, 78];
+  const ybot = ['92px','104px','92px','54px','60px','54px'];
+  const kx = [-70, 0, 70, -70, 0, 70];
+  const kyTop = [' translateY(-30px)',' translateY(-36px)',' translateY(-30px)','','',''];
   const b = document.getElementById('bpPenBall');
   const k = document.getElementById('bpPenKeeper');
-  if (k) { k.style.transition = 'all .45s cubic-bezier(.5,-0.3,.5,1.3)'; k.style.transform = 'translateX(-50%) translateX(' + kx[keeperZone] + 'px)' + kyTop[keeperZone]; }
+  if (k) { k.style.transition = 'all .45s cubic-bezier(.5,-.3,.5,1.35)'; k.style.transform = 'translateX(-50%) translateX(' + kx[keeperZone] + 'px)' + kyTop[keeperZone]; }
   if (b) { b.style.transition = 'all .5s ease'; b.style.transform = 'translateX(-50%) translateX(' + xoff[zone] + 'px)'; b.style.bottom = ybot[zone]; }
   setTimeout(function(){
-    bpPenState.shots++;
-    if (goal) bpPenState.goals++;
     const res = document.getElementById('bpPenResult');
-    if (res) res.innerHTML = goal ? '<span style="color:#0d7a4a">\u26bd BUT !</span>' : '<span style="color:#c0392b">\U0001F9E4 Arr\u00eat\u00e9 !</span>';
-    bpPenUpdateScore();
-    setTimeout(function(){
-      bpPenReset();
-      if (bpPenState.shots >= 5) { bpPenFinish(); }
-      else { const zs = document.querySelectorAll('#bpPenZones .bp-pen-zone'); zs.forEach(function(x){ x.disabled = false; }); if (res) res.textContent = ''; }
-    }, 850);
+    if (goal) {
+      bpPen.streak++;
+      bpPenRenderMult(); bpPenScoreLine();
+      if (res) res.innerHTML = '<span style="color:#0d7a4a">\u26bd BUT !</span>';
+      if (bpPen.streak >= 5) { setTimeout(function(){ bpPenEnd(true, 5); }, 750); }
+      else { setTimeout(function(){ bpPenReset(); bpPenOfferChoice(); }, 800); }
+    } else {
+      if (res) res.innerHTML = '<span style="color:#c0392b">\U0001F9E4 ARR\u00caT\u00c9 ! Tu repars sans lot\u2026</span>';
+      setTimeout(function(){ bpPenEnd(false, 0); }, 950);
+    }
   }, 560);
 };
-async function bpPenFinish(){
-  bpPenState.playing = false;
-  const g = bpPenState.goals;
-  let tier, tierTxt;
-  if (g === 5) { tier = '\U0001F3C6 Gros lot !'; tierTxt = 'Gros lot'; }
-  else if (g === 4) { tier = '\U0001F381 Beau lot !'; tierTxt = 'Beau lot'; }
-  else if (g === 3) { tier = '\U0001F36C Petit lot'; tierTxt = 'Petit lot'; }
-  else { tier = '\U0001F605 Pas de lot cette fois'; tierTxt = 'Pas de lot'; }
-  document.getElementById('bpPenZones').innerHTML = '';
-  document.getElementById('bpPenResult').innerHTML = '<div style="font-size:18px">' + g + '/5 buts</div><div style="margin-top:4px">' + tier + '</div>';
-  if (g >= 3) { try { bpConfetti(); } catch(e){} }
-  try {
-    const code = bpLeagueCode();
-    const gid = 'g_' + Date.now();
-    await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\u26bd Penalty ' + g + '/5 \u2014 ' + tierTxt, ts: Date.now() });
-  } catch(e){}
+function bpPenOfferChoice(){
+  const t = BP_PEN_TIERS[bpPen.streak - 1];
+  const next = BP_PEN_TIERS[Math.min(bpPen.streak, 4)];
+  document.getElementById('bpPenControls').innerHTML =
+    '<div style="font-size:12px;margin-bottom:6px">Tu tiens <b>' + t.ic + ' ' + t.name + '</b>. Encaisser, ou risquer pour <b>' + next.ic + ' ' + next.name + '</b> ?</div>' +
+    '<button class="iw-btn primary" style="margin-right:6px" onclick="bpPenClaim()">\U0001F4B0 Encaisser</button>' +
+    '<button class="iw-btn" style="background:var(--acc);color:#fff" onclick="bpPenNext()">\u26bd Tirer encore</button>';
+}
+window.bpPenNext = function(){
+  if (!bpPen || !bpPen.playing) return;
+  document.getElementById('bpPenControls').innerHTML = '';
+  document.getElementById('bpPenResult').textContent = '';
+  const zs = document.querySelectorAll('#bpPenZones .bp-pen-zone'); zs.forEach(function(b){ b.disabled = false; });
+};
+window.bpPenClaim = function(){ if (!bpPen || !bpPen.playing) return; bpPenEnd(true, bpPen.streak); };
+async function bpPenEnd(win, streak){
+  bpPen.playing = false;
+  document.getElementById('bpPenControls').innerHTML = '';
+  const res = document.getElementById('bpPenResult');
+  let tierTxt = 'Pas de lot';
+  if (win && streak >= 1) {
+    const t = BP_PEN_TIERS[streak - 1]; tierTxt = t.name;
+    if (res) res.innerHTML = '<div style="font-size:16px">' + streak + ' but' + (streak > 1 ? 's' : '') + ' !</div><div style="margin-top:4px;font-size:19px">' + t.ic + ' ' + t.name + (streak >= 5 ? ' \U0001F389' : '') + '</div>';
+    try { bpConfetti(); } catch(e){}
+  } else {
+    if (res) res.innerHTML = '<div style="font-size:16px;color:#c0392b">\U0001F9E4 Arr\u00eat\u00e9 \u2014 pas de lot cette fois</div>';
+  }
+  try { const code = bpLeagueCode(); const gid = 'g_' + Date.now(); await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\u26bd Penalty ' + (win ? streak : 0) + '/5 \u2014 ' + tierTxt, ts: Date.now() }); } catch(e){}
   const myT = await bpMyTicketCount();
-  const start = document.getElementById('bpPenStart');
-  if (start) { start.style.display = 'inline-block'; start.disabled = myT <= 0; start.textContent = myT > 0 ? 'Rejouer (1 ticket)' : 'Aucun ticket'; }
+  bpPen.streak = 0; bpPenRenderMult(); bpPenRenderDiff();
+  document.getElementById('bpPenScore').textContent = '';
+  document.getElementById('bpPenControls').innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpStartPen()"' + (myT <= 0 ? ' disabled' : '') + '>' + (myT > 0 ? 'Rejouer (1 ticket)' : 'Aucun ticket') + '</button>';
   document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
+  bpPenReset();
   try { renderInstantView(); } catch(e){}
 }
 const BP_QUIZ = {
@@ -4876,7 +4919,14 @@ function renderHistoryPanel() {
     const scoreStr = live ? live.homeScore + '-' + live.awayScore : (_b0.finalHome != null ? _b0.finalHome + '-' + _b0.finalAway : '?-?');
 
     // Trier les pronos par points décroissants
-    const pronosWithPts = pronos.map(({ name, bet }) => {
+    const _betNames = {}; pronos.forEach(function(p){ _betNames[p.name] = 1; });
+    const _RESERVED = {config:1,players:1,standings:1,teams:1,info:1,bets:1,matchesLock:1,global:1};
+    const _allPronos = pronos.slice();
+    if (started && historyFilterPlayer === 'all') {
+      playerNames.forEach(function(nm){ if (!_betNames[nm] && !_RESERVED[nm]) _allPronos.push({ name: nm, bet: null, omission: true }); });
+    }
+    const pronosWithPts = _allPronos.map(({ name, bet, omission }) => {
+      if (omission) return { name: name, bet: null, omission: true, pts: { pts: -1, type: 'omission' } };
       const fh = live ? live.homeScore : bet.finalHome;
       const fa = live ? live.awayScore : bet.finalAway;
       let pts = null;
@@ -4890,23 +4940,23 @@ function renderHistoryPanel() {
       return b.pts.pts - a.pts.pts;
     });
 
-    const pronosHtml = pronosWithPts.map(({ name, bet, pts }, idx) => {
+    const pronosHtml = pronosWithPts.map(({ name, bet, pts, omission }, idx) => {
       const isMe = name === currentPlayer;
       const ptsVal = pts ? fmtPts(pts.pts) : null;
       const ptsBubble = ptsVal
         ? '<span style="background:' + (pts.type === 'cash' ? '#1a6fd4' : (pts.pts > 0 ? '#056b52' : '#cc2200')) + ';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap">' + ptsVal + '</span>'
         : '<span style="font-size:10px;color:var(--txt2)">—</span>';
       const rankNum = live ? '<span style="font-size:9px;color:var(--txt2);width:14px;text-align:center;flex-shrink:0">' + (idx+1) + '</span>' : '';
-      const _detail = (pts && (started || isMe)) ? bpPtsDetail(bet, pts) : '';
+      const _detail = omission ? '<span style="font-size:10px;color:#cc2200;font-weight:700">∅ Pari à vide -1</span>' : ((pts && (started || isMe)) ? bpPtsDetail(bet, pts) : '');
       return '<div style="border-bottom:1px solid var(--bg3)">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px 3px;gap:6px">' +
         '<div style="display:flex;align-items:center;gap:5px;min-width:0">' +
           '<span style="width:14px;font-size:14px;color:var(--acc);font-weight:900;flex-shrink:0;line-height:1">' + (isMe ? '▶' : '') + '</span>' +
           rankNum +
           ptsBubble +
-          '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
+          '<span style="font-size:11px;font-weight:' + (isMe ? '700' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + (omission ? ' · pari à vide' : '') + '</span>' +
         '</div>' +
-        '<span style="font-size:11px;font-weight:700;color:#111;flex-shrink:0">' + ((started || isMe) ? (bet.h + '-' + bet.a) : '🔒') + '</span>' +
+        '<span style="font-size:11px;font-weight:700;color:#111;flex-shrink:0">' + (omission ? '∅' : ((started || isMe) ? (bet.h + '-' + bet.a) : '🔒')) + '</span>' +
         '</div>' +
         (_detail ? '<div style="padding:0 8px 5px 34px;line-height:1.3">' + _detail + '</div>' : '') +
       '</div>';
