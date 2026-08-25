@@ -842,6 +842,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .iw-ticket{background:linear-gradient(135deg,#8e44ad,#c0392b);color:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;margin-bottom:6px;flex-wrap:wrap}
 .iw-note{font-size:12px;color:var(--txt2);background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:6px}
 .iw-gain{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bord)}
+.iw-points{background:linear-gradient(90deg,#fff8e1,#ffecb3);border:1px solid #ffd54f;border-radius:10px;padding:9px 12px;font-size:15px;font-weight:700;margin:2px 0 10px;text-align:center;color:#7a5c00}
 .iw-games{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .iw-game{background:var(--bg2);border:1px solid var(--bord);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:.15s}
 .iw-game:active{transform:scale(.96)}
@@ -879,6 +880,14 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .bp-qz-opt{background:var(--bg2);border:1.5px solid var(--bord);border-radius:9px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left}
 .bp-qz-opt.good{background:#0d7a4a;color:#fff;border-color:#0d7a4a}
 .bp-qz-opt.bad{background:#c0392b;color:#fff;border-color:#c0392b}
+.bp-qz-top{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-top:4px}
+.bp-qz-bar{display:flex;gap:2px;margin:5px 0}
+.bp-qz-seg{flex:1;height:9px;border-radius:2px;background:var(--bg2)}
+.bp-qz-seg.on{background:linear-gradient(#f7c948,#e8871e)}
+.bp-qz-seg.cur{background:#e8871e;box-shadow:0 0 0 2px rgba(247,201,72,.4)}
+.bp-qz-banque{width:100%;margin-top:8px;background:#b8860b;color:#fff;border:none;border-radius:9px;padding:9px;font-size:13px;font-weight:800;cursor:pointer}
+.bp-qz-banque:active{opacity:.85}
+.bp-qz-banque:disabled{opacity:.5}
 /* Football Studio */
 .bp-fs-table{background:linear-gradient(#1a5c3a,#0e3d26);border-radius:14px;padding:16px 10px;margin:6px 0}
 .bp-fs-cards{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:12px}
@@ -3723,44 +3732,36 @@ async function bpMyTicketCount(){
   if (!currentPlayer || bpLeagueCode() === 'NONE') return 0;
   try { const s = await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).once('value'); return s.val() || 0; } catch(e) { return 0; }
 }
-let bpWheelLots = [], bpWheelSpinning = false, bpWheelRot = 0;
-function bpRenderWheel(lots){
-  const box = document.getElementById('bpWheelBox');
-  if (!box) return;
-  const n = lots.length;
-  if (!n) { box.innerHTML = '<div class="compo-muted">Aucun cadeau dans la roue. Ajoute des cadeaux d\'abord.</div>'; return; }
-  const seg = 360 / n;
-  const cols = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393','#16a085','#d35400'];
-  let stops = [];
-  for (let i=0;i<n;i++){ stops.push(cols[i%cols.length] + ' ' + (i*seg) + 'deg ' + ((i+1)*seg) + 'deg'); }
-  let labels = '';
+const BP_WHEEL_PTS = [5, 10, 20, 5, 50, 10, 100, 15];
+let bpWheelSpinning = false, bpWheelRot = 0;
+function bpRenderWheel(){
+  const box = document.getElementById('bpWheelBox'); if (!box) return;
+  const n = BP_WHEEL_PTS.length, seg = 360 / n;
+  const cols = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393'];
+  let stops = [], labels = '';
   for (let i=0;i<n;i++){
+    stops.push(cols[i%cols.length] + ' ' + (i*seg) + 'deg ' + ((i+1)*seg) + 'deg');
     const mid = i*seg + seg/2;
-    labels += '<div class="bp-wheel-label" style="transform:rotate(' + mid + 'deg)"><span>' + bpEscape(bpTrunc(lots[i].name, 16)) + '</span></div>';
+    labels += '<div class="bp-wheel-label" style="transform:rotate(' + mid + 'deg)"><span>' + BP_WHEEL_PTS[i] + ' pts</span></div>';
   }
   box.innerHTML = '<div class="bp-wheel-wrap"><div class="bp-wheel-pointer"></div><div class="bp-wheel" id="bpWheel" style="background:conic-gradient(' + stops.join(',') + ')">' + labels + '</div><div class="bp-wheel-hub">🎁</div></div>';
   bpWheelRot = 0;
 }
 window.bpOpenWheel = async function(){
-  const code = bpLeagueCode();
-  let data = {};
-  try { data = (await fetch(FB_URL + bpInstantBase() + '.json').then(function(r){ return r.json(); })) || {}; } catch(e){}
-  bpWheelLots = Object.keys(data).map(function(id){ return Object.assign({id:id}, data[id]); }).filter(function(l){ return l && l.name; });
   const modal = document.getElementById('bpWheelModal'); if (modal) modal.style.display = 'flex';
-  bpRenderWheel(bpWheelLots);
+  bpRenderWheel();
   const res = document.getElementById('bpWheelResult'); if (res) res.textContent = '';
   const myT = await bpMyTicketCount();
   const btn = document.getElementById('bpWheelSpinBtn');
-  if (btn) { btn.disabled = (myT <= 0 || !bpWheelLots.length); btn.textContent = myT > 0 ? ('\ud83c\udf9f\ufe0f Tourner (' + myT + ')') : 'Aucun ticket'; }
+  if (btn) { btn.disabled = (myT <= 0); btn.textContent = myT > 0 ? ('🎟️ Tourner (' + myT + ')') : 'Aucun ticket'; }
 };
 window.bpCloseWheel = function(){ const m = document.getElementById('bpWheelModal'); if (m) m.style.display = 'none'; };
 window.bpSpinWheel = async function(){
   if (bpWheelSpinning) return;
   const myT = await bpMyTicketCount();
   if (myT <= 0) { alert('Tu n\'as pas de ticket.'); return; }
-  if (!bpWheelLots.length) { alert('Aucun cadeau dans la roue.'); return; }
   bpWheelSpinning = true;
-  const n = bpWheelLots.length, seg = 360 / n;
+  const n = BP_WHEEL_PTS.length, seg = 360 / n;
   const winIdx = Math.floor(Math.random() * n);
   const wheel = document.getElementById('bpWheel');
   const target = 360*6 + (360 - (winIdx*seg + seg/2));
@@ -3768,20 +3769,16 @@ window.bpSpinWheel = async function(){
   bpWheelRot = finalRot;
   const btn = document.getElementById('bpWheelSpinBtn'); if (btn) btn.disabled = true;
   if (wheel) { wheel.style.transition = 'transform 4.5s cubic-bezier(.17,.67,.2,1)'; wheel.style.transform = 'rotate(' + finalRot + 'deg)'; }
+  try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
   setTimeout(async function(){
-    const lot = bpWheelLots[winIdx];
+    const won = BP_WHEEL_PTS[winIdx];
     const res = document.getElementById('bpWheelResult');
-    if (res) res.innerHTML = '\ud83c\udf89 Tu gagnes : <b>' + bpEscape(lot.name) + '</b> !';
-    bpConfetti();
-    try {
-      const code = bpLeagueCode();
-      await db.ref('instantwin_tickets/' + code + '/' + currentPlayer).set(Math.max(0, myT - 1));
-      const gid = 'g_' + Date.now();
-      await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: lot.name, ts: Date.now() });
-    } catch(e){}
+    if (res) res.innerHTML = '🎉 Tu gagnes : <b>' + won + ' pts</b> !';
+    try { bpConfetti(); } catch(e){}
+    try { await bpAwardPoints(won, '🎡 Roue — ' + won + ' pts'); } catch(e){}
     bpWheelSpinning = false;
     const myT2 = await bpMyTicketCount();
-    if (btn) { btn.disabled = myT2 <= 0; btn.textContent = myT2 > 0 ? ('\ud83c\udf9f\ufe0f Tourner (' + myT2 + ')') : 'Ticket epuise'; }
+    if (btn) { btn.disabled = myT2 <= 0; btn.textContent = myT2 > 0 ? ('🎟️ Tourner (' + myT2 + ')') : 'Ticket épuisé'; }
     try { renderInstantView(); } catch(e){}
   }, 4700);
 };
@@ -3846,11 +3843,11 @@ function bpShowRealDetail(el){
 function bpClosePotDetail(){ const m = document.getElementById('bpPotModal'); if (m) m.style.display = 'none'; }
 let bpPen = null;
 const BP_PEN_TIERS = [
-  { ic:'\U0001F36C', name:'Petit lot' },
-  { ic:'\U0001F949', name:'Bronze' },
-  { ic:'\U0001F948', name:'Argent' },
-  { ic:'\U0001F947', name:'Or' },
-  { ic:'\U0001F3C6', name:'JACKPOT' }
+  { ic:'🍬', name:'Petit lot' },
+  { ic:'🥉', name:'Bronze' },
+  { ic:'🥈', name:'Argent' },
+  { ic:'🥇', name:'Or' },
+  { ic:'🏆', name:'JACKPOT' }
 ];
 const BP_PEN_DIFF = { facile:{ lab:'Facile', save:0.20 }, moyen:{ lab:'Moyen', save:0.38 }, difficile:{ lab:'Difficile', save:0.55 } };
 window.bpOpenPenalty = async function(){
@@ -3858,7 +3855,7 @@ window.bpOpenPenalty = async function(){
   modal.style.display = 'flex';
   const myT = await bpMyTicketCount();
   bpPen = { streak:0, diff:'moyen', playing:false };
-  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) \u2014 marque, puis encaisse ou continue pour un meilleur lot !') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
+  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('🎟\uFE0F ' + myT + ' ticket(s) \u2014 marque, puis encaisse ou continue pour un meilleur lot !') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
   document.getElementById('bpPenScore').textContent = '';
   document.getElementById('bpPenResult').textContent = '';
   document.getElementById('bpPenZones').innerHTML = '';
@@ -3891,7 +3888,7 @@ window.bpStartPen = async function(){
   if (myT <= 0) { document.getElementById('bpPenInfo').innerHTML = 'Aucun ticket.'; return; }
   try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
   bpPen.streak = 0; bpPen.playing = true;
-  document.getElementById('bpPenInfo').innerHTML = 'Choisis o\u00f9 tirer ! \U0001F945';
+  document.getElementById('bpPenInfo').innerHTML = 'Choisis o\u00f9 tirer ! 🥅';
   document.getElementById('bpPenResult').textContent = '';
   document.getElementById('bpPenControls').innerHTML = '';
   bpPenRenderDiff(); bpPenRenderMult(); bpPenRenderZones(); bpPenScoreLine();
@@ -3926,7 +3923,7 @@ window.bpPenShoot = function(zone){
       if (bpPen.streak >= 5) { setTimeout(function(){ bpPenEnd(true, 5); }, 750); }
       else { setTimeout(function(){ bpPenReset(); bpPenOfferChoice(); }, 800); }
     } else {
-      if (res) res.innerHTML = '<span style="color:#c0392b">\U0001F9E4 ARR\u00caT\u00c9 ! Tu repars sans lot\u2026</span>';
+      if (res) res.innerHTML = '<span style="color:#c0392b">🧤 ARR\u00caT\u00c9 ! Tu repars sans lot\u2026</span>';
       setTimeout(function(){ bpPenEnd(false, 0); }, 950);
     }
   }, 560);
@@ -3936,7 +3933,7 @@ function bpPenOfferChoice(){
   const next = BP_PEN_TIERS[Math.min(bpPen.streak, 4)];
   document.getElementById('bpPenControls').innerHTML =
     '<div style="font-size:12px;margin-bottom:6px">Tu tiens <b>' + t.ic + ' ' + t.name + '</b>. Encaisser, ou risquer pour <b>' + next.ic + ' ' + next.name + '</b> ?</div>' +
-    '<button class="iw-btn primary" style="margin-right:6px" onclick="bpPenClaim()">\U0001F4B0 Encaisser</button>' +
+    '<button class="iw-btn primary" style="margin-right:6px" onclick="bpPenClaim()">💰 Encaisser</button>' +
     '<button class="iw-btn" style="background:var(--acc);color:#fff" onclick="bpPenNext()">\u26bd Tirer encore</button>';
 }
 window.bpPenNext = function(){
@@ -3950,20 +3947,21 @@ async function bpPenEnd(win, streak){
   bpPen.playing = false;
   document.getElementById('bpPenControls').innerHTML = '';
   const res = document.getElementById('bpPenResult');
-  let tierTxt = 'Pas de lot';
+  const _PEN_PTS = [0, 5, 12, 25, 50, 100];
+  const won = (win && streak >= 1) ? _PEN_PTS[streak] : 0;
   if (win && streak >= 1) {
-    const t = BP_PEN_TIERS[streak - 1]; tierTxt = t.name;
-    if (res) res.innerHTML = '<div style="font-size:16px">' + streak + ' but' + (streak > 1 ? 's' : '') + ' !</div><div style="margin-top:4px;font-size:19px">' + t.ic + ' ' + t.name + (streak >= 5 ? ' \U0001F389' : '') + '</div>';
+    const t = BP_PEN_TIERS[streak - 1];
+    if (res) res.innerHTML = '<div style="font-size:16px">' + streak + ' but' + (streak > 1 ? 's' : '') + ' ! ' + t.ic + '</div><div style="margin-top:4px;font-size:23px;font-weight:900;color:#0d7a4a">+' + won + ' pts</div>';
     try { bpConfetti(); } catch(e){}
   } else {
-    if (res) res.innerHTML = '<div style="font-size:16px;color:#c0392b">\U0001F9E4 Arr\u00eat\u00e9 \u2014 pas de lot cette fois</div>';
+    if (res) res.innerHTML = '<div style="font-size:16px;color:#c0392b">🧤 Arr\u00eat\u00e9 \u2014 0 pt cette fois</div>';
   }
-  try { const code = bpLeagueCode(); const gid = 'g_' + Date.now(); await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\u26bd Penalty ' + (win ? streak : 0) + '/5 \u2014 ' + tierTxt, ts: Date.now() }); } catch(e){}
+  try { await bpAwardPoints(won, '\u26bd Penalty ' + (win ? streak : 0) + '/5'); } catch(e){}
   const myT = await bpMyTicketCount();
   bpPen.streak = 0; bpPenRenderMult(); bpPenRenderDiff();
   document.getElementById('bpPenScore').textContent = '';
   document.getElementById('bpPenControls').innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpStartPen()"' + (myT <= 0 ? ' disabled' : '') + '>' + (myT > 0 ? 'Rejouer (1 ticket)' : 'Aucun ticket') + '</button>';
-  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
+  document.getElementById('bpPenInfo').innerHTML = myT > 0 ? ('🎟\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
   bpPenReset();
   try { renderInstantView(); } catch(e){}
 }
@@ -4018,13 +4016,14 @@ const BP_QUIZ = {
   ]
 };
 let bpQuiz = null;
+const BP_QZ_LADDER = [1,2,4,6,9,13,18,25,34,45,60,78,100,130,170];
 window.bpOpenQuiz = async function(){
   const modal = document.getElementById('bpQuizModal'); if (!modal) return;
   modal.style.display = 'flex';
   const myT = await bpMyTicketCount();
   const body = document.getElementById('bpQuizBody');
   if (myT <= 0) { body.innerHTML = '<div class="iw-note" style="text-align:center">Il te faut un ticket (Bonus BY PRONOS) pour jouer.</div>'; return; }
-  body.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--txt2);margin-bottom:4px">Choisis un thème \u2014 5 s / question, 1 minute :</div><div class="bp-qz-theme">' +
+  body.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--txt2);margin-bottom:6px">🔗 <b>Maillon Faible</b> — 15 questions. Chaque bonne réponse grimpe l\'échelle. Mets en <b>🏦 banque</b> pour sécuriser ; une erreur remet la chaîne à 0 ! (1 ticket)</div><div class="bp-qz-theme">' +
     Object.keys(BP_QUIZ).map(function(t){ return '<button class="bp-qz-tbtn" onclick="bpQuizStart(\'' + t + '\')">' + t + '</button>'; }).join('') + '</div>';
 };
 window.bpCloseQuiz = function(){ const m = document.getElementById('bpQuizModal'); if (m) m.style.display = 'none'; if (bpQuiz && bpQuiz.timer) clearInterval(bpQuiz.timer); bpQuiz = null; };
@@ -4032,31 +4031,45 @@ window.bpQuizStart = async function(theme){
   const myT = await bpMyTicketCount();
   if (myT <= 0) return;
   try { await db.ref('instantwin_tickets/' + bpLeagueCode() + '/' + currentPlayer).set(Math.max(0, myT - 1)); } catch(e){}
-  const qs = (BP_QUIZ[theme] || []).slice().sort(function(){ return Math.random() - 0.5; });
-  bpQuiz = { theme: theme, qs: qs, i: 0, score: 0, start: Date.now(), timer: null, answered: false };
+  const themeQs = (BP_QUIZ[theme] || []).slice().sort(function(){ return Math.random() - 0.5; });
+  let others = [];
+  Object.keys(BP_QUIZ).forEach(function(t){ if (t !== theme) others = others.concat(BP_QUIZ[t]); });
+  others.sort(function(){ return Math.random() - 0.5; });
+  const qs = themeQs.concat(others).slice(0, 15);
+  bpQuiz = { theme: theme, qs: qs, i: 0, rung: 0, banked: 0, timer: null, answered: false };
   bpQuizShow();
 };
+function bpQuizLadder(){
+  const segs = BP_QZ_LADDER.map(function(v, i){ const cls = i < bpQuiz.rung ? ' on' : (i === bpQuiz.rung ? ' cur' : ''); return '<div class="bp-qz-seg' + cls + '"></div>'; }).join('');
+  const cur = bpQuiz.rung > 0 ? BP_QZ_LADDER[bpQuiz.rung - 1] : 0;
+  const next = bpQuiz.rung < 15 ? BP_QZ_LADDER[bpQuiz.rung] : BP_QZ_LADDER[14];
+  return '<div class="bp-qz-top"><span>🏦 <b>' + bpQuiz.banked + ' pts</b></span><span>Chaîne : <b style="color:#e8871e">' + cur + '</b>' + (bpQuiz.rung < 15 ? (' → ' + next) : ' (max)') + '</span></div><div class="bp-qz-bar">' + segs + '</div>';
+}
 function bpQuizShow(){
   if (!bpQuiz) return;
-  const elapsed = (Date.now() - bpQuiz.start) / 1000;
-  if (elapsed >= 60 || bpQuiz.i >= bpQuiz.qs.length) { bpQuizEnd(); return; }
+  if (bpQuiz.i >= bpQuiz.qs.length) { bpQuizEnd(); return; }
   const q = bpQuiz.qs[bpQuiz.i];
   bpQuiz.answered = false;
   const opts = q.o.map(function(o, idx){ return '<button class="bp-qz-opt" data-i="' + idx + '" onclick="bpQuizAnswer(' + idx + ')">' + bpEscape(o) + '</button>'; }).join('');
+  const banque = bpQuiz.rung > 0 ? '<button class="bp-qz-banque" onclick="bpQuizBanque()">🏦 Banque — sécuriser ' + BP_QZ_LADDER[bpQuiz.rung - 1] + ' pts</button>' : '';
   document.getElementById('bpQuizBody').innerHTML =
-    '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2)"><span>' + bpEscape(bpQuiz.theme) + '</span><span>Q' + (bpQuiz.i + 1) + ' \u00b7 Score ' + bpQuiz.score + '</span></div>' +
+    bpQuizLadder() +
+    '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);margin-top:6px"><span>' + bpEscape(bpQuiz.theme) + '</span><span>Question ' + (bpQuiz.i + 1) + '/15</span></div>' +
     '<div class="bp-qz-timer"><div class="bp-qz-timer-bar" id="bpQzBar"></div></div>' +
     '<div class="bp-qz-q">' + bpEscape(q.q) + '</div>' +
-    '<div class="bp-qz-opts">' + opts + '</div>';
-  let t = 5.0;
+    '<div class="bp-qz-opts">' + opts + '</div>' + banque;
+  let t = 10.0;
   const bar = document.getElementById('bpQzBar');
   if (bpQuiz.timer) clearInterval(bpQuiz.timer);
-  bpQuiz.timer = setInterval(function(){
-    t -= 0.1;
-    if (bar) bar.style.width = Math.max(0, (t / 5) * 100) + '%';
-    if (t <= 0) { clearInterval(bpQuiz.timer); if (bpQuiz && !bpQuiz.answered) bpQuizAnswer(-1); }
-  }, 100);
+  bpQuiz.timer = setInterval(function(){ t -= 0.1; if (bar) bar.style.width = Math.max(0, (t / 10) * 100) + '%'; if (t <= 0) { clearInterval(bpQuiz.timer); if (bpQuiz && !bpQuiz.answered) bpQuizAnswer(-1); } }, 100);
 }
+window.bpQuizBanque = function(){
+  if (!bpQuiz || bpQuiz.answered || bpQuiz.rung <= 0) return;
+  if (bpQuiz.timer) clearInterval(bpQuiz.timer);
+  bpQuiz.banked += BP_QZ_LADDER[bpQuiz.rung - 1];
+  bpQuiz.rung = 0;
+  bpQuizShow();
+};
 window.bpQuizAnswer = function(idx){
   if (!bpQuiz || bpQuiz.answered) return;
   bpQuiz.answered = true;
@@ -4064,25 +4077,37 @@ window.bpQuizAnswer = function(idx){
   const q = bpQuiz.qs[bpQuiz.i];
   const btns = document.querySelectorAll('#bpQuizBody .bp-qz-opt');
   btns.forEach(function(b){ b.disabled = true; const bi = parseInt(b.getAttribute('data-i')); if (bi === q.c) b.classList.add('good'); else if (bi === idx && idx !== q.c) b.classList.add('bad'); });
-  if (idx === q.c) bpQuiz.score++;
-  setTimeout(function(){ if (!bpQuiz) return; bpQuiz.i++; bpQuizShow(); }, 750);
+  const bq = document.querySelector('.bp-qz-banque'); if (bq) bq.disabled = true;
+  const good = idx === q.c;
+  if (good) bpQuiz.rung = Math.min(15, bpQuiz.rung + 1); else bpQuiz.rung = 0;
+  setTimeout(function(){ if (!bpQuiz) return; bpQuiz.i++; bpQuizShow(); }, good ? 700 : 1050);
 };
-function bpQuizEnd(){
+async function bpQuizEnd(){
   if (bpQuiz && bpQuiz.timer) clearInterval(bpQuiz.timer);
-  const sc = bpQuiz ? bpQuiz.score : 0;
-  let tier, tierTxt;
-  if (sc >= 8) { tier = '\U0001F3C6 Gros lot !'; tierTxt = 'Gros lot'; }
-  else if (sc >= 5) { tier = '\U0001F381 Beau lot !'; tierTxt = 'Beau lot'; }
-  else if (sc >= 3) { tier = '\U0001F36C Petit lot'; tierTxt = 'Petit lot'; }
-  else { tier = '\U0001F605 Pas de lot cette fois'; tierTxt = 'Pas de lot'; }
+  let banked = bpQuiz ? bpQuiz.banked : 0;
+  if (bpQuiz && bpQuiz.rung > 0) banked += BP_QZ_LADDER[bpQuiz.rung - 1];
+  let bal = banked;
+  try { bal = await bpAwardPoints(banked, '🔗 Quiz Maillon Faible — ' + banked + ' pts'); } catch(e){}
   document.getElementById('bpQuizBody').innerHTML =
-    '<div style="text-align:center;padding:16px"><div style="font-size:20px;font-weight:800">' + sc + ' bonne' + (sc > 1 ? 's' : '') + ' r\u00e9ponse' + (sc > 1 ? 's' : '') + ' !</div><div style="font-size:22px;margin:10px 0">' + tier + '</div><button class="iw-btn primary" onclick="bpOpenQuiz()">Rejouer</button></div>';
-  if (sc >= 3) { try { bpConfetti(); } catch(e){} }
-  (async function(){
-    try { const code = bpLeagueCode(); const gid = 'g_' + Date.now(); await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\u2753 Quiz ' + sc + ' pts \u2014 ' + tierTxt, ts: Date.now() }); } catch(e){}
-    try { renderInstantView(); } catch(e){}
-  })();
+    '<div style="text-align:center;padding:14px"><div style="font-size:15px">Tu sécurises</div><div style="font-size:32px;font-weight:900;color:#0d7a4a;margin:4px 0">+' + banked + ' pts</div><div style="font-size:13px;color:var(--txt2)">Nouveau solde : <b>' + bal + ' pts</b></div><div style="font-size:11px;color:var(--txt2);margin-top:6px">🛍️ Échange tes points contre des lots dans la Boutique.</div><button class="iw-btn primary" style="margin-top:10px" onclick="bpOpenQuiz()">Rejouer</button></div>';
+  if (banked > 0) { try { bpConfetti(); } catch(e){} }
+  try { renderInstantView(); } catch(e){}
   bpQuiz = null;
+}
+async function bpMyPoints(){
+  if (!currentPlayer || bpLeagueCode() === 'NONE') return 0;
+  try { const s = await db.ref('instantwin_points/' + bpLeagueCode() + '/' + currentPlayer).once('value'); return s.val() || 0; } catch(e){ return 0; }
+}
+async function bpAwardPoints(pts, label){
+  try {
+    const code = bpLeagueCode();
+    const cur = await bpMyPoints();
+    const bal = cur + (pts || 0);
+    await db.ref('instantwin_points/' + code + '/' + currentPlayer).set(bal);
+    const gid = 'g_' + Date.now();
+    await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, pts: pts || 0, lot: label, ts: Date.now() });
+    return bal;
+  } catch(e){ return 0; }
 }
 let bpFs = null;
 const BP_FS_RANKS = [{v:2,r:'2'},{v:3,r:'3'},{v:4,r:'4'},{v:5,r:'5'},{v:6,r:'6'},{v:7,r:'7'},{v:8,r:'8'},{v:9,r:'9'},{v:10,r:'10'},{v:11,r:'J'},{v:12,r:'Q'},{v:13,r:'K'},{v:14,r:'A'}];
@@ -4091,7 +4116,7 @@ window.bpOpenFs = async function(){
   modal.style.display = 'flex';
   const myT = await bpMyTicketCount();
   bpFs = { bet:null, playing:false };
-  document.getElementById('bpFsInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) \u2014 2 cartes tir\u00e9es, la plus forte gagne. Mise sur Domicile, Nul ou Ext\u00e9rieur.') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
+  document.getElementById('bpFsInfo').innerHTML = myT > 0 ? ('🎟\uFE0F ' + myT + ' ticket(s) \u2014 2 cartes tir\u00e9es, la plus forte gagne. Mise sur Domicile, Nul ou Ext\u00e9rieur.') : ('Il te faut un ticket (Bonus BY PRONOS) pour jouer.');
   document.getElementById('bpFsResult').textContent = '';
   bpFsResetCards(); bpFsRenderBets(); bpFsControls(myT);
 };
@@ -4101,9 +4126,9 @@ function bpFsRenderBets(){
   const el = document.getElementById('bpFsBets'); if (!el) return;
   const sel = function(s){ return (bpFs && bpFs.bet === s) ? ' sel' : ''; };
   el.innerHTML =
-    '<button class="bp-fs-bet home' + sel('home') + '" onclick="bpFsBet(\'home\')"><div class="t">\U0001F534 DOMICILE</div><div class="s">~46% \u00b7 Beau lot</div></button>' +
-    '<button class="bp-fs-bet draw' + sel('draw') + '" onclick="bpFsBet(\'draw\')"><div class="t">\U0001F7E1 NUL</div><div class="s">~8% \u00b7 \U0001F3C6 JACKPOT</div></button>' +
-    '<button class="bp-fs-bet away' + sel('away') + '" onclick="bpFsBet(\'away\')"><div class="t">\U0001F535 EXT\u00c9RIEUR</div><div class="s">~46% \u00b7 Beau lot</div></button>';
+    '<button class="bp-fs-bet home' + sel('home') + '" onclick="bpFsBet(\'home\')"><div class="t">🔴 DOMICILE</div><div class="s">~46% \u00b7 Beau lot</div></button>' +
+    '<button class="bp-fs-bet draw' + sel('draw') + '" onclick="bpFsBet(\'draw\')"><div class="t">🟡 NUL</div><div class="s">~8% \u00b7 🏆 JACKPOT</div></button>' +
+    '<button class="bp-fs-bet away' + sel('away') + '" onclick="bpFsBet(\'away\')"><div class="t">🔵 EXT\u00c9RIEUR</div><div class="s">~46% \u00b7 Beau lot</div></button>';
 }
 window.bpFsBet = function(side){ if (!bpFs || bpFs.playing) return; bpFs.bet = side; bpFsRenderBets(); bpFsControls(); };
 async function bpFsControls(myT){
@@ -4111,7 +4136,7 @@ async function bpFsControls(myT){
   const ctrl = document.getElementById('bpFsControls'); if (!ctrl) return;
   if (myT <= 0) ctrl.innerHTML = '<button class="iw-btn primary" disabled>Aucun ticket</button>';
   else if (bpFs && bpFs.bet) ctrl.innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpStartFs()">Tirer les cartes (1 ticket)</button>';
-  else ctrl.innerHTML = '<div style="font-size:12px;color:var(--txt2)">\U0001F446 Choisis ton pari</div>';
+  else ctrl.innerHTML = '<div style="font-size:12px;color:var(--txt2)">👆 Choisis ton pari</div>';
 }
 window.bpStartFs = async function(){
   if (!bpFs || bpFs.playing || !bpFs.bet) return;
@@ -4139,21 +4164,21 @@ function bpFsShow(el, card){
 async function bpFsResolve(home, away){
   const winner = home.v > away.v ? 'home' : (away.v > home.v ? 'away' : 'draw');
   const win = bpFs.bet === winner;
-  const wlab = winner === 'home' ? '\U0001F534 Domicile gagne' : (winner === 'away' ? '\U0001F535 Ext\u00e9rieur gagne' : '\U0001F7E1 MATCH NUL');
+  const wlab = winner === 'home' ? '🔴 Domicile gagne' : (winner === 'away' ? '🔵 Ext\u00e9rieur gagne' : '🟡 MATCH NUL');
   const res = document.getElementById('bpFsResult');
-  let tierTxt = 'perdu';
+  const won = win ? (winner === 'draw' ? 100 : 15) : 0;
   if (win) {
-    if (winner === 'draw') { tierTxt = 'JACKPOT'; res.innerHTML = '<div>' + wlab + '</div><div style="font-size:19px;margin-top:2px">\U0001F3C6 JACKPOT ! Gros lot !</div>'; }
-    else { tierTxt = 'Beau lot'; res.innerHTML = '<div>' + wlab + '</div><div style="font-size:17px;margin-top:2px">\U0001F381 Gagn\u00e9 \u2014 Beau lot !</div>'; }
+    if (winner === 'draw') { res.innerHTML = '<div>' + wlab + '</div><div style="font-size:21px;margin-top:2px;font-weight:900;color:#0d7a4a">🏆 JACKPOT +100 pts !</div>'; }
+    else { res.innerHTML = '<div>' + wlab + '</div><div style="font-size:18px;margin-top:2px;font-weight:800;color:#0d7a4a">🎁 Gagn\u00e9 +15 pts</div>'; }
     try { bpConfetti(); } catch(e){}
   } else {
-    res.innerHTML = '<div>' + wlab + '</div><div style="font-size:15px;color:#c0392b;margin-top:2px">Perdu \u2014 pas de lot</div>';
+    res.innerHTML = '<div>' + wlab + '</div><div style="font-size:15px;color:#c0392b;margin-top:2px">Perdu \u2014 0 pt</div>';
   }
-  try { const code = bpLeagueCode(); const gid = 'g_' + Date.now(); await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, lot: '\U0001F0CF Football Studio \u2014 ' + tierTxt + ' (' + home.r + ' vs ' + away.r + ')', ts: Date.now() }); } catch(e){}
+  try { await bpAwardPoints(won, '🃏 Football Studio (' + home.r + ' vs ' + away.r + ')'); } catch(e){}
   bpFs.playing = false;
   const myT = await bpMyTicketCount();
   document.getElementById('bpFsControls').innerHTML = '<button class="iw-btn primary" style="font-size:14px;padding:9px 22px" onclick="bpOpenFs()"' + (myT <= 0 ? ' disabled' : '') + '>' + (myT > 0 ? 'Rejouer (1 ticket)' : 'Aucun ticket') + '</button>';
-  document.getElementById('bpFsInfo').innerHTML = myT > 0 ? ('\U0001F39F\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
+  document.getElementById('bpFsInfo').innerHTML = myT > 0 ? ('🎟\uFE0F ' + myT + ' ticket(s) restant(s)') : 'Plus de ticket.';
   try { renderInstantView(); } catch(e){}
 }
 async function renderInstantView() {
@@ -4168,9 +4193,12 @@ async function renderInstantView() {
   try { data = (await fetch(FB_URL + bpInstantBase() + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
   try { tickets = (await fetch(FB_URL + '/instantwin_tickets/' + code + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
   try { gains = (await fetch(FB_URL + '/instantwin_gains/' + code + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
+  let points = {};
+  try { points = (await fetch(FB_URL + '/instantwin_points/' + code + '.json').then(function(r){ return r.json(); })) || {}; } catch(e) {}
   const lots = Object.keys(data || {}).map(function(id){ return Object.assign({ id: id }, data[id]); }).filter(function(l){ return l && l.name; });
   lots.sort(function(a, b){ return (a.createdAt || 0) - (b.createdAt || 0); });
   const myT = (currentPlayer && tickets && tickets[currentPlayer]) ? tickets[currentPlayer] : 0;
+  const myPts = (currentPlayer && points && points[currentPlayer]) ? points[currentPlayer] : 0;
   let html = '';
   // BLOC BONUS BY PRONOS
   html += '<div class="ev-section-title">🎁 Bonus BY PRONOS</div>';
@@ -4180,6 +4208,7 @@ async function renderInstantView() {
   } else {
     html += '<div class="iw-note" style="text-align:center">Pas de ticket cette semaine \u2014 \u00e0 toi de gagner la semaine ou d\'atteindre 20 pts ! 💪</div>';
   }
+  html += '<div class="iw-points">💰 Tes points : <b>' + myPts + '</b> <span style="font-size:10px;opacity:.85">(échangeables en boutique)</span></div>';
   const holders = Object.keys(tickets || {}).filter(function(n){ return tickets[n] > 0; });
   if (holders.length) {
     html += '<div style="font-size:11px;color:var(--txt2);margin:2px 2px 10px">🎫 Tickets en jeu : ' + holders.map(function(n){ return bpEscape(n) + ' (' + tickets[n] + ')'; }).join(', ') + '</div>';
@@ -4191,25 +4220,47 @@ async function renderInstantView() {
   html += '<div class="iw-games">' + gc('🎡','Roue','cadeaux','bpOpenWheel()') + gc('⚽','Penalty','5 tirs','bpOpenPenalty()') + gc('❓','Quiz','1 min','bpOpenQuiz()') + gc('🃏','Football Studio','2 cartes','bpOpenFs()') + '</div>';
   if (myT <= 0) html += '<div style="font-size:10px;color:var(--txt2);text-align:center;margin:-4px 0 8px">🔒 Gagne un ticket pour débloquer les jeux</div>';
   // BLOC CADEAUX
-  html += '<div class="ev-section-title">🎁 Les cadeaux dans la roue</div>';
-  html += lots.length ? lots.map(bpLotCard).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun cadeau. Ajoute le premier ci-dessus !</div>';
+  html += '<div class="ev-section-title">🛍️ Boutique \u2014 échange tes points</div>';
+  html += lots.length ? lots.map(function(l){ return bpLotCard(l, myPts); }).join('') : '<div style="padding:14px;text-align:center;color:var(--txt2);font-size:13px">Aucun lot en boutique. Ajoute le premier ci-dessus !</div>';
   const gList = Object.keys(gains || {}).map(function(id){ return gains[id]; }).filter(Boolean).sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
   if (gList.length) {
-    html += '<div class="ev-section-title">\ud83c\udfc6 Cadeaux gagn\u00e9s</div>';
+    html += '<div class="ev-section-title">\ud83c\udfc6 Historique des points</div>';
     html += gList.slice(0, 40).map(function(g){
       return '<div class="iw-gain"><span><b>' + bpEscape(g.player || '?') + '</b> \u2014 ' + bpEscape(g.lot || '') + '</span><span style="color:var(--txt2);font-size:11px">' + (g.ts ? new Date(g.ts).toLocaleDateString('fr-FR') : '') + '</span></div>';
     }).join('');
   }
   listEl.innerHTML = html;
 }
-function bpLotCard(lot) {
+function bpLotCard(lot, myPts) {
+  const cost = lot.cost || 0;
+  const canBuy = (cost > 0) && (myPts >= cost);
   return '<div class="ev-card" style="flex-direction:column;gap:2px">' +
-    '<div style="font-weight:800;font-size:15px">\ud83c\udf81 ' + bpEscape(lot.name) + '</div>' +
+    '<div style="font-weight:800;font-size:15px">🎁 ' + bpEscape(lot.name) + '</div>' +
     (lot.desc ? '<div class="ev-meta">' + bpEscape(lot.desc) + '</div>' : '') +
-    (lot.createdBy ? '<div style="font-size:10px;color:var(--txt2)">Propos\u00e9 par ' + bpEscape(lot.createdBy) + '</div>' : '') +
-    '<div style="margin-top:6px"><button class="iw-btn danger" onclick="bpDeleteLot(\'' + lot.id + '\')">Supprimer</button></div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px">' +
+      '<span style="font-weight:800;color:#b8860b">🪙 ' + cost + ' pts</span>' +
+      '<span style="display:flex;gap:6px">' +
+        '<button class="iw-btn primary" ' + (canBuy ? '' : 'disabled ') + 'onclick="bpBuyLot(\'' + lot.id + '\',' + cost + ')">Échanger</button>' +
+        '<button class="iw-btn danger" onclick="bpDeleteLot(\'' + lot.id + '\')">✕</button>' +
+      '</span>' +
+    '</div>' +
   '</div>';
 }
+window.bpBuyLot = async function(id, cost){
+  const code = bpLeagueCode();
+  const myPts = await bpMyPoints();
+  if (myPts < cost) { alert('Pas assez de points ! Il te faut ' + cost + ' pts (tu en as ' + myPts + ').'); return; }
+  let name = 'Lot';
+  try { const s = await fetch(FB_URL + bpInstantBase() + '/' + id + '.json').then(function(r){ return r.json(); }); if (s && s.name) name = s.name; } catch(e){}
+  if (!confirm('Échanger ' + cost + ' points contre « ' + name + ' » ?')) return;
+  try {
+    await db.ref('instantwin_points/' + code + '/' + currentPlayer).set(myPts - cost);
+    const gid = 'g_' + Date.now();
+    await db.ref('instantwin_gains/' + code + '/' + gid).set({ player: currentPlayer, pts: -cost, lot: '🛍️ ' + name + ' (échangé)', ts: Date.now() });
+  } catch(e){}
+  alert('🎉 Lot obtenu : ' + name + ' ! Rapproche-toi de l\'organisateur pour le récupérer.');
+  renderInstantView();
+};
 async function bpSetLotWinner(id, winner, method) {
   try {
     await fetch(FB_URL + bpInstantBase() + '/' + id + '.json', { method: 'PATCH', body: JSON.stringify({ winner: winner, method: method, wonAt: Date.now() }) });
@@ -4221,8 +4272,11 @@ window.bpAddLot = async function() {
   const name = g('iwName').trim(), desc = g('iwDesc').trim();
   if (!name) { alert('Donne un nom au lot.'); return; }
   if (!currentPlayer) { alert('Connecte-toi pour ajouter un lot.'); return; }
+  const costStr = prompt('Coût du lot en points ?', '50');
+  if (costStr === null) return;
+  const cost = Math.max(1, parseInt(costStr) || 1);
   const id = 'lot_' + Date.now();
-  const lot = { name: name, desc: desc, createdBy: currentPlayer, createdAt: Date.now(), winner: null };
+  const lot = { name: name, desc: desc, cost: cost, createdBy: currentPlayer, createdAt: Date.now(), winner: null };
   try {
     await fetch(FB_URL + bpInstantBase() + '/' + id + '.json', { method: 'PUT', body: JSON.stringify(lot) });
     ['iwName','iwDesc'].forEach(function(i){ var el = document.getElementById(i); if (el) el.value = ''; });
