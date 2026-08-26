@@ -2773,16 +2773,9 @@ async function bpEnsureH2H(m) {
 function bpCloseTable(){ const m = document.getElementById('bpTableModal'); if (m) m.style.display = 'none'; }
 window.bpCloseTable = bpCloseTable;
 async function bpEnsureCompStandings(comp){
-  const groupMap = { ligue1: 61, ligue2: 62, premier: 39 };
-  window.bpStandingsByComp = window.bpStandingsByComp || {};
-  if (window.bpStandingsByComp[comp]) return window.bpStandingsByComp[comp];
-  const g = groupMap[comp] || 61;
-  try {
-    const r = await fetch(BP_STANDINGS_URL + '?league=' + g + '&season=2026');
-    const d = await r.json();
-    if (d && d.standings && Object.keys(d.standings).length) { window.bpStandingsByComp[comp] = d.standings; return d.standings; }
-  } catch(e){}
-  if (comp === 'ligue1' && bpStandings && Object.keys(bpStandings).length) { window.bpStandingsByComp[comp] = bpStandings; return bpStandings; }
+  // La CF /standings renvoie DÉJÀ les 3 championnats (L1+L2+PL) fusionnés par team.id.
+  // On renvoie tout : le filtrage par équipes de la compétition se fait dans bpOpenTable.
+  if (bpStandings && Object.keys(bpStandings).length) return bpStandings;
   return null;
 }
 window.bpOpenTable = async function(id){
@@ -2794,39 +2787,37 @@ window.bpOpenTable = async function(id){
   const title = document.getElementById('bpTableTitle'); if (title) title.textContent = 'Classement en direct \u2014 ' + clab;
   const body = document.getElementById('bpTableBody'); if (!body) return;
   body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
-  // Équipes de CETTE compétition (d'après les matchs de la liste)
-  const compTeams = {};
-  matches.forEach(function(mm){ if ((mm.comp || 'ligue1') === comp) { compTeams[bpTeamNorm(mm.home)] = 1; compTeams[bpTeamNorm(mm.away)] = 1; } });
-  let stand = await bpEnsureCompStandings(comp);
-  if (!stand) stand = (comp === 'ligue1') ? bpStandings : null;
-  const teams = Object.keys(stand || {}).map(function(tid){ const s = stand[tid] || {}; return { name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null) }; })
-    .filter(function(t){ return t.pts != null && t.name !== '?' && compTeams[bpTeamNorm(t.name)]; });
+  // IDs des équipes de CETTE compétition (fiable, via les matchs)
+  const compIds = {};
+  matches.forEach(function(mm){ if ((mm.comp || 'ligue1') === comp) { if (mm.homeId != null) compIds[String(mm.homeId)] = 1; if (mm.awayId != null) compIds[String(mm.awayId)] = 1; } });
+  const stand = await bpEnsureCompStandings(comp);
+  const teams = Object.keys(stand || {}).filter(function(tid){ return compIds[String(tid)]; }).map(function(tid){ const s = stand[tid] || {}; return { id: String(tid), name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null) }; }).filter(function(t){ return t.pts != null && t.name !== '?'; });
   if (!teams.length) {
-    body.innerHTML = '<div style="padding:18px;text-align:center;color:var(--txt2);font-size:13px">Classement ' + clab + ' indisponible pour le moment.</div>';
+    body.innerHTML = '<div style="padding:18px;text-align:center;color:var(--txt2);font-size:13px">Classement <b>' + clab + '</b> indisponible pour le moment.</div>';
     return;
   }
-  // Projection : applique les scores EN DIRECT des matchs de cette compétition
+  // Projection : applique les scores EN DIRECT des matchs de cette compétition (par ID)
   const proj = {};
-  teams.forEach(function(t){ proj[bpTeamNorm(t.name)] = { name: t.name, base: t.pts, add: 0, live: false }; });
+  teams.forEach(function(t){ proj[t.id] = { id: t.id, name: t.name, base: t.pts, add: 0, live: false }; });
   matches.forEach(function(mm){
     try {
       if ((mm.comp || 'ligue1') !== comp) return;
       if (!(isMatchStarted(mm.time, mm.id) && !isMatchFinished(mm.time, mm.id))) return;
       const lv = liveData[mm.id]; if (!lv || lv.homeScore == null || lv.awayScore == null) return;
-      const hn = bpTeamNorm(mm.home), an = bpTeamNorm(mm.away);
-      if (!proj[hn] || !proj[an]) return;
-      if (lv.homeScore > lv.awayScore) proj[hn].add += 3;
-      else if (lv.awayScore > lv.homeScore) proj[an].add += 3;
-      else { proj[hn].add += 1; proj[an].add += 1; }
-      proj[hn].live = true; proj[an].live = true;
+      const hid = String(mm.homeId), aid = String(mm.awayId);
+      if (!proj[hid] || !proj[aid]) return;
+      if (lv.homeScore > lv.awayScore) proj[hid].add += 3;
+      else if (lv.awayScore > lv.homeScore) proj[aid].add += 3;
+      else { proj[hid].add += 1; proj[aid].add += 1; }
+      proj[hid].live = true; proj[aid].live = true;
     } catch(e){}
   });
-  const rows = Object.keys(proj).map(function(k){ const p = proj[k]; return { name: p.name, total: p.base + p.add, add: p.add, live: p.live }; });
+  const rows = Object.keys(proj).map(function(k){ const p = proj[k]; return { id: p.id, name: p.name, total: p.base + p.add, add: p.add, live: p.live }; });
   rows.sort(function(a, b){ return b.total - a.total || a.name.localeCompare(b.name); });
-  const meH = bpTeamNorm(m.home), meA = bpTeamNorm(m.away);
+  const meH = String(m.homeId), meA = String(m.awayId);
   let html = '<div style="font-size:10px;color:var(--txt2);text-align:center;margin-bottom:6px">Points projetés avec les scores en direct 🔴</div><div style="display:flex;flex-direction:column;gap:1px">';
   rows.forEach(function(r, i){
-    const isMe = (bpTeamNorm(r.name) === meH || bpTeamNorm(r.name) === meA);
+    const isMe = (r.id === meH || r.id === meA);
     const bg = isMe ? 'background:rgba(26,111,212,.14);' : (i % 2 ? 'background:rgba(0,0,0,.03);' : '');
     const zone = i < 3 ? '#16a34a' : (i >= rows.length - 3 ? '#e5544d' : 'transparent');
     html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;' + bg + '">' +
