@@ -2349,6 +2349,7 @@ function renderMatches() {
     return true;
   });
   // Épingler les matchs EN DIRECT en tête de liste (le reste garde son ordre chronologique)
+  if (!window._bpHlLoaded) { window._bpHlLoaded = true; window.bpHighlights = window.bpHighlights || {}; try { fetch(FB_URL + '/highlights/' + bpLeagueCode() + '.json').then(function(r){ return r.json(); }).then(function(d){ if (d) window.bpHighlights = d; }).catch(function(){}); } catch(e){} }
   const _isLive = function(m){ try { return isMatchStarted(m.time, m.id) && !isMatchFinished(m.time, m.id); } catch(e){ return false; } };
   filtered.sort(function(a, b){ return (_isLive(b) ? 1 : 0) - (_isLive(a) ? 1 : 0); });
   document.getElementById('matchList').innerHTML = filtered.map(buildCard).join('');
@@ -2766,6 +2767,29 @@ async function bpEnsureH2H(m) {
     }
   } catch(e) { bpH2H[m.id] = undefined; }
 }
+function bpHighlightManual(m){
+  try { if (window.bpHighlights && window.bpHighlights[m.id]) return window.bpHighlights[m.id]; } catch(e){}
+  return null;
+}
+function bpHighlightOfficialUrl(m){
+  const man = bpHighlightManual(m); if (man) return man;
+  const comp = m.comp || 'ligue1';
+  if (comp === 'ligue1' || comp === 'ligue2') return 'https://ligue1.com/fr/videos';
+  if (comp === 'premier') return 'https://www.premierleague.com/video';
+  const home = bpTeamName(m.home || ''), away = bpTeamName(m.away || '');
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(home + ' ' + away + ' résumé');
+}
+function bpHighlightYtUrl(m){
+  const home = bpTeamName(m.home || ''), away = bpTeamName(m.away || '');
+  const q = encodeURIComponent(home + ' ' + away);
+  const comp = m.comp || 'ligue1';
+  if (comp === 'ligue1') return 'https://www.youtube.com/@Ligue1/search?query=' + q;
+  if (comp === 'ligue2') return 'https://www.youtube.com/@ligue2fr/search?query=' + q;
+  if (comp === 'premier') return 'https://www.youtube.com/@premierleague/search?query=' + q;
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(home + ' ' + away + ' résumé');
+}
+window.bpOpenHighlights = function(id){ const m = matches.find(function(x){ return x.id === id; }); if (m) window.open(bpHighlightOfficialUrl(m), '_blank'); };
+window.bpOpenHighlightsYt = function(id){ const m = matches.find(function(x){ return x.id === id; }); if (m) window.open(bpHighlightYtUrl(m), '_blank'); };
 function bpBannerStatsHtml(m) {
   bpEnsureH2H(m);
   const bpStarted = (typeof isMatchStarted === 'function') ? isMatchStarted(m.time, m.id) : false;
@@ -2773,7 +2797,10 @@ function bpBannerStatsHtml(m) {
   const compoChip = '<span onclick="event.stopPropagation(); bpOpenCompo(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📋 Compos</span>';
   if (!bpStatsOpen[m.id]) {
     const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Stats</span>';
-    return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + '</div>');
+    const _fin = (typeof isMatchFinished === 'function') ? isMatchFinished(m.time, m.id) : false;
+    const _cs = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
+    const hlChip = _fin ? ('<span onclick="event.stopPropagation(); bpOpenHighlights(' + m.id + ')" style="' + _cs + ';background:#0d7a4a">▶️ L1</span><span onclick="event.stopPropagation(); bpOpenHighlightsYt(' + m.id + ')" style="' + _cs + ';background:#e5251b">▶️ YT</span>') : '';
+    return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + hlChip + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
   const tagBtn = function(id, label){
