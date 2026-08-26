@@ -1329,7 +1329,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:370px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-mult" id="bpPenMult"></div><div class="bp-pen-stage" id="bpPenStage"><div class="bp-pen-goalframe"></div><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div><div class="bp-pen-zones" id="bpPenZones"></div></div><div class="bp-pen-score" id="bpPenScore"></div><div id="bpPenResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div class="bp-pen-diff" id="bpPenDiff"></div><div id="bpPenControls" style="margin-top:8px"></div></div></div>
 <div class="compo-modal" id="bpQuizModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseQuiz()">✕</div><div class="compo-title">❓ Quiz Foot</div><div id="bpQuizBody"></div></div></div>
 <div class="compo-modal" id="bpFsModal"><div class="compo-box" style="max-width:380px;text-align:center"><div class="compo-close" onclick="bpCloseFs()">✕</div><div class="compo-title">🃏 Football Studio</div><div id="bpFsInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-fs-table"><div class="bp-fs-cards"><div class="bp-fs-side"><div class="lab" style="color:#ff8a80">DOMICILE</div><div class="bp-fs-card back" id="bpFsCardH"></div></div><div class="bp-fs-vs">VS</div><div class="bp-fs-side"><div class="lab" style="color:#82b1ff">EXTÉRIEUR</div><div class="bp-fs-card back" id="bpFsCardA"></div></div></div><div class="bp-fs-bets" id="bpFsBets"></div></div><div id="bpFsResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div id="bpFsControls" style="margin-top:8px"></div></div></div>
-<div class="compo-modal" id="bpTableModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseTable()">✕</div><div class="compo-title" id="bpTableTitle">🏆 Classement en direct</div><div id="bpTableBody"></div></div></div>
+<div class="compo-modal" id="bpTableModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseTable()">✕</div><div class="compo-title" id="bpTableTitle">Classement en direct</div><div id="bpTableBody"></div></div></div>
 <div class="compo-modal" id="bpPotModal" onclick="if(event.target===this)bpClosePotDetail()"><div class="compo-box" style="max-width:280px"><div class="compo-close" onclick="bpClosePotDetail()">✕</div><div class="compo-title" id="bpPotTitle" style="font-size:16px">🎯 Points possibles</div><div id="bpPotBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
@@ -2772,28 +2772,45 @@ async function bpEnsureH2H(m) {
 }
 function bpCloseTable(){ const m = document.getElementById('bpTableModal'); if (m) m.style.display = 'none'; }
 window.bpCloseTable = bpCloseTable;
-window.bpOpenTable = function(id){
+async function bpEnsureCompStandings(comp){
+  const groupMap = { ligue1: 61, ligue2: 62, premier: 39 };
+  window.bpStandingsByComp = window.bpStandingsByComp || {};
+  if (window.bpStandingsByComp[comp]) return window.bpStandingsByComp[comp];
+  const g = groupMap[comp] || 61;
+  try {
+    const r = await fetch(BP_STANDINGS_URL + '?league=' + g + '&season=2026');
+    const d = await r.json();
+    if (d && d.standings && Object.keys(d.standings).length) { window.bpStandingsByComp[comp] = d.standings; return d.standings; }
+  } catch(e){}
+  if (comp === 'ligue1' && bpStandings && Object.keys(bpStandings).length) { window.bpStandingsByComp[comp] = bpStandings; return bpStandings; }
+  return null;
+}
+window.bpOpenTable = async function(id){
   const m = matches.find(function(x){ return x.id === id; });
   const modal = document.getElementById('bpTableModal'); if (!modal || !m) return;
   modal.style.display = 'flex';
-  const title = document.getElementById('bpTableTitle');
   const comp = m.comp || 'ligue1';
   const clab = comp === 'ligue2' ? 'Ligue 2' : (comp === 'premier' ? 'Premier League' : 'Ligue 1');
-  if (title) title.innerHTML = '\U0001F3C6 Classement en direct \u2014 ' + clab;
+  const title = document.getElementById('bpTableTitle'); if (title) title.textContent = 'Classement en direct \u2014 ' + clab;
   const body = document.getElementById('bpTableBody'); if (!body) return;
-  // Base : toutes les équipes du classement chargé
-  const teams = Object.keys(bpStandings || {}).map(function(tid){ const s = bpStandings[tid] || {}; return { name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null), rank: (s.rank != null ? s.rank : s.rang) }; }).filter(function(t){ return t.pts != null && t.name !== '?'; });
-  // Vérifie que les 2 équipes du match sont dans ce classement (sinon compétition non couverte)
-  const inTable = function(name){ return !!bpStandingsByName[bpTeamNorm(name)]; };
-  if (!teams.length || (!inTable(m.home) && !inTable(m.away))) {
-    body.innerHTML = '<div style="padding:18px;text-align:center;color:var(--txt2);font-size:13px">Classement indisponible pour cette compétition pour le moment.</div>';
+  body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
+  // Équipes de CETTE compétition (d'après les matchs de la liste)
+  const compTeams = {};
+  matches.forEach(function(mm){ if ((mm.comp || 'ligue1') === comp) { compTeams[bpTeamNorm(mm.home)] = 1; compTeams[bpTeamNorm(mm.away)] = 1; } });
+  let stand = await bpEnsureCompStandings(comp);
+  if (!stand) stand = (comp === 'ligue1') ? bpStandings : null;
+  const teams = Object.keys(stand || {}).map(function(tid){ const s = stand[tid] || {}; return { name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null) }; })
+    .filter(function(t){ return t.pts != null && t.name !== '?' && compTeams[bpTeamNorm(t.name)]; });
+  if (!teams.length) {
+    body.innerHTML = '<div style="padding:18px;text-align:center;color:var(--txt2);font-size:13px">Classement ' + clab + ' indisponible pour le moment.</div>';
     return;
   }
-  // Projection : applique les résultats des matchs EN DIRECT (équipes présentes dans ce classement)
+  // Projection : applique les scores EN DIRECT des matchs de cette compétition
   const proj = {};
   teams.forEach(function(t){ proj[bpTeamNorm(t.name)] = { name: t.name, base: t.pts, add: 0, live: false }; });
   matches.forEach(function(mm){
     try {
+      if ((mm.comp || 'ligue1') !== comp) return;
       if (!(isMatchStarted(mm.time, mm.id) && !isMatchFinished(mm.time, mm.id))) return;
       const lv = liveData[mm.id]; if (!lv || lv.homeScore == null || lv.awayScore == null) return;
       const hn = bpTeamNorm(mm.home), an = bpTeamNorm(mm.away);
@@ -2807,8 +2824,7 @@ window.bpOpenTable = function(id){
   const rows = Object.keys(proj).map(function(k){ const p = proj[k]; return { name: p.name, total: p.base + p.add, add: p.add, live: p.live }; });
   rows.sort(function(a, b){ return b.total - a.total || a.name.localeCompare(b.name); });
   const meH = bpTeamNorm(m.home), meA = bpTeamNorm(m.away);
-  let html = '<div style="font-size:10px;color:var(--txt2);text-align:center;margin-bottom:6px">Points projetés avec les scores en direct \U0001F534</div>';
-  html += '<div style="display:flex;flex-direction:column;gap:1px">';
+  let html = '<div style="font-size:10px;color:var(--txt2);text-align:center;margin-bottom:6px">Points projetés avec les scores en direct \U0001F534</div><div style="display:flex;flex-direction:column;gap:1px">';
   rows.forEach(function(r, i){
     const isMe = (bpTeamNorm(r.name) === meH || bpTeamNorm(r.name) === meA);
     const bg = isMe ? 'background:rgba(26,111,212,.14);' : (i % 2 ? 'background:rgba(0,0,0,.03);' : '');
@@ -2868,7 +2884,7 @@ function bpBannerStatsHtml(m) {
       }
     }
     const _cs2 = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
-    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:#1a6fd4">🏆 Classement</span>';
+    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:rgba(0,0,0,0.55)">Classement</span>';
     return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + tableChip + hlChip + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
