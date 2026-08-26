@@ -2824,14 +2824,14 @@ window.bpOpenTable = async function(id){
   const rows = Object.keys(proj).map(function(k){ const p = proj[k]; return { name: p.name, total: p.base + p.add, add: p.add, live: p.live }; });
   rows.sort(function(a, b){ return b.total - a.total || a.name.localeCompare(b.name); });
   const meH = bpTeamNorm(m.home), meA = bpTeamNorm(m.away);
-  let html = '<div style="font-size:10px;color:var(--txt2);text-align:center;margin-bottom:6px">Points projetés avec les scores en direct \U0001F534</div><div style="display:flex;flex-direction:column;gap:1px">';
+  let html = '<div style="font-size:10px;color:var(--txt2);text-align:center;margin-bottom:6px">Points projetés avec les scores en direct 🔴</div><div style="display:flex;flex-direction:column;gap:1px">';
   rows.forEach(function(r, i){
     const isMe = (bpTeamNorm(r.name) === meH || bpTeamNorm(r.name) === meA);
     const bg = isMe ? 'background:rgba(26,111,212,.14);' : (i % 2 ? 'background:rgba(0,0,0,.03);' : '');
     const zone = i < 3 ? '#16a34a' : (i >= rows.length - 3 ? '#e5544d' : 'transparent');
     html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;' + bg + '">' +
       '<span style="width:18px;text-align:center;font-weight:800;font-size:12px;border-left:3px solid ' + zone + ';padding-left:4px">' + (i + 1) + '</span>' +
-      '<span style="flex:1;font-size:12px;font-weight:' + (isMe ? '800' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + bpEscape(r.name) + (r.live ? ' \U0001F534' : '') + '</span>' +
+      '<span style="flex:1;font-size:12px;font-weight:' + (isMe ? '800' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + bpEscape(r.name) + (r.live ? ' 🔴' : '') + '</span>' +
       (r.add > 0 ? '<span style="font-size:9px;color:#16a34a;font-weight:800">+' + r.add + '</span>' : '') +
       '<span style="font-weight:900;font-size:13px;min-width:26px;text-align:right">' + r.total + '</span>' +
     '</div>';
@@ -2884,7 +2884,7 @@ function bpBannerStatsHtml(m) {
       }
     }
     const _cs2 = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
-    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:rgba(0,0,0,0.55)">Classement</span>';
+    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:rgba(0,0,0,0.55)">Classement Live</span>';
     return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + tableChip + hlChip + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
