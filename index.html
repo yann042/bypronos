@@ -2742,6 +2742,8 @@ let bpBannerTab = {}; // matchId -> 'forme' | 'h2h' | 'h2hdom' | null
 window.bpSetBannerTab = function(mid, tab){ bpBannerTab[mid] = (bpBannerTab[mid] === tab) ? null : tab; try { renderMatches(); } catch(e){} };
 let bpStatsOpen = {};
 window.bpToggleStats = function(mid){ bpStatsOpen[mid] = !bpStatsOpen[mid]; if (!bpStatsOpen[mid]) bpBannerTab[mid] = null; try { renderMatches(); } catch(e){} };
+let bpVideoOpen = {};
+window.bpToggleVideo = function(mid){ bpVideoOpen[mid] = !bpVideoOpen[mid]; try { renderMatches(); } catch(e){} };
 let bpFormTip = {};
 window.bpShowFormTip = function(mid, teamId, idx){ const cur = bpFormTip[mid]; bpFormTip[mid] = (cur && cur.teamId === teamId && cur.idx === idx) ? null : { teamId: teamId, idx: idx }; try { renderMatches(); } catch(e){} };
 let _bpH2HTimer = null;
@@ -2799,7 +2801,18 @@ function bpBannerStatsHtml(m) {
     const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Stats</span>';
     const _fin = (typeof isMatchFinished === 'function') ? isMatchFinished(m.time, m.id) : false;
     const _cs = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
-    const hlChip = _fin ? ('<span onclick="event.stopPropagation(); bpOpenHighlights(' + m.id + ')" style="' + _cs + ';background:#0d7a4a">▶️ L1</span><span onclick="event.stopPropagation(); bpOpenHighlightsYt(' + m.id + ')" style="' + _cs + ';background:#e5251b">▶️ YT</span>') : '';
+    let hlChip = '';
+    if (_fin) {
+      const _comp = m.comp || 'ligue1';
+      const _clab = _comp === 'ligue2' ? 'Ligue 2' : (_comp === 'premier' ? 'Premier League' : 'Ligue 1');
+      if (bpVideoOpen[m.id]) {
+        hlChip = '<span onclick="event.stopPropagation(); bpOpenHighlights(' + m.id + ')" style="' + _cs + ';background:#0d7a4a">▶️ ' + _clab + '</span>' +
+                 '<span onclick="event.stopPropagation(); bpOpenHighlightsYt(' + m.id + ')" style="' + _cs + ';background:#e5251b">▶️ YouTube</span>' +
+                 '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.55)">✕</span>';
+      } else {
+        hlChip = '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.55)">📹 Vidéos</span>';
+      }
+    }
     return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + hlChip + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
