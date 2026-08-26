@@ -1329,6 +1329,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 <div class="compo-modal" id="bpPenModal"><div class="compo-box" style="max-width:370px;text-align:center"><div class="compo-close" onclick="bpClosePen()">✕</div><div class="compo-title">⚽ Penalty</div><div id="bpPenInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-pen-mult" id="bpPenMult"></div><div class="bp-pen-stage" id="bpPenStage"><div class="bp-pen-goalframe"></div><div class="bp-pen-keeper" id="bpPenKeeper">🧤</div><div class="bp-pen-ball" id="bpPenBall">⚽</div><div class="bp-pen-zones" id="bpPenZones"></div></div><div class="bp-pen-score" id="bpPenScore"></div><div id="bpPenResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div class="bp-pen-diff" id="bpPenDiff"></div><div id="bpPenControls" style="margin-top:8px"></div></div></div>
 <div class="compo-modal" id="bpQuizModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseQuiz()">✕</div><div class="compo-title">❓ Quiz Foot</div><div id="bpQuizBody"></div></div></div>
 <div class="compo-modal" id="bpFsModal"><div class="compo-box" style="max-width:380px;text-align:center"><div class="compo-close" onclick="bpCloseFs()">✕</div><div class="compo-title">🃏 Football Studio</div><div id="bpFsInfo" style="font-size:12px;color:var(--txt2);margin-bottom:4px"></div><div class="bp-fs-table"><div class="bp-fs-cards"><div class="bp-fs-side"><div class="lab" style="color:#ff8a80">DOMICILE</div><div class="bp-fs-card back" id="bpFsCardH"></div></div><div class="bp-fs-vs">VS</div><div class="bp-fs-side"><div class="lab" style="color:#82b1ff">EXTÉRIEUR</div><div class="bp-fs-card back" id="bpFsCardA"></div></div></div><div class="bp-fs-bets" id="bpFsBets"></div></div><div id="bpFsResult" style="min-height:22px;font-weight:800;margin-top:2px"></div><div id="bpFsControls" style="margin-top:8px"></div></div></div>
+<div class="compo-modal" id="bpTableModal"><div class="compo-box" style="max-width:400px"><div class="compo-close" onclick="bpCloseTable()">✕</div><div class="compo-title" id="bpTableTitle">🏆 Classement en direct</div><div id="bpTableBody"></div></div></div>
 <div class="compo-modal" id="bpPotModal" onclick="if(event.target===this)bpClosePotDetail()"><div class="compo-box" style="max-width:280px"><div class="compo-close" onclick="bpClosePotDetail()">✕</div><div class="compo-title" id="bpPotTitle" style="font-size:16px">🎯 Points possibles</div><div id="bpPotBody"></div></div></div>
 <div class="goal-overlay" id="goalOverlay">
   <div class="goal-card">
@@ -2769,6 +2770,59 @@ async function bpEnsureH2H(m) {
     }
   } catch(e) { bpH2H[m.id] = undefined; }
 }
+function bpCloseTable(){ const m = document.getElementById('bpTableModal'); if (m) m.style.display = 'none'; }
+window.bpCloseTable = bpCloseTable;
+window.bpOpenTable = function(id){
+  const m = matches.find(function(x){ return x.id === id; });
+  const modal = document.getElementById('bpTableModal'); if (!modal || !m) return;
+  modal.style.display = 'flex';
+  const title = document.getElementById('bpTableTitle');
+  const comp = m.comp || 'ligue1';
+  const clab = comp === 'ligue2' ? 'Ligue 2' : (comp === 'premier' ? 'Premier League' : 'Ligue 1');
+  if (title) title.innerHTML = '\U0001F3C6 Classement en direct \u2014 ' + clab;
+  const body = document.getElementById('bpTableBody'); if (!body) return;
+  // Base : toutes les équipes du classement chargé
+  const teams = Object.keys(bpStandings || {}).map(function(tid){ const s = bpStandings[tid] || {}; return { name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null), rank: (s.rank != null ? s.rank : s.rang) }; }).filter(function(t){ return t.pts != null && t.name !== '?'; });
+  // Vérifie que les 2 équipes du match sont dans ce classement (sinon compétition non couverte)
+  const inTable = function(name){ return !!bpStandingsByName[bpTeamNorm(name)]; };
+  if (!teams.length || (!inTable(m.home) && !inTable(m.away))) {
+    body.innerHTML = '<div style="padding:18px;text-align:center;color:var(--txt2);font-size:13px">Classement indisponible pour cette compétition pour le moment.</div>';
+    return;
+  }
+  // Projection : applique les résultats des matchs EN DIRECT (équipes présentes dans ce classement)
+  const proj = {};
+  teams.forEach(function(t){ proj[bpTeamNorm(t.name)] = { name: t.name, base: t.pts, add: 0, live: false }; });
+  matches.forEach(function(mm){
+    try {
+      if (!(isMatchStarted(mm.time, mm.id) && !isMatchFinished(mm.time, mm.id))) return;
+      const lv = liveData[mm.id]; if (!lv || lv.homeScore == null || lv.awayScore == null) return;
+      const hn = bpTeamNorm(mm.home), an = bpTeamNorm(mm.away);
+      if (!proj[hn] || !proj[an]) return;
+      if (lv.homeScore > lv.awayScore) proj[hn].add += 3;
+      else if (lv.awayScore > lv.homeScore) proj[an].add += 3;
+      else { proj[hn].add += 1; proj[an].add += 1; }
+      proj[hn].live = true; proj[an].live = true;
+    } catch(e){}
+  });
+  const rows = Object.keys(proj).map(function(k){ const p = proj[k]; return { name: p.name, total: p.base + p.add, add: p.add, live: p.live }; });
+  rows.sort(function(a, b){ return b.total - a.total || a.name.localeCompare(b.name); });
+  const meH = bpTeamNorm(m.home), meA = bpTeamNorm(m.away);
+  let html = '<div style="font-size:10px;color:var(--txt2);text-align:center;margin-bottom:6px">Points projetés avec les scores en direct \U0001F534</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:1px">';
+  rows.forEach(function(r, i){
+    const isMe = (bpTeamNorm(r.name) === meH || bpTeamNorm(r.name) === meA);
+    const bg = isMe ? 'background:rgba(26,111,212,.14);' : (i % 2 ? 'background:rgba(0,0,0,.03);' : '');
+    const zone = i < 3 ? '#16a34a' : (i >= rows.length - 3 ? '#e5544d' : 'transparent');
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;' + bg + '">' +
+      '<span style="width:18px;text-align:center;font-weight:800;font-size:12px;border-left:3px solid ' + zone + ';padding-left:4px">' + (i + 1) + '</span>' +
+      '<span style="flex:1;font-size:12px;font-weight:' + (isMe ? '800' : '500') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + bpEscape(r.name) + (r.live ? ' \U0001F534' : '') + '</span>' +
+      (r.add > 0 ? '<span style="font-size:9px;color:#16a34a;font-weight:800">+' + r.add + '</span>' : '') +
+      '<span style="font-weight:900;font-size:13px;min-width:26px;text-align:right">' + r.total + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+  body.innerHTML = html;
+};
 function bpHighlightManual(m){
   try { if (window.bpHighlights && window.bpHighlights[m.id]) return window.bpHighlights[m.id]; } catch(e){}
   return null;
@@ -2813,7 +2867,9 @@ function bpBannerStatsHtml(m) {
         hlChip = '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.55)">📹 Vidéos</span>';
       }
     }
-    return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + hlChip + '</div>');
+    const _cs2 = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
+    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:#1a6fd4">🏆 Classement</span>';
+    return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + tableChip + hlChip + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
   const tagBtn = function(id, label){
