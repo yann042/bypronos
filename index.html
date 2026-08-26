@@ -2861,21 +2861,21 @@ function bpBannerStatsHtml(m) {
   if (!bpStatsOpen[m.id]) {
     const btn = '<span onclick="event.stopPropagation(); bpToggleStats(' + m.id + ')" style="cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.9);white-space:nowrap">📊 Stats</span>';
     const _fin = (typeof isMatchFinished === 'function') ? isMatchFinished(m.time, m.id) : false;
-    const _cs = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
+    const _cs = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:rgba(255,255,255,0.9)';
     let hlChip = '';
     if (_fin) {
       const _comp = m.comp || 'ligue1';
       const _clab = _comp === 'ligue2' ? 'Ligue 2' : (_comp === 'premier' ? 'Premier League' : 'Ligue 1');
       if (bpVideoOpen[m.id]) {
-        hlChip = '<span onclick="event.stopPropagation(); bpOpenHighlights(' + m.id + ')" style="' + _cs + ';background:#0d7a4a">▶️ ' + _clab + '</span>' +
-                 '<span onclick="event.stopPropagation(); bpOpenHighlightsYt(' + m.id + ')" style="' + _cs + ';background:#e5251b">▶️ YouTube</span>' +
-                 '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.55)">✕</span>';
+        hlChip = '<span onclick="event.stopPropagation(); bpOpenHighlights(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.5)">▶️ ' + _clab + '</span>' +
+                 '<span onclick="event.stopPropagation(); bpOpenHighlightsYt(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.5)">▶️ YouTube</span>' +
+                 '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.5)">✕</span>';
       } else {
-        hlChip = '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.55)">📹 Vidéos</span>';
+        hlChip = '<span onclick="event.stopPropagation(); bpToggleVideo(' + m.id + ')" style="' + _cs + ';background:rgba(0,0,0,0.5)">📹 Vidéos</span>';
       }
     }
-    const _cs2 = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:#fff';
-    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:rgba(0,0,0,0.55)">Classement Live</span>';
+    const _cs2 = 'cursor:pointer;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.2px;padding:2px 7px;border-radius:10px;white-space:nowrap;color:rgba(255,255,255,0.9)';
+    const tableChip = '<span onclick="event.stopPropagation(); bpOpenTable(' + m.id + ')" style="' + _cs2 + ';background:rgba(0,0,0,0.5)">Classement Live</span>';
     return wrap('<div style="display:inline-flex;gap:5px;justify-content:center;flex-wrap:wrap">' + compoChip + btn + tableChip + hlChip + '</div>');
   }
   const tab = bpBannerTab[m.id] || null;
