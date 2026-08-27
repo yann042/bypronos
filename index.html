@@ -2788,10 +2788,15 @@ window.bpOpenTable = async function(id){
   const body = document.getElementById('bpTableBody'); if (!body) return;
   body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt2)">Chargement\u2026</div>';
   // IDs des équipes de CETTE compétition (fiable, via les matchs)
+  const leagueMap = { ligue1: 61, ligue2: 62, premier: 39 };
+  const lgId = String(leagueMap[comp] || 61);
   const compIds = {};
   matches.forEach(function(mm){ if ((mm.comp || 'ligue1') === comp) { if (mm.homeId != null) compIds[String(mm.homeId)] = 1; if (mm.awayId != null) compIds[String(mm.awayId)] = 1; } });
   const stand = await bpEnsureCompStandings(comp);
-  const teams = Object.keys(stand || {}).filter(function(tid){ return compIds[String(tid)]; }).map(function(tid){ const s = stand[tid] || {}; return { id: String(tid), name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null) }; }).filter(function(t){ return t.pts != null && t.name !== '?'; });
+  // Si la CF fournit le championnat par équipe (champ 'league') -> filtrage complet et fiable.
+  // Sinon repli sur les IDs des équipes présentes dans les matchs (peut être incomplet).
+  const _hasLg = Object.keys(stand || {}).some(function(tid){ return stand[tid] && stand[tid].league != null; });
+  const teams = Object.keys(stand || {}).filter(function(tid){ const s = stand[tid] || {}; return _hasLg ? (String(s.league) === lgId) : compIds[String(tid)]; }).map(function(tid){ const s = stand[tid] || {}; return { id: String(tid), name: (s.name || s.nom || '?'), pts: (s.points != null ? s.points : null) }; }).filter(function(t){ return t.pts != null && t.name !== '?'; });
   if (!teams.length) {
     body.innerHTML = '<div style="padding:18px;text-align:center;color:var(--txt2);font-size:13px">Classement <b>' + clab + '</b> indisponible pour le moment.</div>';
     return;
