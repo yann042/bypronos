@@ -1232,7 +1232,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         </div>
         <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenalty" style="color:var(--acc3);font-weight:700">0 pts</span></div>
         <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotal" style="color:var(--acc)">0 pts</span></div>
-        <button class="place-btn" onclick="placeBets()">VALIDER MES PARIS →</button>
       </div>
     </div>
   </div>
@@ -1718,16 +1717,19 @@ let bpBackfilled = false;
 // injecter un match interdit dans une ligue (ex. Premier League hors POTES, Dijon hors POTES...).
 function bpBetEligibleInLeague(b, code) {
   code = (code || '').toUpperCase();
-  const comp = (b && b.comp) || 'ligue1';
-  const name = ((b && b.home) || '') + ' ' + ((b && b.away) || '');
+  // Normalisation : minuscules, sans accents, tirets/espaces unifies -> "Saint-Etienne" == "saint etienne"
+  const norm = function(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-\s]+/g,' '); };
+  const name = norm(((b && b.home) || '') + ' ' + ((b && b.away) || ''));
   const has = function(n){ return name.indexOf(n) !== -1; };
-  if (comp === 'ligue1') return true;
-  if (comp === 'ligue2') {
-    if (code === 'POTES') return has('Saint Etienne');
-    return has('Saint Etienne') || has('Dijon');
+  const comp = (b && b.comp) || '';
+  // Detection par nom d'equipe en secours, au cas ou comp serait vide.
+  const PL = ['arsenal','manchester','man utd','man city','aston villa','liverpool','chelsea','tottenham','newcastle','everton','west ham','wolves','wolverhampton','brighton','fulham','brentford','crystal palace','nottingham','bournemouth','leicester','ipswich','southampton','burnley','sunderland','leeds'];
+  if (comp === 'premier' || PL.some(has)) return code === 'POTES';           // PL : uniquement POTES
+  if (comp === 'ligue2' || has('saint etienne') || has('dijon')) {           // Ligue 2 (St-Etienne / Dijon)
+    if (code === 'POTES') return has('saint etienne');                       // POTES : seulement les matchs de St-Etienne (donc Dijon-StE oui, Dijon-autre non)
+    return has('saint etienne') || has('dijon');                            // CAPIO / RESTALLIANCE : St-Etienne + Dijon
   }
-  if (comp === 'premier') return code === 'POTES';
-  return true; // worldcup / autres : pas de restriction connue
+  return true;                                                               // Ligue 1 et reste : partout
 }
 function bpBackfillBetInfo() {
   if (bpBackfilled) return;
@@ -2207,9 +2209,10 @@ function buildCard(m) {
       h: s.h, a: s.a, odd: scoreOdd(m, s.h, s.a)
     }));
 
+    let _mvb=null; try { const _mp=loadPlayers()[currentPlayer]; _mvb=_mp&&_mp.validatedBets&&(_mp.validatedBets[m.id]||_mp.validatedBets[String(m.id)]); } catch(e){}
     const pills = scores.map(s => {
       const key = `${m.id}_${s.h}_${s.a}`;
-      const sel = betslip[key] ? 'selected' : '';
+      const sel = (betslip[key] || (_mvb && String(_mvb.h)===String(s.h) && String(_mvb.a)===String(s.a))) ? 'selected' : '';
       return `<div class="score-pill ${pillCls} ${sel}" onclick="toggleScore(${m.id},${s.h},${s.a})">
         <span class="pill-score">${s.h}-${s.a}</span>
         <span class="pill-odd">${s.odd.toFixed(1).replace(".", ",")}</span>
@@ -2226,27 +2229,8 @@ function buildCard(m) {
       </div>`;
     }
 
-    const betKey = Object.keys(betslip).find(k => k.startsWith(m.id + '_'));
-    let footerHtml = '';
-    if (betKey) {
-      const b = betslip[betKey];
-      const ptsR = fmtPts(b.resultOdd);
-      const ptsS = fmtPts(b.scoreOdd);
-      const ptsMax = fmtPts(b.resultOdd + b.scoreOdd);
-      footerHtml = `<div class="score-step-footer">
-        <div class="score-step-recap">
-          <span class="recap-score">🎯 ${b.h}-${b.a} · ${b.resultLabel}</span>
-          <div class="recap-pts">
-            <span class="recap-pt-item result">✅ ${ptsR} pts résultat</span>
-            <span class="recap-pt-item score">🎯 ${ptsS} pts score</span>
-            <span class="recap-pt-item total">= ${ptsMax} pts max</span>
-          </div>
-        </div>
-        <button class="btn-valider" onclick="placeBetForMatch(${m.id})">VALIDER ✓</button>
-      </div>`;
-    } else {
-      footerHtml = '<div class="score-step-hint">👆 Cliquez sur un score pour valider</div>';
-    }
+    // Validation automatique : le score choisi est enregistre au clic, plus de bouton VALIDER.
+    const footerHtml = '<div class="score-step-hint">👆 Cliquez sur un score : il est validé automatiquement (re-cliquez pour changer ou retirer)</div>';
 
     scoreBlock = `<div class="score-step ${pillCls}">
       <div class="score-step-label ${pillCls}">${clsLabel[scoreKey]}</div>
@@ -3460,25 +3444,55 @@ function selectResult(matchId, cls) {
 
 function toggleScore(matchId, h, a) {
   if(!currentPlayer){ openLogin(); return; }
-  const key=`${matchId}_${h}_${a}`;
   const m=matches.find(x=>x.id===matchId);
   if(!m) return;
-  if(betslip[key]) {
-    delete betslip[key];
-  } else {
+  if(isMatchStarted(m.time, m.id)) { showNotif('\u23f1 Match commence, pari verrouille'); return; }
+
+  // Pari deja valide sur ce match (si on rouvre pour changer / retirer)
+  let _vb=null;
+  try { const _p=loadPlayers()[currentPlayer]; _vb=_p&&_p.validatedBets&&(_p.validatedBets[matchId]||_p.validatedBets[String(matchId)]); } catch(e){}
+  const dejaCeScore = _vb && String(_vb.h)===String(h) && String(_vb.a)===String(a);
+
+  if (dejaCeScore) {
+    // Re-clic sur le meme score => on retire le prono
+    bpRemoveValidatedBet(matchId);
+    delete matchState[matchId];
     Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
-    const odd=scoreOdd(m,h,a);
-    const res=deduceResult(m,h,a);
-    const rMap={win:m.odds[0],draw:m.odds[1],lose:m.odds[2]};
-    betslip[key]={matchId,h,a,matchName:m.home+' - '+m.away,home:m.home,away:m.away,scoreOdd:odd,resultLabel:res.label,resultCls:res.cls,resultShort:res.short,resultOdd:rMap[res.cls],stake:1};
+    renderMatches(); renderBetslip(); autosave();
+    return;
   }
-  renderMatches();
-  renderBetslip();
-  autosave();
-  // Ouvrir le tiroir mobile automatiquement si un score est sélectionné
-  if (Object.keys(betslip).length > 0 && window.innerWidth <= 768) {
-    openMobileSlip();
+
+  // Nouveau score => on le pose puis on VALIDE immediatement (score selectionne = prono valide)
+  const key=`${matchId}_${h}_${a}`;
+  Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+  const odd=scoreOdd(m,h,a);
+  const res=deduceResult(m,h,a);
+  const rMap={win:m.odds[0],draw:m.odds[1],lose:m.odds[2]};
+  betslip[key]={matchId,h,a,matchName:m.home+' - '+m.away,home:m.home,away:m.away,scoreOdd:odd,resultLabel:res.label,resultCls:res.cls,resultShort:res.short,resultOdd:rMap[res.cls],stake:1};
+  placeBetForMatch(matchId);
+}
+// Retire un prono valide (re-clic sur le meme score). Symetrique de la validation auto.
+function bpRemoveValidatedBet(matchId) {
+  const players = loadPlayers();
+  const p = players[currentPlayer];
+  if (p && p.validatedBets) {
+    delete p.validatedBets[parseInt(matchId)];
+    delete p.validatedBets[String(matchId)];
+    savePlayers(players);
   }
+  // Coherence inter-ligues : retirer aussi ce match dans mes autres ligues
+  (async () => {
+    try {
+      const curCode = bpLeagueCode();
+      for (const lg of BP_LEAGUES) {
+        if (lg.code === curCode) continue;
+        const ref = db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets/' + parseInt(matchId));
+        const snap = await ref.once('value');
+        if (snap.exists()) await ref.remove();
+      }
+    } catch(e) { console.warn('bpRemoveValidatedBet', e); }
+  })();
+  try { showNotif('\ud83d\uddd1\ufe0f Prono retire'); } catch(e){}
 }
 
 // ==============================================
@@ -3559,18 +3573,22 @@ function placeBetForMatch(matchId) {
   if (!p.season.days[day]) p.season.days[day] = {ptsResult:0,ptsScore:0,bets:0};
   if (!p.validatedBets) p.validatedBets = {};
 
+  const _newBets = {};
   keys.forEach(k => {
     const b = betslip[k];
+    const _mm = matches.find(x => x.id === parseInt(b.matchId)) || {};
     // Points calcules d'apres les vrais resultats (recomputeStandings), pas a la validation.
-    p.validatedBets[parseInt(b.matchId)] = {
+    const _bet = {
       h:b.h, a:b.a,
       home:b.home, away:b.away,
-      comp:(matches.find(x => x.id === parseInt(b.matchId)) || {}).comp||'',
-      ts:(matches.find(x => x.id === parseInt(b.matchId)) || {}).ts||0,
+      comp:_mm.comp||'',
+      ts:_mm.ts||0,
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
       scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
-      round: (matches.find(x => x.id === parseInt(b.matchId)) || {}).round || 'Journée en cours'
+      round:_mm.round || 'Journée en cours'
     };
+    p.validatedBets[parseInt(b.matchId)] = _bet;
+    _newBets[parseInt(b.matchId)] = _bet;
     delete betslip[k];
   });
   p.current = {};
@@ -3578,10 +3596,12 @@ function placeBetForMatch(matchId) {
   const savedCls = matchState[matchId] ? matchState[matchId].resultCls : null;
   if (savedCls && p.validatedBets[parseInt(matchId)]) {
     p.validatedBets[parseInt(matchId)].resultCls = savedCls;
+    if (_newBets[parseInt(matchId)]) _newBets[parseInt(matchId)].resultCls = savedCls;
   }
   // Vider matchState pour replier le scoreBlock
   delete matchState[matchId];
   savePlayers(players);
+  bpPropagateBets(_newBets);
 
   const m = matches.find(x => x.id === matchId);
   showNotif('✅ Pari validé sur ' + (m ? m.home + ' - ' + m.away : 'le match'));
@@ -6451,7 +6471,6 @@ window.addEventListener('load', ()=>{ if (!bpRestoreSession()) openLogin(); setT
     </div>
     <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenaltyMobile" style="color:var(--acc3);font-weight:700">0 pts</span></div>
     <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotalMobile" style="color:var(--acc)">0 pts</span></div>
-    <button class="place-btn" style="margin-top:10px" onclick="placeBets()">VALIDER MES PARIS →</button>
   </div>
 </div>
 
