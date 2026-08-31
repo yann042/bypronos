@@ -1713,6 +1713,22 @@ function bpLeagueFilter(list) {
   });
 }
 let bpBackfilled = false;
+// Un pari est-il eligible dans une ligue donnee ? Memes regles que bpLeagueFilter, mais pour un
+// code de ligue CIBLE explicite. Utilise par la propagation et la sync inter-ligues pour ne jamais
+// injecter un match interdit dans une ligue (ex. Premier League hors POTES, Dijon hors POTES...).
+function bpBetEligibleInLeague(b, code) {
+  code = (code || '').toUpperCase();
+  const comp = (b && b.comp) || 'ligue1';
+  const name = ((b && b.home) || '') + ' ' + ((b && b.away) || '');
+  const has = function(n){ return name.indexOf(n) !== -1; };
+  if (comp === 'ligue1') return true;
+  if (comp === 'ligue2') {
+    if (code === 'POTES') return has('Saint Etienne');
+    return has('Saint Etienne') || has('Dijon');
+  }
+  if (comp === 'premier') return code === 'POTES';
+  return true; // worldcup / autres : pas de restriction connue
+}
 function bpBackfillBetInfo() {
   if (bpBackfilled) return;
   if (!currentLeague || !bpAllMatches || !bpAllMatches.length) return;
@@ -3584,7 +3600,11 @@ async function bpPropagateBets(newBets) {
       if (lg.code === curCode) continue;
       const snap = await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer).once('value');
       if (!snap.exists()) continue; // le pseudo ne participe pas à cette ligue
-      await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets').update(newBets);
+      // Ne propager que les matchs autorises dans la ligue cible (ex. PL uniquement dans POTES)
+      const eligible = {};
+      Object.keys(newBets).forEach(function(mid){ if (bpBetEligibleInLeague(newBets[mid], lg.code)) eligible[mid] = newBets[mid]; });
+      if (!Object.keys(eligible).length) continue;
+      await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets').update(eligible);
       done.push(lg.code);
     }
     if (done.length) { try { showNotif('\u2194\ufe0f Pronos aussi enregistrés sur : ' + done.join(', ')); } catch(e){} }
@@ -3614,7 +3634,7 @@ window.bpSyncMyBetsAcrossLeagues = async function() {
     for (const c of codes) {
       const have = mine[c];
       const toAdd = {};
-      Object.keys(union).forEach(function(mid){ if (!(mid in have)) toAdd[mid] = union[mid]; });
+      Object.keys(union).forEach(function(mid){ if (!(mid in have) && bpBetEligibleInLeague(union[mid], c)) toAdd[mid] = union[mid]; });
       const n = Object.keys(toAdd).length;
       if (n) { await db.ref('leagues/' + c + '/standings/' + currentPlayer + '/validatedBets').update(toAdd); totalAdd += n; }
     }
@@ -4703,6 +4723,26 @@ function savePlayers(data) {
   localStorage.setItem(bpPlayersKey(),JSON.stringify(clean));
   savePlayers_league(clean);
 }
+// Reconcilie le roster local avec Firebase pour la ligue COURANTE.
+// Firebase est la source de verite du "qui participe" : on repart de son roster, donc un joueur
+// present en local mais absent de Firebase (fantome empile par l'ancien merge quand on passe
+// d'une ligue a l'autre, ex. Domdug/PLC de CAPIO apparaissant dans POTES) disparait proprement.
+// On PRESERVE toutefois le brouillon local (paris en cours non valides) du joueur courant,
+// et son entree entiere s'il vient de rejoindre et que Firebase n'a pas encore recu son PATCH.
+function bpReconcilePlayers(localPlayers, fbPlayers) {
+  const fb = bpFilterPlayers(fbPlayers || {});
+  const out = {};
+  Object.keys(fb).forEach(function(nm){ out[nm] = fb[nm]; });
+  if (currentPlayer && localPlayers && localPlayers[currentPlayer]) {
+    const loc = localPlayers[currentPlayer];
+    if (!out[currentPlayer]) {
+      out[currentPlayer] = loc; // je viens de rejoindre : Firebase pas encore a jour, on garde ma copie
+    } else if (loc.current && loc.current.betslip && Object.keys(loc.current.betslip).length) {
+      out[currentPlayer] = Object.assign({}, out[currentPlayer], { current: loc.current });
+    }
+  }
+  return out;
+}
 function autosave() {
   if(!currentPlayer) return;
   const players=loadPlayers();
@@ -5747,7 +5787,7 @@ async function syncFromFirebase() {
     const fbPlayers = currentLeague ? await loadPlayersFromLeague() : await loadPlayersFromFirebase();
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
       const localPlayers = loadPlayers();
-      const merged = Object.assign({}, localPlayers, bpFilterPlayers(fbPlayers));
+      const merged = bpReconcilePlayers(localPlayers, fbPlayers);
       localStorage.setItem(bpPlayersKey(), JSON.stringify(merged));
       renderMatches();
       renderBetslip();
@@ -5763,7 +5803,7 @@ function watchFirebase() {
       const fbPlayers = await loadPlayersFromFirebase();
       if (fbPlayers && Object.keys(fbPlayers).length > 0) {
         const localPlayers = loadPlayers();
-        const merged = Object.assign({}, localPlayers, bpFilterPlayers(fbPlayers));
+        const merged = bpReconcilePlayers(localPlayers, fbPlayers);
         const current = JSON.stringify(localPlayers);
         const next = JSON.stringify(merged);
         if (current !== next) {
