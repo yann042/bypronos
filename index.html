@@ -3590,6 +3590,43 @@ async function bpPropagateBets(newBets) {
     if (done.length) { try { showNotif('\u2194\ufe0f Pronos aussi enregistrés sur : ' + done.join(', ')); } catch(e){} }
   } catch(e) { console.warn('bpPropagateBets', e); }
 }
+// SYNC INTER-LIGUES (rattrapage retroactif). La propagation ci-dessus ne pousse que "vers l'avant"
+// au moment du clic Valider, et seulement vers les ligues ou le pseudo existe deja. Un joueur qui
+// valide sur une ligue AVANT d'en rejoindre une autre se retrouve donc "a vide" dans la 2e.
+// Cette fonction reconcilie : mes paris valides doivent etre les memes dans toutes mes ligues.
+// Regle de securite : on comble UNIQUEMENT les matchs manquants, jamais d'ecrasement d'un pari
+// deja present -> operation sure et idempotente (relancable sans effet de bord).
+window.bpSyncMyBetsAcrossLeagues = async function() {
+  try {
+    if (!currentPlayer) return 0;
+    const mine = {}; // { code: validatedBets } pour les ligues ou je participe
+    for (const lg of BP_LEAGUES) {
+      const snap = await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer).once('value');
+      if (!snap.exists()) continue;
+      mine[lg.code] = (snap.val() && snap.val().validatedBets) || {};
+    }
+    const codes = Object.keys(mine);
+    if (codes.length < 2) return 0; // il faut au moins 2 ligues pour synchroniser
+    // Union de tous mes paris (1re occurrence gardee ; on ne compare pas, on comble les trous)
+    const union = {};
+    codes.forEach(function(c){ Object.keys(mine[c]).forEach(function(mid){ if (!(mid in union)) union[mid] = mine[c][mid]; }); });
+    let totalAdd = 0;
+    for (const c of codes) {
+      const have = mine[c];
+      const toAdd = {};
+      Object.keys(union).forEach(function(mid){ if (!(mid in have)) toAdd[mid] = union[mid]; });
+      const n = Object.keys(toAdd).length;
+      if (n) { await db.ref('leagues/' + c + '/standings/' + currentPlayer + '/validatedBets').update(toAdd); totalAdd += n; }
+    }
+    if (totalAdd) {
+      try { await recomputeStandings(); } catch(e){}
+      try { renderRanking(); } catch(e){}
+      try { renderMatches(); } catch(e){}
+      try { showNotif('\u2194\ufe0f Pronos synchronises entre tes ligues (' + totalAdd + ')'); } catch(e){}
+    }
+    return totalAdd;
+  } catch(e) { console.warn('bpSyncMyBetsAcrossLeagues', e); return 0; }
+};
 function placeBets() {
   const keys=Object.keys(betslip);
   if(!keys.length) return;
@@ -4991,27 +5028,48 @@ function renderResultsView() {
   renderHistoryPanel();
 }
 
-function bpWeekPoints(data) {
+// Matchs officiels (regles) groupes par semaine : { weekKey: { mid: 1 } }
+// Sert a appliquer la penalite d'omission (-1) dans les classements Semaine et Choix semaine,
+// exactement comme recomputeStandings le fait pour la Saison.
+function bpWeekOfficials(players) {
+  var byWeek = {};
+  Object.keys(players || {}).forEach(function(nm){
+    var vb = (players[nm] && players[nm].validatedBets) || {};
+    Object.keys(vb).forEach(function(mid){
+      var b = vb[mid]; if (!b) return;
+      var live = liveData[parseInt(mid)] || liveData[mid];
+      var settled = b.cashedOut || (live && live.finished) || (b.finalHome != null && b.finalAway != null);
+      if (!settled) return;
+      var wk = bpWeekKey(b.ts); if (!wk) return;
+      (byWeek[wk] = byWeek[wk] || {})[String(mid)] = 1;
+    });
+  });
+  return byWeek;
+}
+function bpWeekPoints(data, officials) {
   try {
     const vb = (data && data.validatedBets) || {};
     const now = new Date();
     const dow = (now.getDay() + 6) % 7; // 0 = lundi
     const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow, 0, 0, 0, 0);
     const startTs = Math.floor(monday.getTime() / 1000);
-    let total = 0;
+    let total = 0; const bet = {};
     Object.keys(vb).forEach(function(mid){
       const b = vb[mid];
       if (!b.ts || b.ts < startTs) return;
+      bet[String(mid)] = 1;
       if (b.cashedOut) { total += (b.cashoutValue || 0); return; }
       const live = liveData[parseInt(mid)];
       const fh = live ? live.homeScore : b.finalHome;
       const fa = live ? live.awayScore : b.finalAway;
       if (fh != null && fa != null) { const lp = calcLivePts(b, fh, fa); if (lp) total += lp.pts; }
     });
+    // Penalite d'omission : -1 par match officiel de la semaine non pronostique
+    if (officials) Object.keys(officials).forEach(function(mid){ if (!bet[mid]) total -= 1; });
     return Math.round(total * 100) / 100;
   } catch(e) { return 0; }
 }
-function bpWeekPointsFor(data, weekKey) {
+function bpWeekPointsFor(data, weekKey, officials) {
   try {
     if (!weekKey) return 0;
     const p = weekKey.split('-');
@@ -5019,16 +5077,19 @@ function bpWeekPointsFor(data, weekKey) {
     const startTs = Math.floor(start.getTime() / 1000);
     const endTs = startTs + 7 * 86400;
     const vb = (data && data.validatedBets) || {};
-    let total = 0;
+    let total = 0; const bet = {};
     Object.keys(vb).forEach(function(mid){
       const b = vb[mid];
       if (!b.ts || b.ts < startTs || b.ts >= endTs) return;
+      bet[String(mid)] = 1;
       if (b.cashedOut) { total += (b.cashoutValue || 0); return; }
       const live = liveData[parseInt(mid)];
       const fh = live ? live.homeScore : b.finalHome;
       const fa = live ? live.awayScore : b.finalAway;
       if (fh != null && fa != null) { const lp = calcLivePts(b, fh, fa); if (lp) total += lp.pts; }
     });
+    // Penalite d'omission : -1 par match officiel de cette semaine non pronostique
+    if (officials) Object.keys(officials).forEach(function(mid){ if (!bet[mid]) total -= 1; });
     return Math.round(total * 100) / 100;
   } catch(e) { return 0; }
 }
@@ -5046,13 +5107,15 @@ function renderRankingPanel() {
       ? wks.map(function(wk){ return '<button class="history-filter-btn' + (rankChosenWeek === wk ? ' active' : '') + '" onclick="setRankWeek(this,\'' + wk + '\')">' + bpWeekLabel(wk) + '</button>'; }).join('')
       : '<span style="font-size:11px;color:var(--txt2);padding:2px">Aucune semaine passée</span>';
   }
+  const _officials = bpWeekOfficials(players);
+  const _curWk = bpWeekKey(Math.floor(Date.now() / 1000));
   const rows = Object.entries(players)
     .map(([name, data]) => {
       const pts = rankTab === 'saison'
         ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
         : rankTab === 'choix'
-          ? bpWeekPointsFor(data, rankChosenWeek)
-          : bpWeekPoints(data);
+          ? bpWeekPointsFor(data, rankChosenWeek, _officials[rankChosenWeek])
+          : bpWeekPoints(data, _officials[_curWk]);
       return { name, pts };
     })
     .sort((a, b) => b.pts - a.pts);
@@ -5779,8 +5842,24 @@ async function bpAfterAuth() {
     } catch(e) { currentLeague = { code, name: code, isAdmin:false }; }
     localStorage.setItem('bypronos_league', code);
     const lb = document.getElementById('leagueBadge'); if (lb) lb.textContent = '· ' + currentLeague.name;
-    try { const uid = (window._firebaseAuth||firebase.auth())?.currentUser?.uid; if (uid) await db.ref('leagues/'+code+'/players/'+uid).update({ name: currentPlayer, uid }); } catch(e){}
+    // VERROU D'IDENTITE : un UID = un pseudo canonique, immuable.
+    // Si l'UID a deja un pseudo enregistre, on l'adopte au lieu de le rederiver du displayName/email
+    // (evite qu'un joueur reapparaisse a vide sous une nouvelle cle, ex. Cedric/Arsenul).
+    try {
+      const uid = (window._firebaseAuth||firebase.auth())?.currentUser?.uid;
+      if (uid) {
+        const savedName = (await db.ref('leagues/'+code+'/players/'+uid+'/name').once('value')).val();
+        if (savedName && savedName !== currentPlayer) {
+          currentPlayer = savedName;
+          localStorage.setItem('bypronos_player', savedName);
+          const _pn = document.getElementById('playerName'); if (_pn) _pn.textContent = savedName;
+          const _av = document.getElementById('playerAvatar'); if (_av) _av.textContent = savedName.slice(0,2).toUpperCase();
+        }
+        await db.ref('leagues/'+code+'/players/'+uid).update({ name: currentPlayer, uid });
+      }
+    } catch(e){}
     syncFromFirebase(); watchFirebase(); renderMatches(); bpApplyLeagueFilter();
+    bpSyncMyBetsAcrossLeagues(); // rattrapage inter-ligues (comble les paris manquants a l'entree)
   } else {
     showLeagueModal();
   }
