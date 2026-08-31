@@ -3627,7 +3627,7 @@ async function bpPropagateBets(newBets) {
       await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets').update(eligible);
       done.push(lg.code);
     }
-    if (done.length) { try { showNotif('\u2194\ufe0f Pronos aussi enregistrés sur : ' + done.join(', ')); } catch(e){} }
+    if (done.length) { try { showNotif('\u2194\ufe0f Pronos synchronisés entre tes ligues'); } catch(e){} }
   } catch(e) { console.warn('bpPropagateBets', e); }
 }
 // SYNC INTER-LIGUES (rattrapage retroactif). La propagation ci-dessus ne pousse que "vers l'avant"
@@ -3662,7 +3662,7 @@ window.bpSyncMyBetsAcrossLeagues = async function() {
       try { await recomputeStandings(); } catch(e){}
       try { renderRanking(); } catch(e){}
       try { renderMatches(); } catch(e){}
-      try { showNotif('\u2194\ufe0f Pronos synchronises entre tes ligues (' + totalAdd + ')'); } catch(e){}
+      try { showNotif('\u2194\ufe0f Pronos synchronisés entre tes ligues'); } catch(e){}
     }
     return totalAdd;
   } catch(e) { console.warn('bpSyncMyBetsAcrossLeagues', e); return 0; }
@@ -5091,6 +5091,50 @@ function renderResultsView() {
 // Matchs officiels (regles) groupes par semaine : { weekKey: { mid: 1 } }
 // Sert a appliquer la penalite d'omission (-1) dans les classements Semaine et Choix semaine,
 // exactement comme recomputeStandings le fait pour la Saison.
+// Matchs officiels sur toute la saison, LIVE inclus : un match compte des qu'il est en cours
+// (score dispo) ou termine ou regle. Base de la penalite d'omission pour la Saison en direct.
+function bpSeasonOfficials(players) {
+  const off = {};
+  Object.keys(players || {}).forEach(function(nm){
+    const vb = players[nm] && players[nm].validatedBets; if (!vb) return;
+    Object.keys(vb).forEach(function(mid){
+      const b = vb[mid]; if (!b) return;
+      const l = liveData[parseInt(mid)] || liveData[mid];
+      const liveOfficial = l && (l.finished || l.homeScore != null); // termine OU en cours
+      if (b.cashedOut || liveOfficial || (b.finalHome != null && b.finalAway != null)) off[String(mid)] = 1;
+    });
+  });
+  return off;
+}
+// Total SAISON calcule en direct : memes regles que recomputeStandings, mais les matchs EN COURS
+// sont projetes avec leur score actuel (au lieu de valoir 0). Converge sans a-coup vers le total
+// definitif quand les matchs se terminent. Inclut les ajustements manuels.
+function bpSeasonPointsLive(data, officials) {
+  const vb = (data && data.validatedBets) || {};
+  let sR = 0, sS = 0; const bet = {};
+  Object.keys(vb).forEach(function(mid){
+    const b = vb[mid]; if (!b) return;
+    bet[String(mid)] = 1;
+    if (b.cashedOut) { sR += (b.cashoutValue || 0); return; }
+    const live = liveData[parseInt(mid)] || liveData[mid];
+    let fh = null, fa = null;
+    if (live && (live.finished || live.homeScore != null)) { fh = live.homeScore; fa = live.awayScore; }
+    else if (b.finalHome != null && b.finalAway != null) { fh = b.finalHome; fa = b.finalAway; }
+    if (fh == null || fa == null) return; // match pas commence -> 0 pour l'instant
+    const lp = calcLivePts(b, fh, fa);
+    if (!lp) return;
+    if (lp.type === 'max')         { sR += b.resultOdd; sS += b.scoreOdd; }
+    else if (lp.type === 'bonus')  { sR += b.resultOdd; sS += 0.5; }
+    else if (lp.type === 'result') { sR += b.resultOdd; }
+    else                           { sR += -1; }
+  });
+  let omiss = 0;
+  if (officials) Object.keys(officials).forEach(function(mid){ if (!bet[mid]) omiss += 1; });
+  sR -= omiss;
+  const s = (data && data.season) || {};
+  sR += (s.manualResult || 0); sS += (s.manualScore || 0);
+  return Math.round((sR + sS) * 100) / 100;
+}
 function bpWeekOfficials(players) {
   var byWeek = {};
   Object.keys(players || {}).forEach(function(nm){
@@ -5168,11 +5212,12 @@ function renderRankingPanel() {
       : '<span style="font-size:11px;color:var(--txt2);padding:2px">Aucune semaine passée</span>';
   }
   const _officials = bpWeekOfficials(players);
+  const _seasonOff = bpSeasonOfficials(players);
   const _curWk = bpWeekKey(Math.floor(Date.now() / 1000));
   const rows = Object.entries(players)
     .map(([name, data]) => {
       const pts = rankTab === 'saison'
-        ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
+        ? bpSeasonPointsLive(data, _seasonOff)
         : rankTab === 'choix'
           ? bpWeekPointsFor(data, rankChosenWeek, _officials[rankChosenWeek])
           : bpWeekPoints(data, _officials[_curWk]);
