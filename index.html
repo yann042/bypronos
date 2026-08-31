@@ -5142,7 +5142,8 @@ function bpWeekOfficials(players) {
     Object.keys(vb).forEach(function(mid){
       var b = vb[mid]; if (!b) return;
       var live = liveData[parseInt(mid)] || liveData[mid];
-      var settled = b.cashedOut || (live && live.finished) || (b.finalHome != null && b.finalAway != null);
+      // Officiel des qu'il est termine, REGLE, ou EN COURS (score dispo) -> omission -1 des le coup d'envoi
+      var settled = b.cashedOut || (live && (live.finished || live.homeScore != null)) || (b.finalHome != null && b.finalAway != null);
       if (!settled) return;
       var wk = bpWeekKey(b.ts); if (!wk) return;
       (byWeek[wk] = byWeek[wk] || {})[String(mid)] = 1;
