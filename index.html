@@ -414,11 +414,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .ranking-view{padding:16px}
   .ranking-table{font-size:12px}
   .ranking-table th,.ranking-table td{padding:8px 6px}
-  .rank-pts{font-size:16px;width:70px}
-  .ranking-row{gap:7px}
-  .rank-stat{width:31px}
+  .rank-pts{font-size:16px;width:62px}
+  .ranking-row{gap:6px}
+  .rank-stat{width:33px}
   .rank-stat .nb{font-size:15px}
   .rank-name{font-size:14px}
+  .results-panel-header{padding:8px 10px;font-size:14px;gap:6px}
+  .rank-tabs .history-filter-btn{padding:2px 7px;font-size:10px}
 
   /* Live view */
   .live-view{padding:16px}
@@ -1097,7 +1099,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 @media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto;height:auto;padding:10px}}
 .results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;min-height:200px}
 @media(max-width:768px){.results-panel{min-height:150px;max-height:400px}}
-.results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;flex-wrap:nowrap}
+.rp-title{white-space:nowrap;flex-shrink:0}
+.rank-tabs-wrap{scrollbar-width:none}
+.rank-tabs-wrap::-webkit-scrollbar{display:none}
+.rank-tabs .history-filter-btn{padding:3px 9px;font-size:10.5px;white-space:nowrap}
 .results-panel-body{overflow-y:auto;flex:1;padding:8px}
 
 /* Classement */
@@ -1116,11 +1122,11 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:15px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rank-stats{display:flex;align-items:stretch;margin-left:auto;flex-shrink:0}
-.rank-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;width:34px;line-height:1.05;color:var(--txt2);border-left:1px solid rgba(0,0,0,.12)}
-.rank-stat .ic{font-size:10px}
-.rank-stat .nb{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700}
-.rank-pts{width:84px;text-align:right;white-space:nowrap;flex-shrink:0;padding-left:10px;border-left:1px solid rgba(0,0,0,.12)}
-.ranking-row.gold{padding:12px 12px 18px}
+.rank-stat{display:inline-flex;align-items:center;justify-content:center;gap:3px;width:38px;color:var(--txt2);border-left:1px solid rgba(0,0,0,.12)}
+.rank-stat .ic{font-size:11px;line-height:1}
+.rank-stat .nb{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;line-height:1}
+.rank-pts{width:78px;text-align:right;white-space:nowrap;flex-shrink:0;padding-left:10px;border-left:1px solid rgba(0,0,0,.12)}
+.ranking-row.gold{padding:13px 12px}
 .ranking-row.gold .rank-stat{color:#fff;border-left-color:rgba(255,255,255,.45)}
 .ranking-row.gold .rank-pts{border-left-color:rgba(255,255,255,.45)}
 .ranking-row.silver .rank-stat,.ranking-row.bronze .rank-stat{color:#333;border-left-color:rgba(0,0,0,.18)}
@@ -1265,14 +1271,14 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         <!-- Classement -->
         <div class="results-panel">
           <div class="results-panel-header">
-            🏆 Classement
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-              <div style="display:flex;gap:4px">
+            <span class="rp-title">🏆 Classement</span>
+            <div class="rank-tabs-wrap" style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;min-width:0;overflow-x:auto">
+              <div class="rank-tabs" style="display:flex;gap:4px">
                 <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
                 <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('semaine',this)">Semaine</button>
                 <button class="history-filter-btn" id="rankTabChoix" onclick="window.switchRankTab('choix',this)">Choix semaine</button>
               </div>
-              <div id="teamToggle" style="display:none;gap:4px">
+              <div id="teamToggle" class="rank-tabs" style="display:none;gap:4px">
                 <button class="history-filter-btn active" id="rankTabIndividuel" onclick="window.switchRankMode('individuel',this)">Individuel</button>
                 <button class="history-filter-btn" id="rankTabEquipes" onclick="window.switchRankMode('equipes',this)">Équipes</button>
               </div>
