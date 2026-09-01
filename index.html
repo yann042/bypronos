@@ -414,7 +414,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .ranking-view{padding:16px}
   .ranking-table{font-size:12px}
   .ranking-table th,.ranking-table td{padding:8px 6px}
-  .rank-pts{font-size:16px}
+  .rank-pts{font-size:16px;width:70px}
+  .ranking-row{gap:7px}
+  .rank-stat{width:38px}
+  .rank-stat .nb{font-size:15px}
 
   /* Live view */
   .live-view{padding:16px}
@@ -1110,7 +1113,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.gold .rank-pos{font-size:26px}
 .ranking-row.me{background:var(--bg2);border:1px solid var(--bord)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
-.rank-name{flex:1;font-weight:700;font-size:13px}
+.rank-name{flex:1;font-weight:700;font-size:13px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-stats{display:flex;align-items:stretch;margin-left:auto;flex-shrink:0}
+.rank-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;line-height:1.05;color:var(--txt2);border-left:1px solid rgba(0,0,0,.12)}
+.rank-stat .ic{font-size:10px}
+.rank-stat .nb{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700}
+.rank-pts{width:84px;text-align:right;white-space:nowrap;flex-shrink:0;padding-left:10px;border-left:1px solid rgba(0,0,0,.12)}
+.ranking-row.gold{padding:12px 12px 18px}
+.ranking-row.gold .rank-stat{color:#fff;border-left-color:rgba(255,255,255,.45)}
+.ranking-row.gold .rank-pts{border-left-color:rgba(255,255,255,.45)}
+.ranking-row.silver .rank-stat,.ranking-row.bronze .rank-stat{color:#333;border-left-color:rgba(0,0,0,.18)}
+.ranking-row.silver .rank-pts,.ranking-row.bronze .rank-pts{border-left-color:rgba(0,0,0,.18)}
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:6px 8px;border-bottom:1px solid var(--bord);flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -5266,16 +5279,12 @@ function renderRankingPanel() {
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + '">' + vLabel +
       '<span style="width:14px;font-size:14px;color:var(--acc);font-weight:900;flex-shrink:0;line-height:1">' + (isMe ? '▶' : '') + '</span>' +
       '<span class="rank-pos" style="' + (i===0?'background:rgba(0,0,0,.15);border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-size:20px':'') + '">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + r.name + (i===0 ? ' <span style="font-size:18px">🏆</span>' : '') + '</span>' +
-      '<span style="display:flex;align-items:stretch;margin-left:auto;flex-shrink:0" title="Bons résultats · Scores exacts">' +
-        '<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:38px;padding:0 8px;border-left:1px solid ' + (i<3?'rgba(255,255,255,.4)':'rgba(0,0,0,.12)') + ';line-height:1.05;color:' + (i<3?'#fff':'var(--txt2)') + '">' +
-          '<span style="font-size:10px">✅</span><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700">' + r.results + '</span>' +
-        '</span>' +
-        '<span style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:38px;padding:0 8px;border-left:1px solid ' + (i<3?'rgba(255,255,255,.4)':'rgba(0,0,0,.12)') + ';line-height:1.05;color:' + (i<3?'#fff':'var(--txt2)') + '">' +
-          '<span style="font-size:10px">🎯</span><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700">' + r.exacts + '</span>' +
-        '</span>' +
+      '<span class="rank-name">' + r.name + (i===0 ? ' <span style="font-size:16px">🏆</span>' : '') + '</span>' +
+      '<span class="rank-stats" title="Bons résultats · Scores exacts">' +
+        '<span class="rank-stat"><span class="ic">✅</span><span class="nb">' + r.results + '</span></span>' +
+        '<span class="rank-stat"><span class="ic">🎯</span><span class="nb">' + r.exacts + '</span></span>' +
       '</span>' +
-      '<span class="rank-pts" style="padding-left:10px;border-left:1px solid ' + (i<3?'rgba(255,255,255,.4)':'rgba(0,0,0,.12)') + ';color:' + (i<3?'':'#111') + '">' + fmtPts(r.pts) + ' pts</span>' +
+      '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
 
