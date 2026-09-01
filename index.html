@@ -1122,7 +1122,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px;min-width:0;display:flex;align-items:center;gap:4px}
 .rank-name .rn-text{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-name .rn-trophy{flex-shrink:0;font-size:12px;line-height:1}
+.rank-name .rn-trophy{flex-shrink:0;font-size:15px;line-height:1}
 .rank-stats{display:grid;grid-template-columns:repeat(2,26px);align-items:stretch;margin-left:auto;flex-shrink:0}
 .rank-stat{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--txt2)}
 .rank-stat .ic{font-size:10px;line-height:1.35}
@@ -5282,7 +5282,7 @@ function renderRankingPanel() {
   const html = rows.map((r, i) => {
     const isMe = r.name === currentPlayer;
     const cls = (podium[i] || '') + (isMe ? ' me' : '');
-    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
+    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:2px 2px;gap:0;width:11px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:6px;font-weight:900;line-height:1.35">' + l + '</span>';}).join('') + '</span>' : '';
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'8px':'12px') + '">' + vLabel +
       '<span style="width:14px;font-size:14px;color:var(--acc);font-weight:900;flex-shrink:0;line-height:1">' + (isMe ? '▶' : '') + '</span>' +
       '<span class="rank-pos" style="' + (i===0?'background:rgba(0,0,0,.15);border-radius:50%;width:27px;height:27px;display:inline-flex;align-items:center;justify-content:center;font-size:17px':'') + '">' + (medals[i] || (i+1)) + '</span>' +
@@ -6351,7 +6351,7 @@ async function renderTeamsRanking() {
     const tid = entry[0], t = entry[1];
     const cls = podium[i] || '';
     const isMe = currentUserTeam === tid;
-    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
+    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:2px 2px;gap:0;width:11px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:6px;font-weight:900;line-height:1.35">' + l + '</span>';}).join('') + '</span>' : '';
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + ';' + (isMe?'outline:2px solid var(--acc)':'') + '">' + vLabel +
       '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '>' : '') + '</span>' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
