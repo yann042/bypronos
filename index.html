@@ -5135,6 +5135,27 @@ function bpSeasonPointsLive(data, officials) {
   sR += (s.manualResult || 0); sS += (s.manualScore || 0);
   return Math.round((sR + sS) * 100) / 100;
 }
+// Compte, pour un joueur, le nombre de BONS RESULTATS et de SCORES EXACTS sur une periode.
+// startTs/endTs en secondes (null = pas de borne). Live inclus (coherent avec les points affiches).
+function bpTallyResultsScores(data, startTs, endTs) {
+  const vb = (data && data.validatedBets) || {};
+  let results = 0, exacts = 0;
+  Object.keys(vb).forEach(function(mid){
+    const b = vb[mid]; if (!b || b.cashedOut) return;
+    if (startTs != null && (!b.ts || b.ts < startTs)) return;
+    if (endTs != null && (!b.ts || b.ts >= endTs)) return;
+    const live = liveData[parseInt(mid)] || liveData[mid];
+    let fh = null, fa = null;
+    if (live && (live.finished || live.homeScore != null)) { fh = live.homeScore; fa = live.awayScore; }
+    else if (b.finalHome != null && b.finalAway != null) { fh = b.finalHome; fa = b.finalAway; }
+    if (fh == null || fa == null) return;
+    const lp = calcLivePts(b, fh, fa);
+    if (!lp) return;
+    if (lp.type === 'max') { results++; exacts++; }
+    else if (lp.type === 'bonus' || lp.type === 'result') { results++; }
+  });
+  return { results: results, exacts: exacts };
+}
 function bpWeekOfficials(players) {
   var byWeek = {};
   Object.keys(players || {}).forEach(function(nm){
@@ -5215,6 +5236,11 @@ function renderRankingPanel() {
   const _officials = bpWeekOfficials(players);
   const _seasonOff = bpSeasonOfficials(players);
   const _curWk = bpWeekKey(Math.floor(Date.now() / 1000));
+  // Bornes temporelles selon l'onglet, pour compter bons resultats / scores exacts sur le bon perimetre
+  const _n = new Date(); const _dw = (_n.getDay() + 6) % 7;
+  const _weekStartTs = Math.floor(new Date(_n.getFullYear(), _n.getMonth(), _n.getDate() - _dw, 0,0,0,0).getTime() / 1000);
+  let _chStart = null, _chEnd = null;
+  if (rankChosenWeek) { const _p = rankChosenWeek.split('-'); const _d = new Date(parseInt(_p[0]), parseInt(_p[1]) - 1, parseInt(_p[2]), 0,0,0,0); _chStart = Math.floor(_d.getTime() / 1000); _chEnd = _chStart + 7 * 86400; }
   const rows = Object.entries(players)
     .map(([name, data]) => {
       const pts = rankTab === 'saison'
@@ -5222,7 +5248,12 @@ function renderRankingPanel() {
         : rankTab === 'choix'
           ? bpWeekPointsFor(data, rankChosenWeek, _officials[rankChosenWeek])
           : bpWeekPoints(data, _officials[_curWk]);
-      return { name, pts };
+      const tally = rankTab === 'saison'
+        ? bpTallyResultsScores(data, null, null)
+        : rankTab === 'choix'
+          ? bpTallyResultsScores(data, _chStart, _chEnd)
+          : bpTallyResultsScores(data, _weekStartTs, null);
+      return { name, pts, results: tally.results, exacts: tally.exacts };
     })
     .sort((a, b) => b.pts - a.pts);
 
@@ -5235,7 +5266,10 @@ function renderRankingPanel() {
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + '">' + vLabel +
       '<span style="width:14px;font-size:14px;color:var(--acc);font-weight:900;flex-shrink:0;line-height:1">' + (isMe ? '▶' : '') + '</span>' +
       '<span class="rank-pos" style="' + (i===0?'background:rgba(0,0,0,.15);border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-size:20px':'') + '">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + r.name + (i===0 ? ' <span style="font-size:18px">🏆</span>' : '') + '</span>' +
+      '<span class="rank-name" style="display:flex;flex-direction:column;justify-content:center;line-height:1.15" title="Bons résultats · Scores exacts">' +
+        '<span>' + r.name + (i===0 ? ' <span style="font-size:18px">🏆</span>' : '') + '</span>' +
+        '<span style="font-size:10px;font-weight:600;color:' + (i<3?'rgba(255,255,255,.9)':'var(--txt2)') + '">✅ ' + r.results + ' · 🎯 ' + r.exacts + '</span>' +
+      '</span>' +
       '<span class="rank-pts" style="color:' + (i<3?'':'#111') + '">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
