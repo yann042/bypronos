@@ -1122,15 +1122,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
 .rank-name{flex:1;font-weight:700;font-size:13px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rank-stats{display:grid;grid-template-columns:repeat(2,26px);align-items:stretch;margin-left:auto;flex-shrink:0}
-.rank-stat{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--txt2);border-left:1px solid rgba(0,0,0,.12)}
+.rank-stat{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--txt2)}
 .rank-stat .ic{font-size:10px;line-height:1.35}
 .rank-stat .nb{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;line-height:1}
-.rank-pts{width:78px;text-align:right;white-space:nowrap;flex-shrink:0;padding-left:10px;border-left:1px solid rgba(0,0,0,.12)}
+.rank-pts{width:78px;text-align:right;white-space:nowrap;flex-shrink:0;padding-left:6px}
 .ranking-row.gold{padding:13px 12px}
-.ranking-row.gold .rank-stat{color:#fff;border-left-color:rgba(255,255,255,.45)}
-.ranking-row.gold .rank-pts{border-left-color:rgba(255,255,255,.45)}
-.ranking-row.silver .rank-stat,.ranking-row.bronze .rank-stat{color:#333;border-left-color:rgba(0,0,0,.18)}
-.ranking-row.silver .rank-pts,.ranking-row.bronze .rank-pts{border-left-color:rgba(0,0,0,.18)}
+.ranking-row.gold .rank-stat{color:#fff}
+.ranking-row.silver .rank-stat,.ranking-row.bronze .rank-stat{color:#333}
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:6px 8px;border-bottom:1px solid var(--bord);flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
