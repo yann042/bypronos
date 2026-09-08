@@ -1094,6 +1094,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .comp-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
 .comp-btn:hover{border-color:var(--acc);color:var(--acc)}
 .comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.mf-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
+.mf-btn:hover{border-color:var(--acc);color:var(--acc)}
+.mf-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
 
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;height:100%;overflow:hidden}
 @media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto;height:auto;padding:10px}}
@@ -1224,6 +1227,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 L1</button>
   <button class="comp-btn" id="compBtn4" onclick="selectComp('ligue2',this)">🇫🇷 L2</button>
   <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
+</div>
+<div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
+  <button class="mf-btn active" id="mfBtnTous" onclick="selectMatchFilter('tous',this)">Tous</button>
+  <button class="mf-btn" id="mfBtnAjouer" onclick="selectMatchFilter('ajouer',this)">📅 À jouer</button>
+  <button class="mf-btn" id="mfBtnLive" onclick="selectMatchFilter('live',this)">🔴 Live</button>
+  <button class="mf-btn" id="mfBtnFin" onclick="selectMatchFilter('termines',this)">✅ Terminés</button>
 </div>
 <div class="section-title" id="sectionTitle">⚽ Tous les matchs</div>
       <div id="matchList"></div>
@@ -2349,6 +2358,20 @@ function buildCard(m) {
 }
 
 let currentComp = 'all';
+let matchFilter = 'tous'; // tous | ajouer (a jouer cette semaine) | live | termines
+window.selectMatchFilter = function(f, btn) {
+  matchFilter = f;
+  document.querySelectorAll('.mf-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderMatches();
+};
+// Statut d'un match : 'termines' | 'live' | 'ajouer'
+function bpMatchStatus(m) {
+  const fin = (m.result !== undefined) || isMatchFinished(m.time, m.id) || (liveData[m.id] && liveData[m.id].finished);
+  if (fin) return 'termines';
+  if (isMatchStarted(m.time, m.id)) return 'live';
+  return 'ajouer';
+}
 
 function renderMatches() {
   // Pre-remplir MATCH_IMAGES depuis TEAM_MATCH_IMAGES
@@ -2360,13 +2383,22 @@ function renderMatches() {
   });
   const players = loadPlayers();
   const myBets = players[currentPlayer] && players[currentPlayer].validatedBets || {};
+  // Bornes de la semaine courante (pour le filtre "A jouer cette semaine")
+  const _n = new Date(); const _dw = (_n.getDay() + 6) % 7;
+  const _wkStart = new Date(_n.getFullYear(), _n.getMonth(), _n.getDate() - _dw, 0,0,0,0).getTime();
+  const _wkEnd = _wkStart + 7 * 86400000;
   const filtered = matches.filter(function(m) {
-    // Masquer les matchs avec resultat final connu
-    if (m.result !== undefined) {
-      // Afficher quand meme si le joueur a un pari validé (pour voir son résultat)
-      return !!myBets[m.id] || !!betslip[m.id];
-    }
     if (currentComp !== 'all' && (m.comp || 'ligue1') !== currentComp) return false;
+    const st = bpMatchStatus(m);
+    if (matchFilter === 'ajouer') {
+      if (st !== 'ajouer') return false;
+      let ts = 0; try { ts = parseKickoff(m.date, m.time).getTime(); } catch(e){}
+      return ts >= _wkStart && ts < _wkEnd;
+    }
+    if (matchFilter === 'live')     return st === 'live';
+    if (matchFilter === 'termines') return st === 'termines';
+    // 'tous' : comportement d'origine — on masque les matchs termines sauf si le joueur a parie
+    if (st === 'termines') return !!myBets[m.id] || !!betslip[m.id];
     return true;
   });
   // Épingler les matchs EN DIRECT en tête de liste (le reste garde son ordre chronologique)
