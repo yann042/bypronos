@@ -1103,6 +1103,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .mdate .mdate-num{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;line-height:1}
 .mdate .mdate-cnt{font-size:8px;opacity:.7;white-space:nowrap}
 .mdate-all{font-weight:800;font-size:12px}
+.mdate.mdate-past{opacity:.4;filter:grayscale(.35)}
+.mdate.mdate-past:hover{opacity:.75}
+.mdate.mdate-past.active{opacity:1;filter:none}
 
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;height:100%;overflow:hidden}
 @media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto;height:auto;padding:10px}}
@@ -2383,12 +2386,15 @@ function renderMatchDates() {
   }
   bar.dataset.sig = sig;
   const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const _t = new Date();
+  const todayStr = _t.getFullYear() + '-' + String(_t.getMonth()+1).padStart(2,'0') + '-' + String(_t.getDate()).padStart(2,'0');
   let html = '<button class="mdate mdate-all' + (active==='all'?' active':'') + '" data-d="all" onclick="selectMatchDate(\'all\',this)">Tous</button>';
   html += dates.map(function(d){
     const dt = new Date(d + 'T12:00:00');
     const jour = JOURS[dt.getDay()] || '';
     const jj = d.slice(8,10), mm = d.slice(5,7);
-    return '<button class="mdate' + (active===d?' active':'') + '" data-d="' + d + '" onclick="selectMatchDate(\'' + d + '\',this)">' +
+    const past = d < todayStr ? ' mdate-past' : '';
+    return '<button class="mdate' + (active===d?' active':'') + past + '" data-d="' + d + '" onclick="selectMatchDate(\'' + d + '\',this)">' +
       '<span class="mdate-day">' + jour + '</span>' +
       '<span class="mdate-num">' + jj + '/' + mm + '</span>' +
       '<span class="mdate-cnt">' + seen[d] + ' match' + (seen[d]>1?'s':'') + '</span>' +
