@@ -1103,6 +1103,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .mdate .mdate-num{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;line-height:1}
 .mdate .mdate-cnt{font-size:8px;opacity:.7;white-space:nowrap}
 .mdate-all{font-weight:800;font-size:12px}
+.sports-sticky{position:sticky;top:0;z-index:6;background:var(--bg);margin:-16px -20px 8px;padding:14px 20px 6px;border-bottom:1px solid var(--bord)}
+.sports-sticky .mdate-bar{margin-bottom:2px}
+.sports-sticky > div:first-child{margin-bottom:8px}
+@media(max-width:768px){.sports-sticky{margin:-12px -12px 8px;padding:10px 12px 6px}}
 .mdate.mdate-past{opacity:.4;filter:grayscale(.35)}
 .mdate.mdate-past:hover{opacity:.75}
 .mdate.mdate-past.active{opacity:1;filter:none}
@@ -1231,6 +1235,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
     <div class="content">
       
+      <div class="sports-sticky">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
   <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
   <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 L1</button>
@@ -1238,6 +1243,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
 </div>
 <div id="matchDateBar" class="mdate-bar"></div>
+      </div>
 <div class="section-title" id="sectionTitle">⚽ Tous les matchs</div>
       <div id="matchList"></div>
     </div>
