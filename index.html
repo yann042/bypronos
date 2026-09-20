@@ -414,7 +414,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
   .ranking-view{padding:16px}
   .ranking-table{font-size:12px}
   .ranking-table th,.ranking-table td{padding:8px 6px}
-  .rank-pts{font-size:16px}
+  .rank-pts{font-size:16px;width:62px}
+  .ranking-row{gap:6px}
+  .rank-stats{grid-template-columns:repeat(2,24px)}
+  .rank-stat .nb{font-size:13px}
+  .rank-name{font-size:12px}
+  .results-panel-header{padding:8px 10px;font-size:14px;gap:6px}
+  .rank-tabs .history-filter-btn{padding:2px 7px;font-size:10px}
 
   /* Live view */
   .live-view{padding:16px}
@@ -1088,12 +1094,31 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .comp-btn{background:var(--bg2);border:1px solid var(--bord);border-radius:20px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;color:var(--txt2);transition:all .15s;font-family:'Barlow',sans-serif;white-space:nowrap}
 .comp-btn:hover{border-color:var(--acc);color:var(--acc)}
 .comp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.mdate-bar{display:flex;align-items:stretch;gap:6px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.mdate-bar::-webkit-scrollbar{height:0}
+.mdate{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:48px;padding:5px 8px;background:var(--bg2);border:1px solid var(--bord);border-radius:10px;cursor:pointer;color:var(--txt2);font-family:'Barlow',sans-serif;transition:all .15s}
+.mdate:hover{border-color:var(--acc);color:var(--acc)}
+.mdate.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.mdate .mdate-day{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;opacity:.85}
+.mdate .mdate-num{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;line-height:1}
+.mdate .mdate-cnt{font-size:8px;opacity:.7;white-space:nowrap}
+.mdate-all{font-weight:800;font-size:12px}
+.sports-sticky{position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0 8px}
+.sports-sticky .mdate-bar{margin-bottom:0}
+.sports-sticky > div:first-child{margin-bottom:8px}
+.mdate.mdate-past{opacity:.4;filter:grayscale(.35)}
+.mdate.mdate-past:hover{opacity:.75}
+.mdate.mdate-past.active{opacity:1;filter:none}
 
 .results-view{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;height:100%;overflow:hidden}
 @media(max-width:768px){.results-view{grid-template-columns:1fr;overflow-y:auto;height:auto;padding:10px}}
 .results-panel{background:var(--bg2);border:1px solid var(--bord);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;min-height:200px}
 @media(max-width:768px){.results-panel{min-height:150px;max-height:400px}}
-.results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.results-panel-header{padding:10px 14px;border-bottom:1px solid var(--bord);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;flex-wrap:nowrap}
+.rp-title{white-space:nowrap;flex-shrink:0}
+.rank-tabs-wrap{scrollbar-width:none}
+.rank-tabs-wrap::-webkit-scrollbar{display:none}
+.rank-tabs .history-filter-btn{padding:3px 9px;font-size:10.5px;white-space:nowrap}
 .results-panel-body{overflow-y:auto;flex:1;padding:8px}
 
 /* Classement */
@@ -1101,7 +1126,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.gold{background:linear-gradient(135deg,#c9960a,#e8b84b) !important;border:3px solid #c9960a !important;padding:12px 14px 18px}
 .ranking-row.silver{background:linear-gradient(135deg,#e8e8e8,#d0d0d0) !important;border:1.5px solid #b0b0b0 !important}
 .ranking-row.bronze{background:linear-gradient(135deg,#f5dfc0,#e8c99a) !important;border:2px solid #c08040 !important}
-.ranking-row.gold .rank-name{color:#fff !important;font-weight:800;font-size:15px}
+.ranking-row.gold .rank-name{color:#fff !important;font-weight:800;font-size:14px}
 .ranking-row.silver .rank-name{color:#333 !important;font-weight:800}
 .ranking-row.bronze .rank-name{color:#7a4a10 !important;font-weight:800}
 .ranking-row.gold .rank-pts{color:#fff !important;font-size:22px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.3)}
@@ -1110,7 +1135,17 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 .ranking-row.gold .rank-pos{font-size:26px}
 .ranking-row.me{background:var(--bg2);border:1px solid var(--bord)}
 .rank-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;width:28px;text-align:center;flex-shrink:0}
-.rank-name{flex:1;font-weight:700;font-size:13px}
+.rank-name{flex:1;font-weight:700;font-size:13px;min-width:0;display:flex;align-items:center;gap:4px}
+.rank-name .rn-text{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-name .rn-trophy{flex-shrink:0;font-size:15px;line-height:1}
+.rank-stats{display:grid;grid-template-columns:repeat(2,26px);align-items:stretch;margin-left:auto;flex-shrink:0}
+.rank-stat{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:var(--txt2)}
+.rank-stat .ic{font-size:10px;line-height:1.35}
+.rank-stat .nb{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;line-height:1}
+.rank-pts{width:78px;text-align:right;white-space:nowrap;flex-shrink:0;padding-left:6px}
+.ranking-row.gold{padding:13px 12px}
+.ranking-row.gold .rank-stat{color:#fff}
+.ranking-row.silver .rank-stat,.ranking-row.bronze .rank-stat{color:#333}
 
 /* Historique */
 .history-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:6px 8px;border-bottom:1px solid var(--bord);flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -1199,12 +1234,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
 
     <div class="content">
       
+      <div class="sports-sticky">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto">
   <button class="comp-btn active" id="compBtn0" onclick="selectComp('all',this)">Tous</button>
   <button class="comp-btn" id="compBtn2" onclick="selectComp('ligue1',this)">🇫🇷 L1</button>
   <button class="comp-btn" id="compBtn4" onclick="selectComp('ligue2',this)">🇫🇷 L2</button>
   <button class="comp-btn" id="compBtn3" onclick="selectComp('premier',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
 </div>
+<div id="matchDateBar" class="mdate-bar"></div>
+      </div>
 <div class="section-title" id="sectionTitle">⚽ Tous les matchs</div>
       <div id="matchList"></div>
     </div>
@@ -1232,7 +1270,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         </div>
         <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenalty" style="color:var(--acc3);font-weight:700">0 pts</span></div>
         <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotal" style="color:var(--acc)">0 pts</span></div>
-        <button class="place-btn" onclick="placeBets()">VALIDER MES PARIS →</button>
       </div>
     </div>
   </div>
@@ -1252,14 +1289,14 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Barlow'
         <!-- Classement -->
         <div class="results-panel">
           <div class="results-panel-header">
-            🏆 Classement
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-              <div style="display:flex;gap:4px">
+            <span class="rp-title">🏆 Classement</span>
+            <div class="rank-tabs-wrap" style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;min-width:0;overflow-x:auto">
+              <div class="rank-tabs" style="display:flex;gap:4px">
                 <button class="history-filter-btn active" id="rankTabSaison" onclick="window.switchRankTab('saison',this)">Saison</button>
                 <button class="history-filter-btn" id="rankTabJournee" onclick="window.switchRankTab('semaine',this)">Semaine</button>
                 <button class="history-filter-btn" id="rankTabChoix" onclick="window.switchRankTab('choix',this)">Choix semaine</button>
               </div>
-              <div id="teamToggle" style="display:none;gap:4px">
+              <div id="teamToggle" class="rank-tabs" style="display:none;gap:4px">
                 <button class="history-filter-btn active" id="rankTabIndividuel" onclick="window.switchRankMode('individuel',this)">Individuel</button>
                 <button class="history-filter-btn" id="rankTabEquipes" onclick="window.switchRankMode('equipes',this)">Équipes</button>
               </div>
@@ -1713,6 +1750,25 @@ function bpLeagueFilter(list) {
   });
 }
 let bpBackfilled = false;
+// Un pari est-il eligible dans une ligue donnee ? Memes regles que bpLeagueFilter, mais pour un
+// code de ligue CIBLE explicite. Utilise par la propagation et la sync inter-ligues pour ne jamais
+// injecter un match interdit dans une ligue (ex. Premier League hors POTES, Dijon hors POTES...).
+function bpBetEligibleInLeague(b, code) {
+  code = (code || '').toUpperCase();
+  // Normalisation : minuscules, sans accents, tirets/espaces unifies -> "Saint-Etienne" == "saint etienne"
+  const norm = function(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-\s]+/g,' '); };
+  const name = norm(((b && b.home) || '') + ' ' + ((b && b.away) || ''));
+  const has = function(n){ return name.indexOf(n) !== -1; };
+  const comp = (b && b.comp) || '';
+  // Detection par nom d'equipe en secours, au cas ou comp serait vide.
+  const PL = ['arsenal','manchester','man utd','man city','aston villa','liverpool','chelsea','tottenham','newcastle','everton','west ham','wolves','wolverhampton','brighton','fulham','brentford','crystal palace','nottingham','bournemouth','leicester','ipswich','southampton','burnley','sunderland','leeds'];
+  if (comp === 'premier' || PL.some(has)) return code === 'POTES';           // PL : uniquement POTES
+  if (comp === 'ligue2' || has('saint etienne') || has('dijon')) {           // Ligue 2 (St-Etienne / Dijon)
+    if (code === 'POTES') return has('saint etienne');                       // POTES : seulement les matchs de St-Etienne (donc Dijon-StE oui, Dijon-autre non)
+    return has('saint etienne') || has('dijon');                            // CAPIO / RESTALLIANCE : St-Etienne + Dijon
+  }
+  return true;                                                               // Ligue 1 et reste : partout
+}
 function bpBackfillBetInfo() {
   if (bpBackfilled) return;
   if (!currentLeague || !bpAllMatches || !bpAllMatches.length) return;
@@ -2196,9 +2252,10 @@ function buildCard(m) {
       h: s.h, a: s.a, odd: scoreOdd(m, s.h, s.a)
     }));
 
+    let _mvb=null; try { const _mp=loadPlayers()[currentPlayer]; _mvb=_mp&&_mp.validatedBets&&(_mp.validatedBets[m.id]||_mp.validatedBets[String(m.id)]); } catch(e){}
     const pills = scores.map(s => {
       const key = `${m.id}_${s.h}_${s.a}`;
-      const sel = betslip[key] ? 'selected' : '';
+      const sel = (betslip[key] || (_mvb && String(_mvb.h)===String(s.h) && String(_mvb.a)===String(s.a))) ? 'selected' : '';
       return `<div class="score-pill ${pillCls} ${sel}" onclick="toggleScore(${m.id},${s.h},${s.a})">
         <span class="pill-score">${s.h}-${s.a}</span>
         <span class="pill-odd">${s.odd.toFixed(1).replace(".", ",")}</span>
@@ -2215,27 +2272,8 @@ function buildCard(m) {
       </div>`;
     }
 
-    const betKey = Object.keys(betslip).find(k => k.startsWith(m.id + '_'));
-    let footerHtml = '';
-    if (betKey) {
-      const b = betslip[betKey];
-      const ptsR = fmtPts(b.resultOdd);
-      const ptsS = fmtPts(b.scoreOdd);
-      const ptsMax = fmtPts(b.resultOdd + b.scoreOdd);
-      footerHtml = `<div class="score-step-footer">
-        <div class="score-step-recap">
-          <span class="recap-score">🎯 ${b.h}-${b.a} · ${b.resultLabel}</span>
-          <div class="recap-pts">
-            <span class="recap-pt-item result">✅ ${ptsR} pts résultat</span>
-            <span class="recap-pt-item score">🎯 ${ptsS} pts score</span>
-            <span class="recap-pt-item total">= ${ptsMax} pts max</span>
-          </div>
-        </div>
-        <button class="btn-valider" onclick="placeBetForMatch(${m.id})">VALIDER ✓</button>
-      </div>`;
-    } else {
-      footerHtml = '<div class="score-step-hint">👆 Cliquez sur un score pour valider</div>';
-    }
+    // Validation automatique : le score choisi est enregistre au clic, plus de bouton VALIDER.
+    const footerHtml = '<div class="score-step-hint">👆 Cliquez sur un score : il est validé automatiquement (re-cliquez pour changer ou retirer)</div>';
 
     scoreBlock = `<div class="score-step ${pillCls}">
       <div class="score-step-label ${pillCls}">${clsLabel[scoreKey]}</div>
@@ -2334,6 +2372,46 @@ function buildCard(m) {
 }
 
 let currentComp = 'all';
+let matchDateFilter = null; // null = tous les jours, sinon 'YYYY-MM-DD'
+window.selectMatchDate = function(d, btn) {
+  matchDateFilter = (d === 'all' || !d) ? null : d;
+  renderMatches();
+};
+// Construit la frise calendrier : une case par journee de matchs (jour + date + nb de matchs)
+function renderMatchDates() {
+  const bar = document.getElementById('matchDateBar'); if (!bar) return;
+  const seen = {}; const dates = [];
+  matches.forEach(function(m){
+    if (currentComp !== 'all' && (m.comp || 'ligue1') !== currentComp) return;
+    if (!m.date) return;
+    if (seen[m.date] === undefined) { seen[m.date] = 0; dates.push(m.date); }
+    seen[m.date]++;
+  });
+  dates.sort();
+  const active = matchDateFilter || 'all';
+  const sig = currentComp + '|' + dates.join(',');
+  if (bar.dataset.sig === sig) { // memes dates : on met juste a jour la case active (pas de rebuild = pas de reset du scroll)
+    bar.querySelectorAll('.mdate').forEach(function(b){ b.classList.toggle('active', b.dataset.d === active); });
+    return;
+  }
+  bar.dataset.sig = sig;
+  const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const _t = new Date();
+  const todayStr = _t.getFullYear() + '-' + String(_t.getMonth()+1).padStart(2,'0') + '-' + String(_t.getDate()).padStart(2,'0');
+  let html = '<button class="mdate mdate-all' + (active==='all'?' active':'') + '" data-d="all" onclick="selectMatchDate(\'all\',this)">Tous</button>';
+  html += dates.map(function(d){
+    const dt = new Date(d + 'T12:00:00');
+    const jour = JOURS[dt.getDay()] || '';
+    const jj = d.slice(8,10), mm = d.slice(5,7);
+    const past = d < todayStr ? ' mdate-past' : '';
+    return '<button class="mdate' + (active===d?' active':'') + past + '" data-d="' + d + '" onclick="selectMatchDate(\'' + d + '\',this)">' +
+      '<span class="mdate-day">' + jour + '</span>' +
+      '<span class="mdate-num">' + jj + '/' + mm + '</span>' +
+      '<span class="mdate-cnt">' + seen[d] + ' match' + (seen[d]>1?'s':'') + '</span>' +
+    '</button>';
+  }).join('');
+  bar.innerHTML = html;
+}
 
 function renderMatches() {
   // Pre-remplir MATCH_IMAGES depuis TEAM_MATCH_IMAGES
@@ -2345,13 +2423,12 @@ function renderMatches() {
   });
   const players = loadPlayers();
   const myBets = players[currentPlayer] && players[currentPlayer].validatedBets || {};
+  renderMatchDates();
   const filtered = matches.filter(function(m) {
-    // Masquer les matchs avec resultat final connu
-    if (m.result !== undefined) {
-      // Afficher quand meme si le joueur a un pari validé (pour voir son résultat)
-      return !!myBets[m.id] || !!betslip[m.id];
-    }
     if (currentComp !== 'all' && (m.comp || 'ligue1') !== currentComp) return false;
+    if (matchDateFilter) return m.date === matchDateFilter; // date ciblee : tous les matchs du jour (termines inclus)
+    // Vue "Tous" : masquer les matchs termines sauf si le joueur a un pari valide
+    if (m.result !== undefined) return !!myBets[m.id] || !!betslip[m.id];
     return true;
   });
   // Épingler les matchs EN DIRECT en tête de liste (le reste garde son ordre chronologique)
@@ -3449,25 +3526,55 @@ function selectResult(matchId, cls) {
 
 function toggleScore(matchId, h, a) {
   if(!currentPlayer){ openLogin(); return; }
-  const key=`${matchId}_${h}_${a}`;
   const m=matches.find(x=>x.id===matchId);
   if(!m) return;
-  if(betslip[key]) {
-    delete betslip[key];
-  } else {
+  if(isMatchStarted(m.time, m.id)) { showNotif('\u23f1 Match commence, pari verrouille'); return; }
+
+  // Pari deja valide sur ce match (si on rouvre pour changer / retirer)
+  let _vb=null;
+  try { const _p=loadPlayers()[currentPlayer]; _vb=_p&&_p.validatedBets&&(_p.validatedBets[matchId]||_p.validatedBets[String(matchId)]); } catch(e){}
+  const dejaCeScore = _vb && String(_vb.h)===String(h) && String(_vb.a)===String(a);
+
+  if (dejaCeScore) {
+    // Re-clic sur le meme score => on retire le prono
+    bpRemoveValidatedBet(matchId);
+    delete matchState[matchId];
     Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
-    const odd=scoreOdd(m,h,a);
-    const res=deduceResult(m,h,a);
-    const rMap={win:m.odds[0],draw:m.odds[1],lose:m.odds[2]};
-    betslip[key]={matchId,h,a,matchName:m.home+' - '+m.away,home:m.home,away:m.away,scoreOdd:odd,resultLabel:res.label,resultCls:res.cls,resultShort:res.short,resultOdd:rMap[res.cls],stake:1};
+    renderMatches(); renderBetslip(); autosave();
+    return;
   }
-  renderMatches();
-  renderBetslip();
-  autosave();
-  // Ouvrir le tiroir mobile automatiquement si un score est sélectionné
-  if (Object.keys(betslip).length > 0 && window.innerWidth <= 768) {
-    openMobileSlip();
+
+  // Nouveau score => on le pose puis on VALIDE immediatement (score selectionne = prono valide)
+  const key=`${matchId}_${h}_${a}`;
+  Object.keys(betslip).filter(k=>k.startsWith(matchId+'_')).forEach(k=>delete betslip[k]);
+  const odd=scoreOdd(m,h,a);
+  const res=deduceResult(m,h,a);
+  const rMap={win:m.odds[0],draw:m.odds[1],lose:m.odds[2]};
+  betslip[key]={matchId,h,a,matchName:m.home+' - '+m.away,home:m.home,away:m.away,scoreOdd:odd,resultLabel:res.label,resultCls:res.cls,resultShort:res.short,resultOdd:rMap[res.cls],stake:1};
+  placeBetForMatch(matchId);
+}
+// Retire un prono valide (re-clic sur le meme score). Symetrique de la validation auto.
+function bpRemoveValidatedBet(matchId) {
+  const players = loadPlayers();
+  const p = players[currentPlayer];
+  if (p && p.validatedBets) {
+    delete p.validatedBets[parseInt(matchId)];
+    delete p.validatedBets[String(matchId)];
+    savePlayers(players);
   }
+  // Coherence inter-ligues : retirer aussi ce match dans mes autres ligues
+  (async () => {
+    try {
+      const curCode = bpLeagueCode();
+      for (const lg of BP_LEAGUES) {
+        if (lg.code === curCode) continue;
+        const ref = db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets/' + parseInt(matchId));
+        const snap = await ref.once('value');
+        if (snap.exists()) await ref.remove();
+      }
+    } catch(e) { console.warn('bpRemoveValidatedBet', e); }
+  })();
+  try { showNotif('\ud83d\uddd1\ufe0f Prono retire'); } catch(e){}
 }
 
 // ==============================================
@@ -3548,18 +3655,22 @@ function placeBetForMatch(matchId) {
   if (!p.season.days[day]) p.season.days[day] = {ptsResult:0,ptsScore:0,bets:0};
   if (!p.validatedBets) p.validatedBets = {};
 
+  const _newBets = {};
   keys.forEach(k => {
     const b = betslip[k];
+    const _mm = matches.find(x => x.id === parseInt(b.matchId)) || {};
     // Points calcules d'apres les vrais resultats (recomputeStandings), pas a la validation.
-    p.validatedBets[parseInt(b.matchId)] = {
+    const _bet = {
       h:b.h, a:b.a,
       home:b.home, away:b.away,
-      comp:(matches.find(x => x.id === parseInt(b.matchId)) || {}).comp||'',
-      ts:(matches.find(x => x.id === parseInt(b.matchId)) || {}).ts||0,
+      comp:_mm.comp||'',
+      ts:_mm.ts||0,
       resultLabel:b.resultLabel, resultCls:b.resultCls, resultShort:b.resultShort,
       scoreOdd:b.scoreOdd, resultOdd:b.resultOdd,
-      round: (matches.find(x => x.id === parseInt(b.matchId)) || {}).round || 'Journée en cours'
+      round:_mm.round || 'Journée en cours'
     };
+    p.validatedBets[parseInt(b.matchId)] = _bet;
+    _newBets[parseInt(b.matchId)] = _bet;
     delete betslip[k];
   });
   p.current = {};
@@ -3571,10 +3682,12 @@ function placeBetForMatch(matchId) {
   else if (savedCls === 'other_lose') savedCls = 'lose';
   if (savedCls && p.validatedBets[parseInt(matchId)]) {
     p.validatedBets[parseInt(matchId)].resultCls = savedCls;
+    if (_newBets[parseInt(matchId)]) _newBets[parseInt(matchId)].resultCls = savedCls;
   }
   // Vider matchState pour replier le scoreBlock
   delete matchState[matchId];
   savePlayers(players);
+  bpPropagateBets(_newBets);
 
   const m = matches.find(x => x.id === matchId);
   showNotif('✅ Pari validé sur ' + (m ? m.home + ' - ' + m.away : 'le match'));
@@ -3593,12 +3706,53 @@ async function bpPropagateBets(newBets) {
       if (lg.code === curCode) continue;
       const snap = await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer).once('value');
       if (!snap.exists()) continue; // le pseudo ne participe pas à cette ligue
-      await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets').update(newBets);
+      // Ne propager que les matchs autorises dans la ligue cible (ex. PL uniquement dans POTES)
+      const eligible = {};
+      Object.keys(newBets).forEach(function(mid){ if (bpBetEligibleInLeague(newBets[mid], lg.code)) eligible[mid] = newBets[mid]; });
+      if (!Object.keys(eligible).length) continue;
+      await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer + '/validatedBets').update(eligible);
       done.push(lg.code);
     }
-    if (done.length) { try { showNotif('\u2194\ufe0f Pronos aussi enregistrés sur : ' + done.join(', ')); } catch(e){} }
+    if (done.length) { try { showNotif('\u2194\ufe0f Pronos synchronisés entre tes ligues'); } catch(e){} }
   } catch(e) { console.warn('bpPropagateBets', e); }
 }
+// SYNC INTER-LIGUES (rattrapage retroactif). La propagation ci-dessus ne pousse que "vers l'avant"
+// au moment du clic Valider, et seulement vers les ligues ou le pseudo existe deja. Un joueur qui
+// valide sur une ligue AVANT d'en rejoindre une autre se retrouve donc "a vide" dans la 2e.
+// Cette fonction reconcilie : mes paris valides doivent etre les memes dans toutes mes ligues.
+// Regle de securite : on comble UNIQUEMENT les matchs manquants, jamais d'ecrasement d'un pari
+// deja present -> operation sure et idempotente (relancable sans effet de bord).
+window.bpSyncMyBetsAcrossLeagues = async function() {
+  try {
+    if (!currentPlayer) return 0;
+    const mine = {}; // { code: validatedBets } pour les ligues ou je participe
+    for (const lg of BP_LEAGUES) {
+      const snap = await db.ref('leagues/' + lg.code + '/standings/' + currentPlayer).once('value');
+      if (!snap.exists()) continue;
+      mine[lg.code] = (snap.val() && snap.val().validatedBets) || {};
+    }
+    const codes = Object.keys(mine);
+    if (codes.length < 2) return 0; // il faut au moins 2 ligues pour synchroniser
+    // Union de tous mes paris (1re occurrence gardee ; on ne compare pas, on comble les trous)
+    const union = {};
+    codes.forEach(function(c){ Object.keys(mine[c]).forEach(function(mid){ if (!(mid in union)) union[mid] = mine[c][mid]; }); });
+    let totalAdd = 0;
+    for (const c of codes) {
+      const have = mine[c];
+      const toAdd = {};
+      Object.keys(union).forEach(function(mid){ if (!(mid in have) && bpBetEligibleInLeague(union[mid], c)) toAdd[mid] = union[mid]; });
+      const n = Object.keys(toAdd).length;
+      if (n) { await db.ref('leagues/' + c + '/standings/' + currentPlayer + '/validatedBets').update(toAdd); totalAdd += n; }
+    }
+    if (totalAdd) {
+      try { await recomputeStandings(); } catch(e){}
+      try { renderRanking(); } catch(e){}
+      try { renderMatches(); } catch(e){}
+      try { showNotif('\u2194\ufe0f Pronos synchronisés entre tes ligues'); } catch(e){}
+    }
+    return totalAdd;
+  } catch(e) { console.warn('bpSyncMyBetsAcrossLeagues', e); return 0; }
+};
 function placeBets() {
   const keys=Object.keys(betslip);
   if(!keys.length) return;
@@ -4675,6 +4829,26 @@ function savePlayers(data) {
   localStorage.setItem(bpPlayersKey(),JSON.stringify(clean));
   savePlayers_league(clean);
 }
+// Reconcilie le roster local avec Firebase pour la ligue COURANTE.
+// Firebase est la source de verite du "qui participe" : on repart de son roster, donc un joueur
+// present en local mais absent de Firebase (fantome empile par l'ancien merge quand on passe
+// d'une ligue a l'autre, ex. Domdug/PLC de CAPIO apparaissant dans POTES) disparait proprement.
+// On PRESERVE toutefois le brouillon local (paris en cours non valides) du joueur courant,
+// et son entree entiere s'il vient de rejoindre et que Firebase n'a pas encore recu son PATCH.
+function bpReconcilePlayers(localPlayers, fbPlayers) {
+  const fb = bpFilterPlayers(fbPlayers || {});
+  const out = {};
+  Object.keys(fb).forEach(function(nm){ out[nm] = fb[nm]; });
+  if (currentPlayer && localPlayers && localPlayers[currentPlayer]) {
+    const loc = localPlayers[currentPlayer];
+    if (!out[currentPlayer]) {
+      out[currentPlayer] = loc; // je viens de rejoindre : Firebase pas encore a jour, on garde ma copie
+    } else if (loc.current && loc.current.betslip && Object.keys(loc.current.betslip).length) {
+      out[currentPlayer] = Object.assign({}, out[currentPlayer], { current: loc.current });
+    }
+  }
+  return out;
+}
 function autosave() {
   if(!currentPlayer) return;
   const players=loadPlayers();
@@ -5000,27 +5174,114 @@ function renderResultsView() {
   renderHistoryPanel();
 }
 
-function bpWeekPoints(data) {
+// Matchs officiels (regles) groupes par semaine : { weekKey: { mid: 1 } }
+// Sert a appliquer la penalite d'omission (-1) dans les classements Semaine et Choix semaine,
+// exactement comme recomputeStandings le fait pour la Saison.
+// Matchs officiels sur toute la saison, LIVE inclus : un match compte des qu'il est en cours
+// (score dispo) ou termine ou regle. Base de la penalite d'omission pour la Saison en direct.
+function bpSeasonOfficials(players) {
+  const off = {};
+  Object.keys(players || {}).forEach(function(nm){
+    const vb = players[nm] && players[nm].validatedBets; if (!vb) return;
+    Object.keys(vb).forEach(function(mid){
+      const b = vb[mid]; if (!b) return;
+      const l = liveData[parseInt(mid)] || liveData[mid];
+      const liveOfficial = l && (l.finished || l.homeScore != null); // termine OU en cours
+      if (b.cashedOut || liveOfficial || (b.finalHome != null && b.finalAway != null)) off[String(mid)] = 1;
+    });
+  });
+  return off;
+}
+// Total SAISON calcule en direct : memes regles que recomputeStandings, mais les matchs EN COURS
+// sont projetes avec leur score actuel (au lieu de valoir 0). Converge sans a-coup vers le total
+// definitif quand les matchs se terminent. Inclut les ajustements manuels.
+function bpSeasonPointsLive(data, officials) {
+  const vb = (data && data.validatedBets) || {};
+  let sR = 0, sS = 0; const bet = {};
+  Object.keys(vb).forEach(function(mid){
+    const b = vb[mid]; if (!b) return;
+    bet[String(mid)] = 1;
+    if (b.cashedOut) { sR += (b.cashoutValue || 0); return; }
+    const live = liveData[parseInt(mid)] || liveData[mid];
+    let fh = null, fa = null;
+    if (live && (live.finished || live.homeScore != null)) { fh = live.homeScore; fa = live.awayScore; }
+    else if (b.finalHome != null && b.finalAway != null) { fh = b.finalHome; fa = b.finalAway; }
+    if (fh == null || fa == null) return; // match pas commence -> 0 pour l'instant
+    const lp = calcLivePts(b, fh, fa);
+    if (!lp) return;
+    if (lp.type === 'max')         { sR += b.resultOdd; sS += b.scoreOdd; }
+    else if (lp.type === 'bonus')  { sR += b.resultOdd; sS += 0.5; }
+    else if (lp.type === 'result') { sR += b.resultOdd; }
+    else                           { sR += -1; }
+  });
+  let omiss = 0;
+  if (officials) Object.keys(officials).forEach(function(mid){ if (!bet[mid]) omiss += 1; });
+  sR -= omiss;
+  const s = (data && data.season) || {};
+  sR += (s.manualResult || 0); sS += (s.manualScore || 0);
+  return Math.round((sR + sS) * 100) / 100;
+}
+// Compte, pour un joueur, le nombre de BONS RESULTATS et de SCORES EXACTS sur une periode.
+// startTs/endTs en secondes (null = pas de borne). Live inclus (coherent avec les points affiches).
+function bpTallyResultsScores(data, startTs, endTs) {
+  const vb = (data && data.validatedBets) || {};
+  let results = 0, exacts = 0;
+  Object.keys(vb).forEach(function(mid){
+    const b = vb[mid]; if (!b || b.cashedOut) return;
+    if (startTs != null && (!b.ts || b.ts < startTs)) return;
+    if (endTs != null && (!b.ts || b.ts >= endTs)) return;
+    const live = liveData[parseInt(mid)] || liveData[mid];
+    let fh = null, fa = null;
+    if (live && (live.finished || live.homeScore != null)) { fh = live.homeScore; fa = live.awayScore; }
+    else if (b.finalHome != null && b.finalAway != null) { fh = b.finalHome; fa = b.finalAway; }
+    if (fh == null || fa == null) return;
+    const lp = calcLivePts(b, fh, fa);
+    if (!lp) return;
+    if (lp.type === 'max') { results++; exacts++; }
+    else if (lp.type === 'bonus' || lp.type === 'result') { results++; }
+  });
+  return { results: results, exacts: exacts };
+}
+function bpWeekOfficials(players) {
+  var byWeek = {};
+  Object.keys(players || {}).forEach(function(nm){
+    var vb = (players[nm] && players[nm].validatedBets) || {};
+    Object.keys(vb).forEach(function(mid){
+      var b = vb[mid]; if (!b) return;
+      var live = liveData[parseInt(mid)] || liveData[mid];
+      // Officiel des qu'il est termine, REGLE, ou EN COURS (score dispo) -> omission -1 des le coup d'envoi
+      var settled = b.cashedOut || (live && (live.finished || live.homeScore != null)) || (b.finalHome != null && b.finalAway != null);
+      if (!settled) return;
+      var wk = bpWeekKey(b.ts); if (!wk) return;
+      (byWeek[wk] = byWeek[wk] || {})[String(mid)] = 1;
+    });
+  });
+  return byWeek;
+}
+function bpWeekPoints(data, officials) {
   try {
     const vb = (data && data.validatedBets) || {};
     const now = new Date();
     const dow = (now.getDay() + 6) % 7; // 0 = lundi
     const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow, 0, 0, 0, 0);
     const startTs = Math.floor(monday.getTime() / 1000);
-    let total = 0;
+    let total = 0; const bet = {};
     Object.keys(vb).forEach(function(mid){
       const b = vb[mid];
       if (!b.ts || b.ts < startTs) return;
+      bet[String(mid)] = 1;
       if (b.cashedOut) { total += (b.cashoutValue || 0); return; }
       const live = liveData[parseInt(mid)];
       const fh = live ? live.homeScore : b.finalHome;
       const fa = live ? live.awayScore : b.finalAway;
       if (fh != null && fa != null) { const lp = calcLivePts(b, fh, fa); if (lp) total += lp.pts; }
     });
+    // Penalite d'omission : -1 par match officiel de la semaine non pronostique
+    if (officials) Object.keys(officials).forEach(function(mid){ if (!bet[mid]) total -= 1; });
     return Math.round(total * 100) / 100;
   } catch(e) { return 0; }
 }
-function bpWeekPointsFor(data, weekKey) {
+function bpWeekPointsFor(data, weekKey, officials) {
   try {
     if (!weekKey) return 0;
     const p = weekKey.split('-');
@@ -5028,16 +5289,19 @@ function bpWeekPointsFor(data, weekKey) {
     const startTs = Math.floor(start.getTime() / 1000);
     const endTs = startTs + 7 * 86400;
     const vb = (data && data.validatedBets) || {};
-    let total = 0;
+    let total = 0; const bet = {};
     Object.keys(vb).forEach(function(mid){
       const b = vb[mid];
       if (!b.ts || b.ts < startTs || b.ts >= endTs) return;
+      bet[String(mid)] = 1;
       if (b.cashedOut) { total += (b.cashoutValue || 0); return; }
       const live = liveData[parseInt(mid)];
       const fh = live ? live.homeScore : b.finalHome;
       const fa = live ? live.awayScore : b.finalAway;
       if (fh != null && fa != null) { const lp = calcLivePts(b, fh, fa); if (lp) total += lp.pts; }
     });
+    // Penalite d'omission : -1 par match officiel de cette semaine non pronostique
+    if (officials) Object.keys(officials).forEach(function(mid){ if (!bet[mid]) total -= 1; });
     return Math.round(total * 100) / 100;
   } catch(e) { return 0; }
 }
@@ -5055,14 +5319,27 @@ function renderRankingPanel() {
       ? wks.map(function(wk){ return '<button class="history-filter-btn' + (rankChosenWeek === wk ? ' active' : '') + '" onclick="setRankWeek(this,\'' + wk + '\')">' + bpWeekLabel(wk) + '</button>'; }).join('')
       : '<span style="font-size:11px;color:var(--txt2);padding:2px">Aucune semaine passée</span>';
   }
+  const _officials = bpWeekOfficials(players);
+  const _seasonOff = bpSeasonOfficials(players);
+  const _curWk = bpWeekKey(Math.floor(Date.now() / 1000));
+  // Bornes temporelles selon l'onglet, pour compter bons resultats / scores exacts sur le bon perimetre
+  const _n = new Date(); const _dw = (_n.getDay() + 6) % 7;
+  const _weekStartTs = Math.floor(new Date(_n.getFullYear(), _n.getMonth(), _n.getDate() - _dw, 0,0,0,0).getTime() / 1000);
+  let _chStart = null, _chEnd = null;
+  if (rankChosenWeek) { const _p = rankChosenWeek.split('-'); const _d = new Date(parseInt(_p[0]), parseInt(_p[1]) - 1, parseInt(_p[2]), 0,0,0,0); _chStart = Math.floor(_d.getTime() / 1000); _chEnd = _chStart + 7 * 86400; }
   const rows = Object.entries(players)
     .map(([name, data]) => {
       const pts = rankTab === 'saison'
-        ? (data.season ? (data.season.ptsResult || 0) + (data.season.ptsScore || 0) : 0)
+        ? bpSeasonPointsLive(data, _seasonOff)
         : rankTab === 'choix'
-          ? bpWeekPointsFor(data, rankChosenWeek)
-          : bpWeekPoints(data);
-      return { name, pts };
+          ? bpWeekPointsFor(data, rankChosenWeek, _officials[rankChosenWeek])
+          : bpWeekPoints(data, _officials[_curWk]);
+      const tally = rankTab === 'saison'
+        ? bpTallyResultsScores(data, null, null)
+        : rankTab === 'choix'
+          ? bpTallyResultsScores(data, _chStart, _chEnd)
+          : bpTallyResultsScores(data, _weekStartTs, null);
+      return { name, pts, results: tally.results, exacts: tally.exacts };
     })
     .sort((a, b) => b.pts - a.pts);
 
@@ -5071,12 +5348,16 @@ function renderRankingPanel() {
   const html = rows.map((r, i) => {
     const isMe = r.name === currentPlayer;
     const cls = (podium[i] || '') + (isMe ? ' me' : '');
-    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
-    return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + '">' + vLabel +
+    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:2px 2px;gap:0;width:11px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:6.5px;font-weight:900;line-height:1.35">' + l + '</span>';}).join('') + '</span>' : '';
+    return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'8px':'12px') + '">' + vLabel +
       '<span style="width:14px;font-size:14px;color:var(--acc);font-weight:900;flex-shrink:0;line-height:1">' + (isMe ? '▶' : '') + '</span>' +
-      '<span class="rank-pos" style="' + (i===0?'background:rgba(0,0,0,.15);border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-size:20px':'') + '">' + (medals[i] || (i+1)) + '</span>' +
-      '<span class="rank-name">' + r.name + (i===0 ? ' <span style="font-size:18px">🏆</span>' : '') + '</span>' +
-      '<span class="rank-pts" style="color:' + (i<3?'':'#111') + '">' + fmtPts(r.pts) + ' pts</span>' +
+      '<span class="rank-pos" style="' + (i===0?'background:rgba(0,0,0,.15);border-radius:50%;width:27px;height:27px;display:inline-flex;align-items:center;justify-content:center;font-size:17px':'') + '">' + (medals[i] || (i+1)) + '</span>' +
+      '<span class="rank-name"><span class="rn-text">' + r.name + '</span>' + (i===0 ? '<span class="rn-trophy">🏆</span>' : '') + '</span>' +
+      '<span class="rank-stats" title="Bons résultats · Scores exacts">' +
+        '<span class="rank-stat"><span class="ic">✅</span><span class="nb">' + r.results + '</span></span>' +
+        '<span class="rank-stat"><span class="ic">🎯</span><span class="nb">' + r.exacts + '</span></span>' +
+      '</span>' +
+      '<span class="rank-pts">' + fmtPts(r.pts) + ' pts</span>' +
     '</div>';
   }).join('');
 
@@ -5693,7 +5974,7 @@ async function syncFromFirebase() {
     const fbPlayers = currentLeague ? await loadPlayersFromLeague() : await loadPlayersFromFirebase();
     if (fbPlayers && Object.keys(fbPlayers).length > 0) {
       const localPlayers = loadPlayers();
-      const merged = Object.assign({}, localPlayers, bpFilterPlayers(fbPlayers));
+      const merged = bpReconcilePlayers(localPlayers, fbPlayers);
       localStorage.setItem(bpPlayersKey(), JSON.stringify(merged));
       renderMatches();
       renderBetslip();
@@ -5709,7 +5990,7 @@ function watchFirebase() {
       const fbPlayers = await loadPlayersFromFirebase();
       if (fbPlayers && Object.keys(fbPlayers).length > 0) {
         const localPlayers = loadPlayers();
-        const merged = Object.assign({}, localPlayers, bpFilterPlayers(fbPlayers));
+        const merged = bpReconcilePlayers(localPlayers, fbPlayers);
         const current = JSON.stringify(localPlayers);
         const next = JSON.stringify(merged);
         if (current !== next) {
@@ -5788,8 +6069,24 @@ async function bpAfterAuth() {
     } catch(e) { currentLeague = { code, name: code, isAdmin:false }; }
     localStorage.setItem('bypronos_league', code);
     const lb = document.getElementById('leagueBadge'); if (lb) lb.textContent = '· ' + currentLeague.name;
-    try { const uid = (window._firebaseAuth||firebase.auth())?.currentUser?.uid; if (uid) await db.ref('leagues/'+code+'/players/'+uid).update({ name: currentPlayer, uid }); } catch(e){}
+    // VERROU D'IDENTITE : un UID = un pseudo canonique, immuable.
+    // Si l'UID a deja un pseudo enregistre, on l'adopte au lieu de le rederiver du displayName/email
+    // (evite qu'un joueur reapparaisse a vide sous une nouvelle cle, ex. Cedric/Arsenul).
+    try {
+      const uid = (window._firebaseAuth||firebase.auth())?.currentUser?.uid;
+      if (uid) {
+        const savedName = (await db.ref('leagues/'+code+'/players/'+uid+'/name').once('value')).val();
+        if (savedName && savedName !== currentPlayer) {
+          currentPlayer = savedName;
+          localStorage.setItem('bypronos_player', savedName);
+          const _pn = document.getElementById('playerName'); if (_pn) _pn.textContent = savedName;
+          const _av = document.getElementById('playerAvatar'); if (_av) _av.textContent = savedName.slice(0,2).toUpperCase();
+        }
+        await db.ref('leagues/'+code+'/players/'+uid).update({ name: currentPlayer, uid });
+      }
+    } catch(e){}
     syncFromFirebase(); watchFirebase(); renderMatches(); bpApplyLeagueFilter();
+    bpSyncMyBetsAcrossLeagues(); // rattrapage inter-ligues (comble les paris manquants a l'entree)
   } else {
     showLeagueModal();
   }
@@ -6120,7 +6417,7 @@ async function renderTeamsRanking() {
     const tid = entry[0], t = entry[1];
     const cls = podium[i] || '';
     const isMe = currentUserTeam === tid;
-    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:3px 4px;gap:0;width:14px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:7px;font-weight:900;line-height:1.4;-webkit-text-stroke:.3px #fff">' + l + '</span>';}).join('') + '</span>' : '';
+    const vLabel = i===0 ? '<span style="position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15);border-radius:6px 0 0 6px;padding:2px 2px;gap:0;width:11px">' + 'WINNER'.split('').map(function(l){return '<span style="color:#fff;font-size:6.5px;font-weight:900;line-height:1.35">' + l + '</span>';}).join('') + '</span>' : '';
     return '<div class="ranking-row ' + cls + '" style="position:relative;padding-left:' + (i===0?'20px':'12px') + ';' + (isMe?'outline:2px solid var(--acc)':'') + '">' + vLabel +
       '<span style="width:12px;font-size:10px;color:var(--acc);font-weight:900;flex-shrink:0">' + (isMe ? '>' : '') + '</span>' +
       '<span class="rank-pos">' + (medals[i] || (i+1)) + '</span>' +
@@ -6341,7 +6638,6 @@ window.addEventListener('load', ()=>{ if (!bpRestoreSession()) openLogin(); setT
     </div>
     <div class="total-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--bord)"><span>❌ Pénalité si tout faux</span><span id="ptsPenaltyMobile" style="color:var(--acc3);font-weight:700">0 pts</span></div>
     <div class="total-row big" style="margin-top:6px"><span>Max si tout juste</span><span id="ptsTotalMobile" style="color:var(--acc)">0 pts</span></div>
-    <button class="place-btn" style="margin-top:10px" onclick="placeBets()">VALIDER MES PARIS →</button>
   </div>
 </div>
 
