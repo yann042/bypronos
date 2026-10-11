@@ -11,7 +11,14 @@
 <meta name="apple-mobile-web-app-title" content="By Pronos">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){(function(){
+  var reloading=false, had=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(!had){ had=true; return; } // 1re prise de controle (nouveau visiteur) : pas de reload
+    if(reloading) return; reloading=true; location.reload(); // nouvelle version deployee -> recharge auto
+  });
+  window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){});});
+})();}</script>
 <title>By Pronos - Pronostics entre amis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1823,14 +1830,20 @@ function getLeagueUrl() {
 }
 
 function savePlayers_league(data) {
-  const url = getLeagueUrl() + '.json';
+  // IMPORTANT : un client n'ecrit QUE son propre noeud, jamais celui des autres joueurs.
+  // (Avant : PATCH sur tout /standings avec la copie locale de TOUS les joueurs -> un client
+  //  avec une copie perimee d'un autre joueur ecrasait ses paris les plus recents.)
+  if (!currentPlayer) return;
+  const mine = data && data[currentPlayer];
+  if (!mine) return;
+  const url = FB_URL + '/leagues/' + bpLeagueCodeNorm() + '/standings/' + encodeURIComponent(currentPlayer) + '.json';
   fetch(url, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
+    body: JSON.stringify(mine)
   })
   .then(r => r.json())
-  .then(() => console.log('🔥 Firebase ligue OK:', currentLeague ? currentLeague.code : 'global'))
+  .then(() => console.log('🔥 Firebase ligue OK (noeud perso):', currentPlayer))
   .catch(e => console.warn('Firebase error:', e));
 }
 
