@@ -2780,6 +2780,34 @@ async function enrichOdds(list) {
   console.log('[By Pronos] cotes chargees : 1X2 ' + n + '/' + list.length + ', score exact ' + ns + '/' + list.length + (err ? ' (' + err + ' echecs)' : ''));
 }
 
+// Re-verification periodique des cotes. enrichOdds ne tourne qu'au chargement (loadFixtures) ;
+// or le fournisseur publie parfois les cotes d'un match APRES ce chargement -> "COTES NON PUBLIEES"
+// fige jusqu'a ce que le joueur recharge. Ici on re-tente, toutes les quelques minutes, uniquement
+// sur les matchs A VENIR encore sans cotes reelles : des que le fournisseur publie, TOUS les clients
+// recuperent les cotes automatiquement, sans rechargement.
+let bpOddsRetryRunning = false;
+async function bpRetryMissingOdds() {
+  if (bpOddsRetryRunning) return;
+  if (!Array.isArray(matches) || !matches.length) return;
+  let pending;
+  try { pending = matches.filter(m => m && !m.oddsReal && !isMatchStarted(m.time, m.id)); }
+  catch(e) { pending = matches.filter(m => m && !m.oddsReal); }
+  if (!pending.length) return;
+  bpOddsRetryRunning = true;
+  try {
+    await enrichOdds(pending);
+    const got = pending.filter(m => m.oddsReal).length;
+    if (got > 0) {
+      try { renderMatches(); } catch(e){}
+      try { renderBetslip(); } catch(e){}
+      console.log('[By Pronos] cotes re-verifiees : ' + got + ' match(s) nouvellement cote(s)');
+    }
+  } catch(e) { console.warn('bpRetryMissingOdds', e); }
+  finally { bpOddsRetryRunning = false; }
+}
+setTimeout(bpRetryMissingOdds, 120000);         // 1er rattrapage ~2 min apres le chargement
+setInterval(bpRetryMissingOdds, 8 * 60 * 1000); // puis toutes les 8 min
+
 // ============================================================
 // -- RESULTATS & SCORING (points calcules sur les vrais scores)
 // ============================================================
