@@ -1,4 +1,4 @@
-const CACHE = 'bypronos-v2';
+const CACHE = 'bypronos-v3';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
